@@ -31,11 +31,16 @@ Push an event about an entity in the topic `widgets` with a callback URL:
 
 ```ruby
 client.created('widgets', 'https://app.example.com/widgets/1')
+client.updated('widgets', 'https://app.example.com/widgets/2')
+client.noop('widgets', 'https://app.example.com/widgets/3')
 ```
 
 There are methods for the four canonical event types: `created`, `updated`,
-`deleted`, and `noopd`.
+`deleted`, and `noop`.
 
+`noop` is typically used when a subscriber is first connected (or reset), and
+the publisher floods with `noop`s for all existing entities so subscribers can
+refresh their view of the domain.
 
 Register to be notified about `widgets` and `kitten` at most 60 seconds after
 events, in batches of at most 500 events, to a given callback URL:
