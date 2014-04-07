@@ -19,7 +19,7 @@ Or install it yourself as:
 
 ## Usage
 
-Configure your client:
+**Configure** your client:
 
 ```ruby
 require 'routemasterclient'
@@ -27,7 +27,7 @@ client = RoutemasterClient.new(url: 'https://bus.example.com', uuid: 'john-doe')
 ```
 
 
-Push an event about an entity in the topic `widgets` with a callback URL:
+**Push** an event about an entity in the topic `widgets` with a callback URL:
 
 ```ruby
 client.created('widgets', 'https://app.example.com/widgets/1')
@@ -42,7 +42,8 @@ There are methods for the four canonical event types: `created`, `updated`,
 the publisher floods with `noop`s for all existing entities so subscribers can
 refresh their view of the domain.
 
-Register to be notified about `widgets` and `kitten` at most 60 seconds after
+
+**Register** to be notified about `widgets` and `kitten` at most 60 seconds after
 events, in batches of at most 500 events, to a given callback URL:
 
 ```ruby
@@ -54,7 +55,7 @@ client.subscribe(
 ```
 
 
-Monitor the status of topics and subscriptions:
+**Monitor** the status of topics and subscriptions:
 
 ```ruby
 client.monitor_topics
