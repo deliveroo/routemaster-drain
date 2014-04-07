@@ -60,7 +60,7 @@ client.monitor_subscriptions
 #     subscriber: 'bob',
 #     callback:   'https://app.example.com/events',
 #     topics:     ['widgets', 'kitten'],
-#     events:     { sent: 21450, queued: 498, oldest: 59_603 }
+#     events:     { sent: 21_450, queued: 498, oldest: 59_603 }
 #  } ... ]
 ```
 
