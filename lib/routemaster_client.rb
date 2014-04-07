@@ -1,5 +1,6 @@
 require "routemaster_client/version"
 
-module RoutemasterClient
-  # Your code goes here...
+module Routemaster
+  class Client
+  end
 end

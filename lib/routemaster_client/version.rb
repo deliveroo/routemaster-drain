@@ -1,3 +1,5 @@
-module RoutemasterClient
-  VERSION = "0.0.1"
+class Routemaster
+  class Client
+    VERSION = '0.0.1'
+  end
 end
