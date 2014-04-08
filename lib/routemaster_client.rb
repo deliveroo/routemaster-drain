@@ -1,6 +1,7 @@
 require 'routemaster_client/version'
 require 'uri'
 require 'faraday'
+require 'json'
 
 module Routemaster
   class Client
@@ -35,6 +36,8 @@ module Routemaster
       end
       _assert options[:topics].kind_of?(Enumerable), 'topics required'
       _assert options[:callback], 'callback required'
+      _assert_valid_timeout options[:timeout] if options[:timeout]
+      _assert_valid_max_events options[:max] if options[:max]
 
       options[:topics].each { |t| _assert_valid_topic(t) }
       _assert_valid_url(options[:callback])
@@ -44,6 +47,7 @@ module Routemaster
         r.headers['Content-Type'] = 'application/json'
         r.body = data
       end
+      # $stderr.puts response.status
       unless response.success?
         raise "subscription rejected"
       end
@@ -51,6 +55,16 @@ module Routemaster
 
 
     private
+
+    def _assert_valid_timeout(timeout)
+      _assert (timeout.kind_of?(Integer) && (0..3_600_000).include?(timeout)),
+        'bad timeout'
+    end
+
+    def _assert_valid_max_events(max)
+      _assert (max.kind_of?(Integer) && (0..10_000).include?(max)),
+        'bad max # events'
+    end
 
     def _assert_valid_url(url)
       uri = URI.parse(url)

@@ -72,7 +72,7 @@ describe Routemaster::Client do
 
     it 'fails when an non-success HTTP status is returned' do
       @stub.to_return(status: 500)
-      expect { perform }.to raise_error
+      expect { perform }.to raise_error(RuntimeError)
     end
   end
 
@@ -111,7 +111,7 @@ describe Routemaster::Client do
       ).with { |r|
         r.headers['Content-Type'] == 'application/json' &&
         JSON.parse(r.body).all? { |k,v| subscribe_options[k.to_sym] == v }
-      }.to_return(status:200)
+      }
     end
 
     it 'passes with correct arguments' do
@@ -119,11 +119,30 @@ describe Routemaster::Client do
       @stub.should have_been_requested
     end
 
-    it 'fails with a bad callback'
-    it 'fails with a bad timeout'
-    it 'fails with a bad max number of events'
-    it 'fails with a bad topic list'
-    it 'fails on HTTP error'
+    it 'fails with a bad callback' do
+      subscribe_options[:callback] = 'http://example.com'
+      expect { perform }.to raise_error(ArgumentError)
+    end
+
+    it 'fails with a bad timeout' do
+      subscribe_options[:timeout] = -5
+      expect { perform }.to raise_error(ArgumentError)
+    end
+
+    it 'fails with a bad max number of events' do
+      subscribe_options[:max] = 1_000_000
+      expect { perform }.to raise_error(ArgumentError)
+    end
+
+    it 'fails with a bad topic list' do
+      subscribe_options[:topics] = ['widgets', 'foo123$%bar']
+      expect { perform }.to raise_error(ArgumentError)
+    end
+
+    it 'fails on HTTP error' do
+      @stub.to_return(status: 500)
+      expect { perform }.to raise_error(RuntimeError)
+    end
   end
 
   describe '#monitor_topics' do
