@@ -15,7 +15,27 @@ module Routemaster
       nil
     end
 
+    def created(topic, callback)
+      _send_event('created', topic, callback)
+    end
+
+    def updated(topic, callback)
+      _send_event('updated', topic, callback)
+    end
+
+    def deleted(topic, callback)
+      _send_event('deleted', topic, callback)
+    end
+
+    def noop(topic, callback)
+      _send_event('noop', topic, callback)
+    end
+
+
     private
+
+    def _send_event(event, topic, callback)
+    end
 
     def _assert(condition, message)
       condition or raise ArgumentError.new(message)

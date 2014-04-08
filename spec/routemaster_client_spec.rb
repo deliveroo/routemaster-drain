@@ -10,7 +10,7 @@ describe Routemaster::Client do
   subject { described_class.new(options) }
 
   before do
-    stub_request(:get, %r{^https://([a-z_:]+)@bus.example.com/pulse$}).with(status: 200)
+    stub_request(:get, %r{^https://#{options[:uuid]}:x@bus.example.com/pulse$}).with(status: 200)
   end
 
   describe '#initialize' do
@@ -34,16 +34,19 @@ describe Routemaster::Client do
     end
 
     it 'fails it it cannot connect' do
-      stub_request(:any, %r{^https://([a-z_:]+)@bus.example.com}).to_raise(Faraday::ConnectionFailed)
+      stub_request(:any, %r{^https://#{options[:uuid]}:x@bus.example.com}).to_raise(Faraday::ConnectionFailed)
       expect { subject }.to raise_error
     end
   end
 
   shared_examples 'an event sender' do
     let(:callback) { 'https://app.example.com/widgets/123' }
-    let(:stub_request) { stub_request(:post, 'https://bus.example.com/topics/widgets') }
     
-    xit 'sends the event' do
+    before do
+      @stub = stub_request(:post, "https://#{options[:uuid]}:x@bus.example.com/topics/widgets").with(status: 200)
+    end
+    
+    it 'sends the event' do
       subject.send(event, 'widget', callback)
       # a_request(:post, 'https://bus.example.com/topics/widgets').
       #   with { |r|
