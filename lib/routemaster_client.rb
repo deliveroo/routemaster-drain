@@ -7,7 +7,7 @@ module Routemaster
     def initialize(options = {})
       @_url = _assert_valid_url(options[:url])
       @_uuid = options[:uuid]
-      _assert (options[:uuid] =~ /^[a-z_]{1,32}$/), 'uuid should be alpha'
+      _assert (options[:uuid] =~ /^[a-z0-9_-]{1,64}$/), 'uuid should be alpha'
       
       _conn.get('/pulse')
       nil
@@ -40,6 +40,7 @@ module Routemaster
 
     def _send_event(event, topic, callback)
       _assert_valid_url(callback)
+      _assert (topic =~ /^[a-z_]{1,32}$/), 'bad topic name'
       data = { event: event, url: callback }.to_json
       _conn.post("/topics/#{topic}") do |r|
         r.headers['Content-Type'] = 'application/json'
