@@ -70,7 +70,10 @@ describe Routemaster::Client do
       expect { perform }.to raise_error
     end
 
-    it 'fails when an non-success HTTP status is returned'
+    it 'fails when an non-success HTTP status is returned' do
+      @stub.to_return(status: 500)
+      expect { perform }.to raise_error
+    end
   end
 
   describe '#created' do

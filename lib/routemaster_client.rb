@@ -42,10 +42,11 @@ module Routemaster
       _assert_valid_url(callback)
       _assert (topic =~ /^[a-z_]{1,32}$/), 'bad topic name'
       data = { event: event, url: callback }.to_json
-      _conn.post("/topics/#{topic}") do |r|
+      response = _conn.post("/topics/#{topic}") do |r|
         r.headers['Content-Type'] = 'application/json'
         r.body = data
       end
+      fail "event rejected (#{response.status})" unless response.success?
     end
 
     def _assert(condition, message)
