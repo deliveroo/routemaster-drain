@@ -5,9 +5,7 @@ require 'faraday'
 module Routemaster
   class Client
     def initialize(options = {})
-      @_url = URI.parse(options[:url])
-      _assert (@_url.scheme == 'https'), 'HTTPS required'
-
+      @_url = _assert_valid_url(options[:url])
       @_uuid = options[:uuid]
       _assert (options[:uuid] =~ /^[a-z_]{1,32}$/), 'uuid should be alpha'
       
@@ -34,7 +32,14 @@ module Routemaster
 
     private
 
+    def _assert_valid_url(url)
+      uri = URI.parse(url)
+      _assert (uri.scheme == 'https'), 'HTTPS required'
+      return url
+    end
+
     def _send_event(event, topic, callback)
+      _assert_valid_url(callback)
       data = { event: event, url: callback }.to_json
       _conn.post("/topics/#{topic}") do |r|
         r.headers['Content-Type'] = 'application/json'

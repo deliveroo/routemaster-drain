@@ -41,6 +41,7 @@ describe Routemaster::Client do
 
   shared_examples 'an event sender' do
     let(:callback) { 'https://app.example.com/widgets/123' }
+    let(:perform) { subject.send(event, 'widgets', callback) }
     
     before do
       @stub = stub_request(
@@ -49,12 +50,15 @@ describe Routemaster::Client do
     end
     
     it 'sends the event' do
-      subject.send(event, 'widgets', callback)
+      perform
       @stub.should have_been_requested
     end
 
-    it 'fails with a bad event type'
-    it 'fails with a bad callback URL'
+    it 'fails with a bad callback URL' do
+      callback.replace 'http.foo.bar'
+      expect { perform }.to raise_error
+    end
+
     it 'fails with a non-SSL URL'
     it 'fails with a bad topic name'
     it 'fails when an non-success HTTP status is returned'
