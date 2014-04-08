@@ -35,6 +35,11 @@ module Routemaster
     private
 
     def _send_event(event, topic, callback)
+      data = { event: event, url: callback }.to_json
+      _conn.post("/topics/#{topic}") do |r|
+        r.headers['Content-Type'] = 'application/json'
+        r.body = data
+      end
     end
 
     def _assert(condition, message)

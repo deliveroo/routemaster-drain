@@ -43,24 +43,21 @@ describe Routemaster::Client do
     let(:callback) { 'https://app.example.com/widgets/123' }
     
     before do
-      @stub = stub_request(:post, "https://#{options[:uuid]}:x@bus.example.com/topics/widgets").with(status: 200)
+      @stub = stub_request(
+        :post, "https://#{options[:uuid]}:x@bus.example.com/topics/widgets"
+      ).with(status: 200)
     end
     
     it 'sends the event' do
-      subject.send(event, 'widget', callback)
-      # a_request(:post, 'https://bus.example.com/topics/widgets').
-      #   with { |r|
-      #     r.headers['Content-Type'] == 'application/json' &&
-      #     JSON.parse(r.body) == { event: event, url: callback }
-      #   }.
-      #   should have_been_made
-      # stub_request.should have_been_requested
+      subject.send(event, 'widgets', callback)
+      @stub.should have_been_requested
     end
 
     it 'fails with a bad event type'
     it 'fails with a bad callback URL'
     it 'fails with a non-SSL URL'
     it 'fails with a bad topic name'
+    it 'fails when an non-success HTTP status is returned'
   end
 
   describe '#created' do
