@@ -29,6 +29,26 @@ module Routemaster
       _send_event('noop', topic, callback)
     end
 
+    def subscribe(options = {})
+      if (options.keys - [:topics, :callback, :timeout, :max]).any?
+        raise ArgumentError.new('bad options')
+      end
+      _assert options[:topics].kind_of?(Enumerable), 'topics required'
+      _assert options[:callback], 'callback required'
+
+      options[:topics].each { |t| _assert_valid_topic(t) }
+      _assert_valid_url(options[:callback])
+
+      data = options.to_json
+      response = _conn.post('/subscription') do |r|
+        r.headers['Content-Type'] = 'application/json'
+        r.body = data
+      end
+      unless response.success?
+        raise "subscription rejected"
+      end
+    end
+
 
     private
 
@@ -38,9 +58,13 @@ module Routemaster
       return url
     end
 
+    def _assert_valid_topic(topic)
+      _assert (topic =~ /^[a-z_]{1,32}$/), 'bad topic name'
+    end
+
     def _send_event(event, topic, callback)
       _assert_valid_url(callback)
-      _assert (topic =~ /^[a-z_]{1,32}$/), 'bad topic name'
+      _assert_valid_topic(topic)
       data = { event: event, url: callback }.to_json
       response = _conn.post("/topics/#{topic}") do |r|
         r.headers['Content-Type'] = 'application/json'

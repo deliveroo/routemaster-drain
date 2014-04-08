@@ -97,11 +97,33 @@ describe Routemaster::Client do
   end
 
   describe '#subscribe' do
-    it 'passes with correct arguments'
+    let(:perform) { subject.subscribe(subscribe_options) }
+    let(:subscribe_options) {{
+      topics:   %w(widgets kitten),
+      callback: 'https://app.example.com/events',
+      timeout:  60_000,
+      max:      500
+    }}
+
+    before do
+      @stub = stub_request(
+        :post, %r{^https://#{options[:uuid]}:x@bus.example.com/subscription$}
+      ).with { |r|
+        r.headers['Content-Type'] == 'application/json' &&
+        JSON.parse(r.body).all? { |k,v| subscribe_options[k.to_sym] == v }
+      }.to_return(status:200)
+    end
+
+    it 'passes with correct arguments' do
+      expect { perform }.not_to raise_error
+      @stub.should have_been_requested
+    end
+
     it 'fails with a bad callback'
     it 'fails with a bad timeout'
     it 'fails with a bad max number of events'
     it 'fails with a bad topic list'
+    it 'fails on HTTP error'
   end
 
   describe '#monitor_topics' do
