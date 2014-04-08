@@ -1,17 +1,59 @@
 require 'spec_helper'
 require 'routemaster_client'
+require 'webmock/rspec'
 
-describe RoutemasterClient do
+describe Routemaster::Client do
+  let(:options) {{
+    url:  'https://bus.example.com',
+    uuid: 'john_doe'
+  }}
+  subject { described_class.new(options) }
+
+  before do
+    stub_request(:get, %r{^https://([a-z_:]+)@bus.example.com/pulse$}).with(status: 200)
+  end
+
   describe '#initialize' do
-    it 'passes with valid arguments'
-    it 'fails with a non-SSL URL'
-    it 'fails with a bad URL'
-    it 'fails with a bad client id'
-    it 'fails it it cannot connect'
+    it 'passes with valid arguments' do
+      expect { subject }.not_to raise_error
+    end
+
+    it 'fails with a non-SSL URL' do
+      options[:url].sub!(/https/, 'http')
+      expect { subject }.to raise_error(ArgumentError)
+    end
+
+    it 'fails with a bad URL' do
+      options[:url].replace('foobar')
+      expect { subject }.to raise_error(ArgumentError)
+    end
+
+    it 'fails with a bad client id' do
+      options[:uuid].replace('123 $%')
+      expect { subject }.to raise_error(ArgumentError)
+    end
+
+    it 'fails it it cannot connect' do
+      stub_request(:any, %r{^https://([a-z_:]+)@bus.example.com}).to_raise(Faraday::ConnectionFailed)
+      expect { subject }.to raise_error
+    end
   end
 
   shared_examples 'an event sender' do
-    it 'sends the event'
+    let(:callback) { 'https://app.example.com/widgets/123' }
+    let(:stub_request) { stub_request(:post, 'https://bus.example.com/topics/widgets') }
+    
+    xit 'sends the event' do
+      subject.send(event, 'widget', callback)
+      # a_request(:post, 'https://bus.example.com/topics/widgets').
+      #   with { |r|
+      #     r.headers['Content-Type'] == 'application/json' &&
+      #     JSON.parse(r.body) == { event: event, url: callback }
+      #   }.
+      #   should have_been_made
+      # stub_request.should have_been_requested
+    end
+
     it 'fails with a bad event type'
     it 'fails with a bad callback URL'
     it 'fails with a non-SSL URL'
@@ -19,22 +61,22 @@ describe RoutemasterClient do
   end
 
   describe '#created' do
-    let(:event) { :created }
+    let(:event) { 'created' }
     it_behaves_like 'an event sender'
   end
 
   describe '#updated' do
-    let(:event) { :updated }
+    let(:event) { 'updated' }
     it_behaves_like 'an event sender'
   end
 
   describe '#deleted' do
-    let(:event) { :deleted }
+    let(:event) { 'deleted' }
     it_behaves_like 'an event sender'
   end
 
   describe '#noop' do
-    let(:event) { :noop }
+    let(:event) { 'noop' }
     it_behaves_like 'an event sender'
   end
 
