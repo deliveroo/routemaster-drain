@@ -36,7 +36,7 @@ module Routemaster
     end
 
     def subscribe(options = {})
-      if (options.keys - [:topics, :callback, :timeout, :max]).any?
+      if (options.keys - [:topics, :callback, :timeout, :max, :uuid]).any?
         raise ArgumentError.new('bad options')
       end
       _assert options[:topics].kind_of?(Enumerable), 'topics required'
@@ -84,7 +84,7 @@ module Routemaster
     def _send_event(event, topic, callback)
       _assert_valid_url(callback)
       _assert_valid_topic(topic)
-      data = { event: event, url: callback }.to_json
+      data = { type: event, url: callback }.to_json
       response = _conn.post("/topics/#{topic}") do |r|
         r.headers['Content-Type'] = 'application/json'
         r.body = data

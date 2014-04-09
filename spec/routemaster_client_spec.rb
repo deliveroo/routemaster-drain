@@ -57,6 +57,8 @@ describe Routemaster::Client do
       @stub.should have_been_requested
     end
 
+    it 'sends a JSON payload'
+
     it 'fails with a bad callback URL' do
       callback.replace 'http.foo.bar'
       expect { perform }.to raise_error
@@ -145,6 +147,8 @@ describe Routemaster::Client do
       @stub.to_return(status: 500)
       expect { perform }.to raise_error(RuntimeError)
     end
+
+    it 'accepts a uuid'
   end
 
   describe '#monitor_topics' do
