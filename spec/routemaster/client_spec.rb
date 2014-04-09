@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'routemaster_client'
+require 'routemaster/client'
 require 'webmock/rspec'
 
 describe Routemaster::Client do

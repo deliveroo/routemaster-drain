@@ -1,10 +1,10 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('..', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'routemaster_client/version'
+require 'routemaster/client/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'routemaster_client'
+  spec.name          = 'routemaster-client'
   spec.version       = Routemaster::Client::VERSION
   spec.authors       = ['Julien Letessier']
   spec.email         = ['julien.letessier@gmail.com']
@@ -13,9 +13,8 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($/)
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^spec/})
-  spec.require_paths = ['lib']
+  spec.require_paths = %w(.)
 
   spec.add_development_dependency 'bundler', '~> 1.5'
   spec.add_development_dependency 'rake'

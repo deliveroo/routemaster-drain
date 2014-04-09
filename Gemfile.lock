@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    routemaster_client (0.0.1)
+    routemaster-client (0.0.1)
       faraday
 
 GEM
@@ -75,6 +75,6 @@ DEPENDENCIES
   pry-nav
   psych
   rake
-  routemaster_client!
+  routemaster-client!
   rspec
   webmock
