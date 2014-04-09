@@ -20,15 +20,15 @@ module Routemaster
     end
 
     def created(topic, callback)
-      _send_event('created', topic, callback)
+      _send_event('create', topic, callback)
     end
 
     def updated(topic, callback)
-      _send_event('updated', topic, callback)
+      _send_event('update', topic, callback)
     end
 
     def deleted(topic, callback)
-      _send_event('deleted', topic, callback)
+      _send_event('delete', topic, callback)
     end
 
     def noop(topic, callback)
