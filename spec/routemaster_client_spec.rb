@@ -37,6 +37,8 @@ describe Routemaster::Client do
       stub_request(:any, %r{^https://#{options[:uuid]}:x@bus.example.com}).to_raise(Faraday::ConnectionFailed)
       expect { subject }.to raise_error
     end
+
+    it 'fails if it does not get a successful heartbeat from the app'
   end
 
   shared_examples 'an event sender' do
