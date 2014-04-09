@@ -1,4 +1,5 @@
 require 'routemaster_client/version'
+require 'routemaster_client/openssl'
 require 'uri'
 require 'faraday'
 require 'json'
