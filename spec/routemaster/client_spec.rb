@@ -10,7 +10,7 @@ describe Routemaster::Client do
   subject { described_class.new(options) }
 
   before do
-    stub_request(:get, %r{^https://#{options[:uuid]}:x@bus.example.com/pulse$}).with(status: 200)
+    @stub_pulse = stub_request(:get, %r{^https://#{options[:uuid]}:x@bus.example.com/pulse$}).with(status: 200)
   end
 
   describe '#initialize' do
@@ -38,7 +38,10 @@ describe Routemaster::Client do
       expect { subject }.to raise_error
     end
 
-    it 'fails if it does not get a successful heartbeat from the app'
+    it 'fails if it does not get a successful heartbeat from the app' do
+      @stub_pulse.to_return(status: 500)
+      expect { subject }.to raise_error
+    end
   end
 
   shared_examples 'an event sender' do
@@ -57,7 +60,12 @@ describe Routemaster::Client do
       @stub.should have_been_requested
     end
 
-    it 'sends a JSON payload'
+    it 'sends a JSON payload' do
+      @stub.with do |req|
+        expect(req.headers['Content-Type']).to eq('application/json')
+      end
+      perform
+    end
 
     it 'fails with a bad callback URL' do
       callback.replace 'http.foo.bar'
@@ -148,14 +156,17 @@ describe Routemaster::Client do
       expect { perform }.to raise_error(RuntimeError)
     end
 
-    it 'accepts a uuid'
+    it 'accepts a uuid' do
+      subscribe_options[:uuid] = 'hello'
+      expect { perform }.not_to raise_error
+    end
   end
 
   describe '#monitor_topics' do
     it 'passes'
   end
 
-  describe '#monitor_scubscriptions' do
+  describe '#monitor_subscriptions' do
     it 'passes'
   end
 end
