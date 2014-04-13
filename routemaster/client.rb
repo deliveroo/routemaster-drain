@@ -96,8 +96,8 @@ module Routemaster
 
     def _conn
       @_conn ||= Faraday.new(@_url) do |f|
-        f.use      Faraday::Request::BasicAuthentication, @_uuid, 'x'
-        f.adapter  Faraday.default_adapter
+        f.use Faraday::Request::BasicAuthentication, @_uuid, 'x'
+        f.adapter :net_http_persistent
       end
     end
   end
