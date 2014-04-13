@@ -37,13 +37,13 @@ module Routemaster
 
     def _valid_auth?(env)
       Base64.
-        decode64(env['HTTP_AUTHORIZATION']).
+        decode64(env['HTTP_AUTHORIZATION'].gsub(/^Basic /, '')).
         split(':').first == @uuid
     end
 
     def _extract_payload(env)
       return unless env['CONTENT_TYPE'] == 'application/json'
-      JSON.parse(rack.input.read)
+      JSON.parse(env['rack.input'].read)
     end
   end
 end

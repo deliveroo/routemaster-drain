@@ -3,7 +3,7 @@ require 'spec/support/rack_test'
 require 'routemaster/receiver'
 
 describe Routemaster::Receiver do
-  let(:handler) { double 'handler', on_event: nil }
+  let(:handler) { double 'handler', on_events: nil }
   let(:app) { described_class.new(fake_app, options) }
   let(:perform) { post '/events', payload, 'CONTENT_TYPE' => 'application/json' }
   
@@ -33,10 +33,14 @@ describe Routemaster::Receiver do
   it 'passes with valid HTTP Basic' do
     authorize 'demo', 'x'
     perform
-    expect(last_response).to be_ok
+    expect(last_response.status).to eq(204)
   end
 
-  it 'fails without authentication'
+  it 'fails without authentication' do
+    perform
+    expect(last_response.status).to eq(401)
+  end
+
   it 'delegates to the next middleware for unknown paths'
   it 'delegates to the next middlex for non-POST'
   it 'calls the handler when receiving an avent'
