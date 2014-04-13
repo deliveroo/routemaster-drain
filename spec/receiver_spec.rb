@@ -5,7 +5,11 @@ require 'routemaster/receiver'
 describe Routemaster::Receiver do
   let(:handler) { double 'handler', on_events: nil }
   let(:app) { described_class.new(fake_app, options) }
-  let(:perform) { post '/events', payload, 'CONTENT_TYPE' => 'application/json' }
+  
+  
+  def perform
+    post '/events', payload, 'CONTENT_TYPE' => 'application/json'
+  end
   
   let(:options) {{
     path:     '/events',
@@ -15,7 +19,7 @@ describe Routemaster::Receiver do
 
   class FakeApp
     def call(env)
-      [500, {}, 'fake app']
+      [501, {}, 'fake app']
     end
   end
 
@@ -41,8 +45,25 @@ describe Routemaster::Receiver do
     expect(last_response.status).to eq(401)
   end
 
-  it 'delegates to the next middleware for unknown paths'
-  it 'delegates to the next middlex for non-POST'
-  it 'calls the handler when receiving an avent'
-  it 'calls the handler multiple times'
+  it 'delegates to the next middleware for unknown paths' do
+    post '/foobar'
+    expect(last_response.status).to eq(501)
+  end
+
+  it 'delegates to the next middlex for non-POST' do
+    get '/events'
+    expect(last_response.status).to eq(501)
+  end
+
+  it 'calls the handler when receiving an avent' do
+    authorize 'demo', 'x'
+    expect(handler).to receive(:on_events).exactly(:once)
+    perform
+  end
+
+  it 'calls the handler multiple times' do
+    authorize 'demo', 'x'
+    expect(handler).to receive(:on_events).exactly(3).times
+    3.times { perform }
+  end
 end
