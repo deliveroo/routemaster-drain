@@ -12,8 +12,6 @@ module Routemaster
       _assert (options[:uuid] =~ /^[a-z0-9_-]{1,64}$/), 'uuid should be alpha'
       
       _conn.get('/pulse').tap do |response|
-        puts response.status
-        puts response.headers.inspect
         raise 'cannot connect to bus' unless response.success?
       end
       nil
