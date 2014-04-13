@@ -15,12 +15,12 @@ module Routemaster
     def call(env)
       catch :forward do
         throw :forward unless _intercept_endpoint?(env)
-        return [401, {}, ''] unless _has_auth?(env)
-        return [403, {}, ''] unless _valid_auth?(env)
-        return [400, {}, ''] unless payload = _extract_payload(env)
+        return [401, {}, []] unless _has_auth?(env)
+        return [403, {}, []] unless _valid_auth?(env)
+        return [400, {}, []] unless payload = _extract_payload(env)
 
         @handler.on_events(payload)
-        return [204, {}, '']
+        return [204, {}, []]
       end
       @app.call(env)
     end
