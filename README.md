@@ -55,6 +55,27 @@ client.subscribe(
 ```
 
 
+**Receive** events at path `/events` using a Rack middleware:
+
+```ruby
+require 'routemaster/receiver'
+
+class Handler
+  def on_events(batch)
+    batch.each do |event|
+      puts event['url']
+    event
+  end
+end
+
+use Routemaster::Receiver, {
+  path:    '/events',
+  uuid:    'demo',
+  handler: Handler.new
+}
+```
+
+
 **Monitor** the status of topics and subscriptions:
 
 ```ruby
