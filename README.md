@@ -7,7 +7,7 @@ bus.
 
 Add this line to your application's Gemfile:
 
-    gem 'routemaster_client'
+    gem 'routemaster-client'
 
 And then execute:
 
@@ -15,14 +15,14 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install routemaster_client
+    $ gem install routemaster-client
 
 ## Usage
 
 **Configure** your client:
 
 ```ruby
-require 'routemasterclient'
+require 'routemaster/client'
 client = RoutemasterClient.new(url: 'https://bus.example.com', uuid: 'john-doe')
 ```
 
