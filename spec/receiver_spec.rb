@@ -11,11 +11,13 @@ describe Routemaster::Receiver do
     post '/events', payload, 'CONTENT_TYPE' => 'application/json'
   end
   
-  let(:options) {{
-    path:     '/events',
-    uuid:     'demo',
-    handler:  handler
-  }}
+  let(:options) do
+    {
+      path:     '/events',
+      uuid:     'demo',
+      handler:  handler
+    }
+  end
 
   class FakeApp
     def call(env)
@@ -25,13 +27,15 @@ describe Routemaster::Receiver do
 
   let(:fake_app) { FakeApp.new }
   
-  let(:payload) {[{
-    topic: 'widgets', event: 'created', url: 'https://example.com/widgets/1', t: 1234
-  }, {
-    topic: 'widgets', event: 'created', url: 'https://example.com/widgets/2', t: 1234 
-  }, {
-    topic: 'widgets', event: 'created', url: 'https://example.com/widgets/3', t: 1234 
-  }].to_json }
+  let(:payload) do
+    [{
+      topic: 'widgets', event: 'created', url: 'https://example.com/widgets/1', t: 1234
+    }, {
+      topic: 'widgets', event: 'created', url: 'https://example.com/widgets/2', t: 1234 
+    }, {
+      topic: 'widgets', event: 'created', url: 'https://example.com/widgets/3', t: 1234 
+    }].to_json
+  end
 
 
   it 'passes with valid HTTP Basic' do

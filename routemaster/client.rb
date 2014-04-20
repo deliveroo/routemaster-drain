@@ -14,7 +14,6 @@ module Routemaster
       _conn.get('/pulse').tap do |response|
         raise 'cannot connect to bus' unless response.success?
       end
-      nil
     end
 
     def created(topic, callback)
@@ -60,13 +59,11 @@ module Routemaster
     private
 
     def _assert_valid_timeout(timeout)
-      _assert (timeout.kind_of?(Integer) && (0..3_600_000).include?(timeout)),
-        'bad timeout'
+      _assert (0..3_600_000).include?(timeout), 'bad timeout'
     end
 
     def _assert_valid_max_events(max)
-      _assert (max.kind_of?(Integer) && (0..10_000).include?(max)),
-        'bad max # events'
+      _assert (0..10_000).include?(max), 'bad max # events'
     end
 
     def _assert_valid_url(url)

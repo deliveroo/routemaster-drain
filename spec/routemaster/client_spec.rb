@@ -3,10 +3,10 @@ require 'routemaster/client'
 require 'webmock/rspec'
 
 describe Routemaster::Client do
-  let(:options) {{
-    url:  'https://bus.example.com',
-    uuid: 'john_doe'
-  }}
+  let(:options) do
+    { url:  'https://bus.example.com', uuid: 'john_doe' }
+  end
+
   subject { described_class.new(options) }
 
   before do
