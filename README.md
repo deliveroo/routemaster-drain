@@ -26,6 +26,12 @@ require 'routemaster/client'
 client = RoutemasterClient.new(url: 'https://bus.example.com', uuid: 'john-doe')
 ```
 
+You can also specify a timeout value in seconds if you like with the ```timeout``` option.
+
+```ruby
+RoutemasterClient.new(url: 'https://bus.example.com', uuid: 'john-doe', timeout: 2)
+```
+
 
 **Push** an event about an entity in the topic `widgets` with a callback URL:
 
@@ -83,7 +89,7 @@ client.monitor_topics
 #=> [ { name: 'widgets', publisher: 'john-doe', events: 12589 }, ...]
 
 client.monitor_subscriptions
-#=> [ { 
+#=> [ {
 #     subscriber: 'bob',
 #     callback:   'https://app.example.com/events',
 #     topics:     ['widgets', 'kitten'],

@@ -42,19 +42,24 @@ describe Routemaster::Client do
       @stub_pulse.to_return(status: 500)
       expect { subject }.to raise_error
     end
+
+    it 'fails if the timeout value is not an integer' do
+      options[:timeout] = 'timeout'
+      expect { subject }.to raise_error
+    end
   end
 
   shared_examples 'an event sender' do
     let(:callback) { 'https://app.example.com/widgets/123' }
     let(:topic) { 'widgets' }
     let(:perform) { subject.send(event, topic, callback) }
-    
+
     before do
       @stub = stub_request(
         :post, "https://#{options[:uuid]}:x@bus.example.com/topics/widgets"
       ).with(status: 200)
     end
-    
+
     it 'sends the event' do
       perform
       @stub.should have_been_requested
@@ -85,6 +90,11 @@ describe Routemaster::Client do
     it 'fails when an non-success HTTP status is returned' do
       @stub.to_return(status: 500)
       expect { perform }.to raise_error(RuntimeError)
+    end
+
+    it 'fails when the timeout is reached' do
+      @stub.to_timeout
+      expect { perform }.to raise_error(Faraday::TimeoutError)
     end
   end
 

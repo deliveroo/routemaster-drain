@@ -9,8 +9,11 @@ module Routemaster
     def initialize(options = {})
       @_url = _assert_valid_url(options[:url])
       @_uuid = options[:uuid]
+      @_timeout = options.fetch(:timeout, 1)
+
       _assert (options[:uuid] =~ /^[a-z0-9_-]{1,64}$/), 'uuid should be alpha'
-      
+      _assert_valid_timeout(@_timeout)
+
       _conn.get('/pulse').tap do |response|
         raise 'cannot connect to bus' unless response.success?
       end
@@ -51,7 +54,7 @@ module Routemaster
       end
       # $stderr.puts response.status
       unless response.success?
-        raise "subscription rejected"
+        raise 'subscription rejected'
       end
     end
 
@@ -95,6 +98,7 @@ module Routemaster
       @_conn ||= Faraday.new(@_url) do |f|
         f.use Faraday::Request::BasicAuthentication, @_uuid, 'x'
         f.adapter :net_http_persistent
+        f.options.timeout = @_timeout
       end
     end
   end
