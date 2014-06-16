@@ -70,7 +70,7 @@ class Handler
   def on_events(batch)
     batch.each do |event|
       puts event['url']
-    event
+    end
   end
 end
 
