@@ -11,6 +11,11 @@
 # http://www.rubyinside.com/how-to-cure-nethttps-risky-default-https-behavior-4010.html
 if ENV.fetch('RACK_ENV', 'development') !~ /production|staging/
   require 'openssl'
+  require 'core_ext/silence_stream'
+
   I_KNOW_THAT_OPENSSL_VERIFY_PEER_EQUALS_VERIFY_NONE_IS_WRONG = nil
-  OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
+  $stderr.silence_stream do
+    OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+  end
 end
