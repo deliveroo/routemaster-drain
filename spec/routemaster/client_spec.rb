@@ -62,7 +62,7 @@ describe Routemaster::Client do
 
     it 'sends the event' do
       perform
-      @stub.should have_been_requested
+      expect(@stub).to have_been_requested
     end
 
     it 'sends a JSON payload' do
@@ -138,7 +138,7 @@ describe Routemaster::Client do
 
     it 'passes with correct arguments' do
       expect { perform }.not_to raise_error
-      @stub.should have_been_requested
+      expect(@stub).to have_been_requested
     end
 
     it 'fails with a bad callback' do
