@@ -13,4 +13,4 @@ after_script:
 - "./rebund/run upload"
 env:
   global:
-    secure: aPA8JcaCxGsCN3aDOwMfrFtFU9mhs2s+33IFQRWZKKXupMjjlUqP0YXkl+3b/vTN0dvJDb9V8BSDY/cHzssezvNJRmZWRC5LQqK2a3LrXFnzBx3qsgSe3QRveB/X1S5SUHzkaouvHfqLq9OxfrDlPzngjbDyelOqRtzeSLiPja8=
+    secure: "kMxJcT8xyQ+QyCeKW5lDP44IU99Y8iN1AWZo9Z1BKN6HigGa8Ua8O/aD8AJjrTfRRSjnM402utmW6mk78RYVxJha3+69jJYr25I9EeyYhV2cuRu+5Ictxfcb9R9VhS0b6LDncz9h55xDS1UA35rvj+EOO4/M9moccw7T2qzPa2U="
