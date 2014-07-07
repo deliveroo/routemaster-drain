@@ -56,6 +56,7 @@ events, in batches of at most 500 events, to a given callback URL:
 client.subscribe(
   topics:   ['widgets', 'kitten'],
   callback: 'https://app.example.com/events',
+  uuid:     'john-doe',
   timeout:  60_000,
   max:      500)
 ```
