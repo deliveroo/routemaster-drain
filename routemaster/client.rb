@@ -48,7 +48,7 @@ module Routemaster
       _assert_valid_url(options[:callback])
 
       data = options.to_json
-      response = _conn.post('/subscription') do |r|
+      response = _post('/subscription') do |r|
         r.headers['Content-Type'] = 'application/json'
         r.body = data
       end
@@ -83,7 +83,7 @@ module Routemaster
       _assert_valid_url(callback)
       _assert_valid_topic(topic)
       data = { type: event, url: callback }.to_json
-      response = _conn.post("/topics/#{topic}") do |r|
+      response = _post("/topics/#{topic}") do |r|
         r.headers['Content-Type'] = 'application/json'
         r.body = data
       end
@@ -93,6 +93,17 @@ module Routemaster
     def _assert(condition, message)
       condition or raise ArgumentError.new(message)
     end
+
+    def _post(path, &block)
+      retries ||= 5
+      _conn.post(path, &block)
+    rescue Net::HTTP::Persistent::Error => e
+      raise unless (retries -= 1).zero?
+      puts "warning: retrying post to #{path} on #{e.class.name}: #{e.message} (#{retries})"
+      @_conn = nil
+      retry
+    end
+
 
     def _conn
       @_conn ||= Faraday.new(@_url) do |f|
