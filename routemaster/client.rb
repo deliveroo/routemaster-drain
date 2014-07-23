@@ -98,7 +98,7 @@ module Routemaster
       retries ||= 5
       _conn.post(path, &block)
     rescue Net::HTTP::Persistent::Error => e
-      raise unless (retries -= 1).zero?
+      raise if (retries -= 1).zero?
       puts "warning: retrying post to #{path} on #{e.class.name}: #{e.message} (#{retries})"
       @_conn = nil
       retry
