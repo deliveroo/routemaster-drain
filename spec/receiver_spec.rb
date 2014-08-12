@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'spec/support/rack_test'
 require 'routemaster/receiver'
+require 'spec/support/write_expectation'
 
 describe Routemaster::Receiver do
   let(:handler) { double 'handler', on_events: nil, on_events_received: true }
@@ -59,11 +60,14 @@ describe Routemaster::Receiver do
   end
 
   context 'with the deprecated :handler option' do
-    before { options[:handler] = handler }
+    let(:options) {{
+      path:     '/events',
+      uuid:     'demo',
+      handler:  handler
+    }}
 
     it 'calls the handler when receiving an avent' do
       authorize 'demo', 'x'
-
       expect(handler).to receive(:on_events).exactly(:once)
       perform
     end
@@ -72,6 +76,10 @@ describe Routemaster::Receiver do
       authorize 'demo', 'x'
       expect(handler).to receive(:on_events).exactly(3).times
       3.times { perform }
+    end
+    
+    it 'warns about deprecation' do
+      expect { app }.to write('deprecated').to(:error)
     end
   end
 
