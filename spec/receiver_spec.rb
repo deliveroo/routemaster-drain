@@ -3,7 +3,7 @@ require 'spec/support/rack_test'
 require 'routemaster/receiver'
 
 describe Routemaster::Receiver do
-  let(:handler) { double 'handler', on_events: nil }
+  let(:handler) { double 'handler', on_events: nil, on_events_received: true }
   let(:app) { described_class.new(fake_app, options) }
   
   
@@ -14,8 +14,7 @@ describe Routemaster::Receiver do
   let(:options) do
     {
       path:     '/events',
-      uuid:     'demo',
-      handler:  handler
+      uuid:     'demo'
     }
   end
 
@@ -59,15 +58,42 @@ describe Routemaster::Receiver do
     expect(last_response.status).to eq(501)
   end
 
-  it 'calls the handler when receiving an avent' do
-    authorize 'demo', 'x'
-    expect(handler).to receive(:on_events).exactly(:once)
-    perform
+  context 'with the deprecated :handler option' do
+    before { options[:handler] = handler }
+
+    it 'calls the handler when receiving an avent' do
+      authorize 'demo', 'x'
+
+      expect(handler).to receive(:on_events).exactly(:once)
+      perform
+    end
+
+    it 'calls the handler multiple times' do
+      authorize 'demo', 'x'
+      expect(handler).to receive(:on_events).exactly(3).times
+      3.times { perform }
+    end
   end
 
-  it 'calls the handler multiple times' do
-    authorize 'demo', 'x'
-    expect(handler).to receive(:on_events).exactly(3).times
-    3.times { perform }
+  context 'with a listener' do
+    let(:handler) { double }
+    before { app.subscribe(handler, prefix: true) }
+
+    it 'broadcasts :events_received' do
+      authorize 'demo', 'x'
+
+      expect(handler).to receive(:on_events_received).exactly(:once)
+      # TODO:
+      # we'll be able to say this with a more recent wisper (and skip the
+      # handler):
+      # expect(app).to publish_event(:events_received)
+      perform
+    end
+
+    it 'can broadcast multiple times' do
+      authorize 'demo', 'x'
+      expect(handler).to receive(:on_events_received).exactly(3).times
+      3.times { perform }
+    end
   end
 end

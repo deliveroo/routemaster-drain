@@ -2,14 +2,21 @@ require 'sinatra'
 require 'rack/auth/basic'
 require 'base64'
 require 'json'
+require 'wisper'
 
 module Routemaster
   class Receiver
+    include Wisper::Publisher
+
     def initialize(app, options = {})
       @app     = app
       @path    = options[:path]
       @uuid    = options[:uuid]
-      @handler = options[:handler]
+
+      if options[:handler]
+        warn 'the :handler option is deprecated, listen to the :events_received event instead'
+        @handler = options[:handler]
+      end
     end
 
     def call(env)
@@ -19,7 +26,8 @@ module Routemaster
         return [403, {}, []] unless _valid_auth?(env)
         return [400, {}, []] unless payload = _extract_payload(env)
 
-        @handler.on_events(payload)
+        @handler.on_events(payload) if @handler
+        publish(:events_received, payload)
         return [204, {}, []]
       end
       @app.call(env)
