@@ -1,8 +1,10 @@
 require 'spec_helper'
 require 'routemaster/client'
-require 'webmock/rspec'
+require 'spec/support/uses_webmock'
 
 describe Routemaster::Client do
+  uses_webmock
+
   let(:options) do
     { url:  'https://bus.example.com', uuid: 'john_doe' }
   end
