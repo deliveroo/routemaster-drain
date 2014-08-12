@@ -85,7 +85,8 @@ describe Routemaster::Receiver do
 
   context 'with a listener' do
     let(:handler) { double }
-    before { app.subscribe(handler, prefix: true) }
+    before { Wisper.add_listener(handler, scope: 'Routemaster::Receiver', prefix: true) }
+    after { Wisper::GlobalListeners.instance.clear }
 
     it 'broadcasts :events_received' do
       authorize 'demo', 'x'
