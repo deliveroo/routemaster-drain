@@ -26,19 +26,20 @@ module Routemaster
         publish(:dirty_entity, url) if is_added
       end
 
-      def sweep_one(url)
-        @redis.srem(KEY, url)
+      def sweep_one(&block)
+        sweep(1, &block)
       end
 
       # Yields URLs for dirty entitities.
       # The entity will only be marked as clean if the block returns truthy.
       # It is possible to call +next+ or +break+ from the block.
-      def sweep
+      def sweep(limit = 0)
         unswept = []
         while url = @redis.spop(KEY)
           unswept.push url
           is_swept = !! yield(url)
           unswept.pop if is_swept
+          break if (limit -=1).zero?
         end
       ensure
         @redis.sadd(KEY, unswept) if unswept.any?

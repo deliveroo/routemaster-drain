@@ -58,6 +58,19 @@ describe Routemaster::Dirty::Map do
     end
   end
 
+  describe '#sweep_one' do
+    it 'yields one URL' do
+      mark_urls(3)
+      expect { |b| subject.sweep_one(&b) }.to yield_control.exactly(:once)
+    end
+
+    it 'processes exactly one URL' do
+      mark_urls(3)
+      subject.sweep_one { |url| true }
+      expect(subject.count).to eq(2)
+    end
+  end
+
   describe '#count' do
     it 'is 0 by default' do
       expect(subject.count).to eq(0)
