@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
-require 'routemaster/dirty/listener'
+require 'routemaster/dirty/filter'
 
-describe Routemaster::Dirty::Listener do
+describe Routemaster::Dirty::Filter do
   uses_redis
 
   def make_url(idx) ; "https://example.com/#{idx}" ; end

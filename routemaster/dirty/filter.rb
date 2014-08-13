@@ -6,7 +6,7 @@ require 'wisper'
 
 module Routemaster
   module Dirty
-    class Listener
+    class Filter
       include Wisper::Publisher
       extend Forwardable
 
