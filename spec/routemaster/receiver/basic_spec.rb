@@ -29,11 +29,11 @@ describe Routemaster::Receiver::Basic do
   
   let(:payload) do
     [{
-      topic: 'widgets', event: 'created', url: 'https://example.com/widgets/1', t: 1234
+      topic: 'widgets', type: 'create', url: 'https://example.com/widgets/1', t: 1234
     }, {
-      topic: 'widgets', event: 'created', url: 'https://example.com/widgets/2', t: 1234 
+      topic: 'widgets', type: 'create', url: 'https://example.com/widgets/2', t: 1234 
     }, {
-      topic: 'widgets', event: 'created', url: 'https://example.com/widgets/3', t: 1234 
+      topic: 'widgets', type: 'create', url: 'https://example.com/widgets/3', t: 1234 
     }].to_json
   end
 
