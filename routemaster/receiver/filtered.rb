@@ -11,15 +11,14 @@ module Routemaster
       include Wisper::Publisher
 
       def initialize(app, options = {})
-        @topics   = options.fetch(:topics, [])
         @redis    = options.fetch(:redis)
         @basic    = Basic.new(app, options)
-        @map      = options.fetch(:dirty_map)
-        @filter   = Dirty::Filter.new(redis: @redis, topics: @topics)
+        @map      = options.fetch(:dirty_map) { Dirty::Map.new(@redis) }
+        @filter   = Dirty::Filter.new(redis: @redis)
 
         @basic.subscribe(@filter, prefix: true)
         @filter.on(:entity_changed) { |url| @map.mark(url) }
-        @map.on(:dirty_entity) { |url| publish(:sweep_needed) }
+        @map.on(:dirty_entity) { |url| publish(:sweep_needed, @map) }
       end
 
       delegate [:call] => :@basic

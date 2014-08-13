@@ -17,14 +17,10 @@ module Routemaster
       def initialize(options = {})
         @redis  = options.fetch(:redis)
         @expiry = options.fetch(:expiry, EXPIRY)
-        @topics = options.fetch(:topics, [])
       end
 
       def on_events_received(payload)
         payload.each do |event|
-          # skip event about irrelevant topics
-          next unless @topics.empty? || @topics.include?(event['topic'])
-          
           known_state = State.get(@redis, event['url'])
 
           # skip events older than what we already know
