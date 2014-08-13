@@ -5,7 +5,7 @@ require 'spec/support/write_expectation'
 
 describe Routemaster::Receiver::Basic do
   let(:handler) { double 'handler', on_events: nil, on_events_received: true }
-  let(:app) { described_class.new(fake_app, options) }
+  let(:app) { described_class.new(ErrorRackApp.new, options) }
   
   
   def perform(env = {})
@@ -19,14 +19,6 @@ describe Routemaster::Receiver::Basic do
     }
   end
 
-  class FakeApp
-    def call(env)
-      [501, {}, 'fake app']
-    end
-  end
-
-  let(:fake_app) { FakeApp.new }
-  
   let(:payload) do
     [{
       topic: 'widgets', type: 'create', url: 'https://example.com/widgets/1', t: 1234
