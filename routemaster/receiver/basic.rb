@@ -23,9 +23,15 @@ module Routemaster
       def call(env)
         catch :forward do
           throw :forward unless _intercept_endpoint?(env)
-          return [401, {}, []] unless _has_auth?(env)
-          return [403, {}, []] unless _valid_auth?(env)
-          return [400, {}, []] unless payload = _extract_payload(env)
+          # reuse authentication
+          unless env['routemaster.authenticated']
+            return [401, {}, []] unless _has_auth?(env)
+            return [403, {}, []] unless _valid_auth?(env)
+          end
+          # reuse parsed payload
+          unless payload = env['routemaster.payload']
+            return [400, {}, []] unless payload = _extract_payload(env)
+          end
 
           @handler.on_events(payload) if @handler
           publish(:events_received, payload)

@@ -8,8 +8,8 @@ describe Routemaster::Receiver::Basic do
   let(:app) { described_class.new(fake_app, options) }
   
   
-  def perform
-    post '/events', payload, 'CONTENT_TYPE' => 'application/json'
+  def perform(env = {})
+    post '/events', payload, env.merge('CONTENT_TYPE' => 'application/json')
   end
   
   let(:options) do
@@ -103,6 +103,17 @@ describe Routemaster::Receiver::Basic do
       authorize 'demo', 'x'
       expect(handler).to receive(:on_events_received).exactly(3).times
       3.times { perform }
+    end
+
+    it 'skips auth if routemaster.authenticated' do
+      perform('routemaster.authenticated' => true)
+      expect(last_response.status).to eq(204)
+    end
+
+    it 'reuses parsed routemaster.payload' do
+      authorize 'demo', 'x'
+      expect(handler).to receive(:on_events_received).with(:foobar)
+      perform('routemaster.payload' => :foobar)
     end
   end
 end
