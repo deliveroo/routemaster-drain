@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'spec/support/rack_test'
 require 'routemaster/receiver/filtered'
-require 'spec/support/write_expectation'
 require 'spec/support/uses_redis'
 
 describe Routemaster::Receiver::Filtered do
@@ -48,7 +47,7 @@ describe Routemaster::Receiver::Filtered do
   context 'with a listener' do
     let(:handler) { double }
     before { Wisper.add_listener(handler, scope: described_class.name, prefix: true) }
-    after { Wisper::GlobalListeners.instance.clear }
+    after { Wisper::GlobalListeners.clear }
     before { authorize 'demo', 'x' }
 
     it 'broadcasts :sweep_needed' do

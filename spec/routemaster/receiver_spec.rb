@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'spec/support/write_expectation'
 require 'routemaster/receiver'
 
 describe Routemaster::Receiver do
@@ -11,7 +10,8 @@ describe Routemaster::Receiver do
     end
 
     it 'issues a warning' do
-      expect { described_class.new(app) }.to write('deprecated').to(:error)
+      expect(described_class).to receive(:warn).with(/deprecated/)
+      described_class.new(app)
     end
   end
 end
