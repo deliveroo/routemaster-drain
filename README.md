@@ -3,6 +3,20 @@
 A Ruby API for the [Routemaster](https://github.com/HouseTrip/routemaster) event
 bus.
 
+![Version](https://badge.fury.io/rb/routemaster-client.svg) 
+![Build](https://travis-ci.org/HouseTrip/routemaster_client.svg?branch=master)
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Sending events](#sending-events)
+- [Setting up a subscription](#setting-up-a-subscription)
+- [Receiving events](#receiving-events)
+- [Filtering receiver](#filtering-receiver)
+- [Monitoring Routemaster](#monitoring-routemaster)
+- [Internals](#internals)
+- [Contributing](#contributing)
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -52,7 +66,7 @@ the publisher floods with `noop`s for all existing entities so subscribers can
 refresh their view of the domain.
 
 
-## Setting up a subscriptions
+## Setting up a subscription
 
 **Register** to be notified about `widgets` and `kitten` at most 60 seconds after
 events, in batches of at most 500 events, to a given callback URL:
@@ -99,7 +113,8 @@ gem](https://github.com/krisleech/wisper#wisper).
 The filtering receiver, `Receiver::Filter`, 
 - reorders events by ignoring events older than the most recent one received);
 - avoids duplicate events, i.e. it doesn't notify you again about a given entity
-  before you've told it that you've processed it.
+  before you've told it that you've processed it;
+- noop events are ignored.
 
 This is particularly convenient as a means to react to certain entities changing
 very frequently (or rather, faster than you can process them), without causing
