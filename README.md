@@ -314,7 +314,7 @@ Wisper.add_listener ...
 ### Filter
 
 `Routemaster::Dirty::Filter` is a simple event listener for `Receiver::Basic`
-that performs reordering. It ignores events older than the latest know
+that performs reordering. It ignores events older than the latest known
 information on an entity.
 
 It stores transient state in Redis and will emit `:entity_changed` events
