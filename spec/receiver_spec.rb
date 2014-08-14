@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'spec/support/rack_test'
 require 'routemaster/receiver'
-require 'spec/support/write_expectation'
 
 describe Routemaster::Receiver do
   let(:handler) { double 'handler', on_events: nil, on_events_received: true }
@@ -79,14 +78,15 @@ describe Routemaster::Receiver do
     end
     
     it 'warns about deprecation' do
-      expect { app }.to write('deprecated').to(:error)
+      expect_any_instance_of(described_class).to receive(:warn).with(/deprecated/)
+      app
     end
   end
 
   context 'with a listener' do
     let(:handler) { double }
     before { Wisper.add_listener(handler, scope: 'Routemaster::Receiver', prefix: true) }
-    after { Wisper::GlobalListeners.instance.clear }
+    after { Wisper::GlobalListeners.clear }
 
     it 'broadcasts :events_received' do
       authorize 'demo', 'x'
