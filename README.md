@@ -67,20 +67,24 @@ client.subscribe(
 ```ruby
 require 'routemaster/receiver'
 
-class Handler
-  def on_events(batch)
+class Listener
+  def on_events_received(batch)
     batch.each do |event|
       puts event['url']
     end
   end
 end
 
+Wisper.add_listener(Listener.new, :prefix => true)
+
 use Routemaster::Receiver, {
   path:    '/events',
-  uuid:    'demo',
-  handler: Handler.new
+  uuid:    'demo'
 }
 ```
+
+This relies on the excellent event bus from the [wisper
+gem](https://github.com/krisleech/wisper#wisper).
 
 
 **Monitor** the status of topics and subscriptions:

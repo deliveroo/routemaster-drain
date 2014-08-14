@@ -5,3 +5,10 @@ gemspec
 
 # just here to avoid a safety warning
 gem 'psych'
+
+gem 'bundler'
+gem 'rake'
+gem 'guard-rspec'
+gem 'webmock'
+gem 'pry-nav'
+gem 'rack-test'
