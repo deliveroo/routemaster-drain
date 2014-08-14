@@ -39,7 +39,7 @@ module Routemaster
       if (options.keys - [:topics, :callback, :timeout, :max, :uuid]).any?
         raise ArgumentError.new('bad options')
       end
-      _assert options[:topics].kind_of?(Enumerable), 'topics required'
+      _assert options[:topics].kind_of?(Enumerable), 'enumerable :topics required'
       _assert options[:callback], 'callback required'
       _assert_valid_timeout options[:timeout] if options[:timeout]
       _assert_valid_max_events options[:max] if options[:max]
