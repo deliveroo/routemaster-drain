@@ -16,6 +16,9 @@ bus.
 - [Internals](#internals)
 - [Contributing](#contributing)
 
+Older versions:
+[v0.0.1](https://github.com/HouseTrip/routemaster_client/blob/v0.0.1/README.md#routemaster_client),
+[v0.0.2](https://github.com/HouseTrip/routemaster_client/blob/v0.0.2/README.md#routemaster_client),
 
 ## Installation
 
