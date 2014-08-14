@@ -11,8 +11,8 @@ module Routemaster
 
       def initialize(app, options = {})
         @app     = app
-        @path    = options[:path]
-        @uuid    = options[:uuid]
+        @path    = options.fetch(:path, '')
+        @uuid    = options.fetch(:uuid)
 
         if options[:handler]
           warn 'the :handler option is deprecated, listen to the :events_received event instead'
