@@ -52,13 +52,3 @@ module Routemaster
     end
   end
 end
-
-
-__END__
-
-dm.clean(limit: 10) do |state, url|
-  
-end
-
-
-
