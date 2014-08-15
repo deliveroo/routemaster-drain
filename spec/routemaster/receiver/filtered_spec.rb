@@ -39,14 +39,10 @@ describe Routemaster::Receiver::Filtered do
     expect(last_response.status).to eq(501)
   end
 
-  it 'delegates to the next middlex for non-POST' do
-    get '/events'
-    expect(last_response.status).to eq(501)
-  end
-
   context 'with a listener' do
     let(:handler) { double }
-    before { Wisper.add_listener(handler, scope: described_class.name, prefix: true) }
+    # before { Wisper.add_listener(handler, scope: described_class.name, prefix: true) }
+    before { Wisper.add_listener(handler, prefix: true) }
     after { Wisper::GlobalListeners.clear }
     before { authorize 'demo', 'x' }
 

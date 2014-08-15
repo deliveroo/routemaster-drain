@@ -1,65 +1,23 @@
-require 'sinatra'
-require 'rack/auth/basic'
-require 'base64'
-require 'json'
-require 'wisper'
+require 'routemaster/rack/basic'
+require 'delegate'
 
 module Routemaster
   module Receiver
+    # Rack middleware which mounts and runs {Routemaster::Rack::Basic}
+    # on a given path.
     class Basic
-      include Wisper::Publisher
+      extend Forwardable
 
       def initialize(app, options = {})
-        @app     = app
-        @path    = options.fetch(:path, '')
-        @uuid    = options.fetch(:uuid)
-
-        if options[:handler]
-          warn 'the :handler option is deprecated, listen to the :events_received event instead'
-          @handler = options[:handler]
+        @app = ::Rack::Builder.new do
+          map options[:path] do
+            run Rack::Basic.new(options)
+          end
+          run app
         end
       end
 
-      def call(env)
-        catch :forward do
-          throw :forward unless _intercept_endpoint?(env)
-          # reuse authentication
-          unless env['routemaster.authenticated']
-            return [401, {}, []] unless _has_auth?(env)
-            return [403, {}, []] unless _valid_auth?(env)
-          end
-          # reuse parsed payload
-          unless payload = env['routemaster.payload']
-            return [400, {}, []] unless payload = _extract_payload(env)
-          end
-
-          @handler.on_events(payload) if @handler
-          publish(:events_received, payload)
-          return [204, {}, []]
-        end
-        @app.call(env)
-      end
-
-      private
-
-      def _intercept_endpoint?(env)
-        env['PATH_INFO'] == @path && env['REQUEST_METHOD'] == 'POST'
-      end
-
-      def _has_auth?(env)
-        env.has_key?('HTTP_AUTHORIZATION')
-      end
-
-      def _valid_auth?(env)
-        Base64.
-          decode64(env['HTTP_AUTHORIZATION'].gsub(/^Basic /, '')).
-          split(':').first == @uuid
-      end
-
-      def _extract_payload(env)
-        return unless env['CONTENT_TYPE'] == 'application/json'
-        JSON.parse(env['rack.input'].read)
-      end
+      delegate :call => :@app
     end
   end
 end

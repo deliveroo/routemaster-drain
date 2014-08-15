@@ -19,6 +19,9 @@ describe Routemaster::Dirty::Map do
     it 'passes' do
       expect { subject.mark(url(1)) }.not_to raise_error
     end
+
+    it 'returns true if marking for the first time'
+    it 'returns false if re-marking'
   end
   
   describe '#sweep' do
@@ -85,23 +88,6 @@ describe Routemaster::Dirty::Map do
       limit = 4
       subject.sweep { |url| (limit -= 1) < 0 ? false : true }
       expect(subject.count).to eq(6)
-    end
-  end
-  
-  context 'with a listener' do
-    let(:handler) { double }
-    before { subject.subscribe(handler, prefix: true) }
-
-    
-    it 'broadcasts :dirty_entity on new mark' do
-      expect(handler).to receive(:on_dirty_entity).exactly(10).times
-      mark_urls(10)
-    end
-
-    it 'does not broadcast on re-marks' do
-      mark_urls(5)
-      expect(handler).to receive(:on_dirty_entity).exactly(5).times
-      mark_urls(10)
     end
   end
 end
