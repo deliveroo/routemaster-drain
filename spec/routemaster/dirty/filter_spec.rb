@@ -13,54 +13,65 @@ describe Routemaster::Dirty::Filter do
       expect { described_class.new(redis: double) }.not_to raise_error
     end
 
-    it 'accepts optional :topics' do
-      expect { described_class.new(redis: double, topics: []) }.not_to raise_error
-    end
-
     it 'accepts optional :expiry' do
       expect { described_class.new(redis: double, expiry: 10) }.not_to raise_error
     end
   end
 
-  describe '#on_events_received' do
-    let(:listener) { double 'listener' }
+  describe '#run' do
     let(:options) {{ redis:  redis }}
     subject { described_class.new(options) }
 
-    let(:perform) { subject.on_events_received(payload) }
+    let(:result) { subject.run(payload) }
     let(:payload) { [] }
-
-    before { subject.subscribe(listener, prefix: true) }
 
     context 'blank slate' do
       %w(create delete update).each do |event|
         let(:url) { make_url(1) }
 
-        it "broadcasts on '#{event}'" do
-          payload.push('topic' => 'stuff', 'type' => event, 'url' => url, 't' => 1234)
-          expect(listener).to receive(:on_entity_changed).with(url)
-          perform
+        it "keeps a '#{event}' event" do
+          event = { 'topic' => 'stuff', 'type' => event, 'url' => url, 't' => 1234 }
+          payload.push event
+          expect(result).to include(event)
         end
       end
     end
 
-    context 'prior event' do
+    context 'with a prior event' do
       let(:url) { make_url(1) }
+      let(:prior_event) {{ 'topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1234 }}
 
-      before do
-        payload.push('topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1234)
+      before { payload.push prior_event }
+
+      it "keeps a newer event" do
+        newer_event = { 'topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1235 }
+        payload.push newer_event
+        expect(result).to eq([newer_event])
       end
 
-      it "broadcast on newer event" do
-        payload.push('topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1235)
-        expect(listener).to receive(:on_entity_changed).with(url).exactly(:twice)
-        perform
+      it "does keep an older event" do
+        older_event = { 'topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1233 }
+        payload.push older_event
+        expect(result).to eq([prior_event])
+      end
+    end
+
+    context 'with a prior state' do
+      let(:url) { make_url(1) }
+      let(:prior_event) {{ 'topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1234 }}
+
+      before { subject.run([prior_event]) }
+
+      it "keeps a newer event" do
+        newer_event = { 'topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1235 }
+        payload.push newer_event
+        expect(result).to eq([newer_event])
       end
 
-      it "does not broadcast on older event" do
-        payload.push('topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1233)
-        expect(listener).to receive(:on_entity_changed).with(url).exactly(:once)
-        perform
+      it "does not keep an older event" do
+        older_event = { 'topic' => 'stuff', 'type' => 'update', 'url' => url, 't' => 1233 }
+        payload.push older_event
+        expect(result).to be_empty
       end
     end
   end
