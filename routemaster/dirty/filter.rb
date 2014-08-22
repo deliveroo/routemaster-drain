@@ -1,9 +1,5 @@
-require 'delegate'
-require 'set'
-require 'routemaster/dirty/map'
 require 'routemaster/dirty/state'
-require 'wisper'
-
+require 'routemaster/config'
 module Routemaster
   module Dirty
     # Service object, filters an event payload, only include events that reflect
@@ -16,11 +12,11 @@ module Routemaster
     class Filter
       EXPIRY = 86_400
 
-      # @param redis [Redis, Redis::Namespace] a connection to Radis, used to
+      # @param redis [Redis, Redis::Namespace] a connection to Redis, used to
       # persists the known state
-      def initialize(options = {})
-        @redis  = options.fetch(:redis)
-        @expiry = options.fetch(:expiry, EXPIRY)
+      def initialize(redis:nil)
+        @redis  = redis || Config.drain_redis
+        @expiry = Config.cache_expiry
       end
 
       # Process a payload, and returns part if this payload containing
