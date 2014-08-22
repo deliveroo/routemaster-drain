@@ -5,7 +5,7 @@ module RspecSupportUsesRedis
   def uses_redis
     uses_dotenv
 
-    let(:redis) { Redis.new(url: ENV.fetch('REDIS_URL')) }
+    let(:redis) { Redis.new(url: ENV.fetch('REDIS_TEST_URL')) }
     before { redis.flushdb }
   end
 end
