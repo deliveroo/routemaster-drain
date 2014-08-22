@@ -1,0 +1,6 @@
+--no-private
+--protected
+--markup-provider=redcarpet
+--markup=markdown
+
+routemaster/**/*.rb - README.md LICENSE.txt
