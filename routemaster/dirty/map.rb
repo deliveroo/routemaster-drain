@@ -13,17 +13,19 @@ module Routemaster
     # state for multiple updates until the client is ready to update.
     #
     class Map
-      # include Wisper::Publisher
+      include Wisper::Publisher
       KEY = 'dirtymap:items'
 
-      def initialize(redis)
-        @redis = redis
+      def initialize(redis: nil)
+        @redis = redis || Config.drain_redis
       end
 
       # Marks an entity as dirty.
       # Return true if newly marked, false if re-marking.
       def mark(url)
-        @redis.sadd(KEY, url)
+        @redis.sadd(KEY, url).tap do |marked|
+          publish(:dirty_entity, url) if marked
+        end
       end
 
       # Shortcut for `#sweep(1)`

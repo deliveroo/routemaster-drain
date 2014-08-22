@@ -5,7 +5,7 @@ require 'routemaster/dirty/map'
 describe Routemaster::Dirty::Map do
   uses_redis
 
-  subject { described_class.new(redis) }
+  subject { described_class.new(redis: redis) }
 
   def url(idx) ; "https://example.com/#{idx}" ; end
 
@@ -22,6 +22,23 @@ describe Routemaster::Dirty::Map do
 
     it 'returns true if marking for the first time'
     it 'returns false if re-marking'
+  
+    context 'with a listener' do
+      let(:handler) { double }
+      before { subject.subscribe(handler, prefix: true) }
+
+      
+      it 'broadcasts :dirty_entity on new mark' do
+        expect(handler).to receive(:on_dirty_entity).exactly(10).times
+        mark_urls(10)
+      end
+
+      it 'does not broadcast on re-marks' do
+        mark_urls(5)
+        expect(handler).to receive(:on_dirty_entity).exactly(5).times
+        mark_urls(10)
+      end
+    end
   end
   
   describe '#sweep' do
