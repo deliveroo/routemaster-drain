@@ -1,12 +1,7 @@
-# test for bad MIME
-# test for bad JSON
-# test for correct JSON with bad format
-
 require 'spec_helper'
 require 'spec/support/rack_test'
 require 'spec/support/events'
 require 'routemaster/middleware/parse'
-# require 'json'
 
 describe Routemaster::Middleware::Parse do
   let(:terminator) { ErrorRackApp.new }
