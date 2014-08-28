@@ -37,6 +37,10 @@ module Routemaster
       end
     end
 
+    def queue_name
+      ENV.fetch('ROUTEMASTER_QUEUE_NAME', 'routemaster')
+    end
+
     def drain_tokens
       Set.new(ENV.fetch('ROUTEMASTER_DRAIN_TOKENS'))
     end

@@ -4,7 +4,10 @@ require 'rspec'
 require 'rack/test'
 
 class ErrorRackApp
+  attr_reader :last_env
+
   def call(env)
+    @last_env = env
     [501, {}, 'fake app']
   end
 end
