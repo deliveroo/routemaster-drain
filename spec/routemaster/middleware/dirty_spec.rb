@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'spec/support/rack_test'
 require 'spec/support/events'
 require 'routemaster/middleware/dirty'
-require 'json'
 
 describe Routemaster::Middleware::Dirty do
   let(:terminator) { ErrorRackApp.new }
