@@ -7,15 +7,15 @@ module Routemaster
     #
     # Will use `Routemaster::Dirty::Filter` by default.
     class Filter
-      # @param redis [Redis, Redis::Namespace] a connectino to Redis, used to
+      # @param redis [Redis, Redis::Namespace] a connection to Redis, used to
       # persist entity state.
       # @param expiry [Integer] how long to persist state for (defaults to 1
       # day)
       # @param filter [Routemaster::Dirty::Filter] an event filter (optional;
       # will be created using the `redis` and `expiry` options if not provided)
-      def initialize(app, options = {})
+      def initialize(app, filter:nil)
         @app    = app
-        @filter = options.fetch(:filter) { Routemaster::Dirty::Filter.new(options) }
+        @filter = filter || Routemaster::Dirty::Filter.new(options)
       end
 
       def call(env)

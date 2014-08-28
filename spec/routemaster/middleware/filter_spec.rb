@@ -5,37 +5,28 @@ require 'routemaster/middleware/filter'
 require 'json'
 
 describe Routemaster::Middleware::Filter do
-  class RecordEnvApp
-    def call(env)
-      @last_env = env
-      [204, {}, []]
-    end
-
-    def payload
-      @last_env['routemaster.payload']
-    end
-  end
-
-  let(:app) { described_class.new(RecordEnvApp.new, options) }
+  let(:terminator) { ErrorRackApp.new }
+  let(:app) { described_class.new(terminator, **options) }
   
-  def perform(payload = nil)
+  let(:perform) do
     post '/whatever', '', 'routemaster.payload' => payload
-  end
-
-  describe '#initialize' do
-    it 'requires the :redis option'
   end
 
   describe '#call' do
     let(:filter) { double('filter') }
-    let(:options) {{ redis: double('redis') }}
+    let(:options) {{ filter:filter }}
+    let(:payload) { [make_event(1)] }
 
-    before do
-      allow(Routemaster::Dirty::Filter).to receive(:new).and_return(filter)
+    it 'calls the filter' do
+      expect(filter).to receive(:run).with(payload)
+      perform
     end
 
-    it 'calls the filter'
-    it 'returns the filtered events'
+    it 'puts filtered events in the environment' do
+      allow(filter).to receive(:run).with(payload).and_return(:foo)
+      perform
+      expect(terminator.last_env['routemaster.payload']).to eq(:foo)
+    end
   end
 end
 
