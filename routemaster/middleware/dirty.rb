@@ -1,3 +1,5 @@
+require 'routemaster/dirty/map'
+
 module Routemaster
   module Middleware
     # If an event payload was place in the environment
@@ -9,19 +11,16 @@ module Routemaster
     # The dirty map is passed as `:map` to the constructor and must respond to
     # `#mark` (like `Routemaster::Dirty::Map`).
     class Dirty
-      include Wisper::Publisher
-
-      def initialize(app, options = {})
+      def initialize(app, dirty_map:nil)
         @app = app
-        @map = options.fetch(:dirty_map)
+        @map = dirty_map || Routemaster::Dirty::Map.new
       end
 
       def call(env)
-        payload = env['routemaster.payload']
-        if payload && payload.any?
-          payload.each do |event|
-            publish(:sweep_needed) if @map.mark(event['url'])
-          end
+        env['routemaster.dirty'] = dirty = []
+        env.fetch('routemaster.payload', []).each do |event|
+          next unless @map.mark(event['url'])
+          dirty << event['url']
         end
         @app.call(env)
       end
