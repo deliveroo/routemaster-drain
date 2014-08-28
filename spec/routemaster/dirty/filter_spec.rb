@@ -8,13 +8,12 @@ describe Routemaster::Dirty::Filter do
   def make_url(idx) ; "https://example.com/#{idx}" ; end
 
   describe '#initialize' do
-    it 'requires the redis: options' do
-      expect { described_class.new }.to raise_error(KeyError)
-      expect { described_class.new(redis: double) }.not_to raise_error
+    it 'passes without options' do
+      expect { described_class.new }.not_to raise_error
     end
 
-    it 'accepts optional :expiry' do
-      expect { described_class.new(redis: double, expiry: 10) }.not_to raise_error
+    it 'accepts :redis' do
+      expect { described_class.new(redis: double) }.not_to raise_error
     end
   end
 
