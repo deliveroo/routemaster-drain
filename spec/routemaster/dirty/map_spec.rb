@@ -20,8 +20,14 @@ describe Routemaster::Dirty::Map do
       expect { subject.mark(url(1)) }.not_to raise_error
     end
 
-    it 'returns true if marking for the first time'
-    it 'returns false if re-marking'
+    it 'returns true if marking for the first time' do
+      expect(subject.mark(url(1))).to eq(true)
+    end
+
+    it 'returns false if re-marking' do
+      subject.mark(url(1))
+      expect(subject.mark(url(1))).to eq(false)
+    end
   
     context 'with a listener' do
       let(:handler) { double }
@@ -79,15 +85,21 @@ describe Routemaster::Dirty::Map do
   end
 
   describe '#sweep_one' do
-    it 'yields one URL' do
+    it 'takes one URL' do
       mark_urls(3)
-      expect { |b| subject.sweep_one(&b) }.to yield_control.exactly(:once)
+      expect { |b| subject.sweep_one(url(1), &b) }.to yield_control.exactly(:once)
     end
 
     it 'processes exactly one URL' do
       mark_urls(3)
-      subject.sweep_one { |url| true }
+      subject.sweep_one(url(1)) { true }
       expect(subject.count).to eq(2)
+    end
+
+    it 'does not sweep if block returns falsy' do
+      mark_urls(3)
+      subject.sweep_one(url(1)) { nil }
+      expect(subject.count).to eq(3)
     end
   end
 

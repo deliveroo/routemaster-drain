@@ -28,9 +28,11 @@ module Routemaster
         end
       end
 
-      # Shortcut for `#sweep(1)`
-      def sweep_one(&block)
-        sweep(1, &block)
+      # Runs the block.
+      # The entity will only be marked as clean if the block returns truthy.
+      def sweep_one(url, &block)
+        return unless block.call(url)
+        @redis.srem(KEY, url)
       end
 
       # Yields URLs for dirty entitities.
