@@ -1,5 +1,6 @@
 require 'wisper'
 require 'base64'
+require 'routemaster/config'
 
 module Routemaster
   module Middleware

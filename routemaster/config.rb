@@ -42,7 +42,7 @@ module Routemaster
     end
 
     def drain_tokens
-      Set.new(ENV.fetch('ROUTEMASTER_DRAIN_TOKENS'))
+      Set.new(ENV.fetch('ROUTEMASTER_DRAIN_TOKENS').split(','))
     end
 
     def url_expansions

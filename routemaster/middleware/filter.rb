@@ -15,7 +15,7 @@ module Routemaster
       # will be created using the `redis` and `expiry` options if not provided)
       def initialize(app, filter:nil)
         @app    = app
-        @filter = filter || Routemaster::Dirty::Filter.new(options)
+        @filter = filter || Routemaster::Dirty::Filter.new
       end
 
       def call(env)
