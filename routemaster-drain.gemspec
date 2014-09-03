@@ -17,10 +17,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = %w(.)
 
   spec.add_runtime_dependency     'faraday'
-  spec.add_runtime_dependency     'typhoeus'
+  spec.add_runtime_dependency     'faraday_middleware'
+  spec.add_runtime_dependency     'net-http-persistent'
   spec.add_runtime_dependency     'rack'
   spec.add_runtime_dependency     'wisper'
   spec.add_runtime_dependency     'hashie'
   spec.add_runtime_dependency     'redis-namespace'
   spec.add_runtime_dependency     'resque'
+  spec.add_runtime_dependency     'thread'
 end
