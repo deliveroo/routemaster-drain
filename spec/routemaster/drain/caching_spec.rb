@@ -29,8 +29,18 @@ describe Routemaster::Drain::Caching do
 
   it 'emits events' do
     expect(listener).to receive(:on_events_received) do |payload|
-      expect(payload.size).to eq(4)
+      expect(payload.size).to eq(3)
     end
+    perform
+  end
+
+  it 'busts the cache' do
+    expect_any_instance_of(Routemaster::Cache).to receive(:bust).exactly(3).times
+    perform
+  end
+
+  it 'schedules caching jobs' do
+    expect(Resque).to receive(:enqueue_to).exactly(3).times
     perform
   end
 end
