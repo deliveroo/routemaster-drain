@@ -1,5 +1,5 @@
 module Routemaster
-  class Client
+  module Drain
     VERSION = '0.0.2'
   end
 end

@@ -1,11 +1,11 @@
 # coding: utf-8
-lib = File.expand_path('..', __FILE__)
+lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'routemaster/client/version'
+require 'routemaster/drain'
 
 Gem::Specification.new do |spec|
   spec.name          = 'routemaster-drain'
-  spec.version       = Routemaster::Client::VERSION
+  spec.version       = Routemaster::Drain::VERSION
   spec.authors       = ['Julien Letessier']
   spec.email         = ['julien.letessier@gmail.com']
   spec.summary       = %q{Event receiver for the Routemaster bus}
@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 
   spec.files         = `git ls-files`.split($/)
   spec.test_files    = spec.files.grep(%r{^spec/})
-  spec.require_paths = %w(.)
+  spec.require_paths = %w(lib)
 
   spec.add_runtime_dependency     'faraday'
   spec.add_runtime_dependency     'faraday_middleware'

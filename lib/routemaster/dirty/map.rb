@@ -35,6 +35,10 @@ module Routemaster
         @redis.srem(KEY, url)
       end
 
+      def all
+        @redis.smembers(KEY)
+      end
+
       # Yields URLs for dirty entitities.
       # The entity will only be marked as clean if the block returns truthy.
       # It is possible to call +next+ or +break+ from the block.
