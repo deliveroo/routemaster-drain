@@ -21,7 +21,7 @@ module Routemaster
   class Cache
     include Wisper::Publisher
 
-    # A pool of threads, used for parallal/future request processing.
+    # A pool of threads, used for parallel/future request processing.
     class Pool < SimpleDelegator
       include Singleton
 
@@ -38,16 +38,37 @@ module Routemaster
     # Wraps a future response, so it quacks exactly like an ordinary response.
     class FutureResponse
       extend Forwardable
-      
+     
+      # The `block` is expected to return a {Response}
       def initialize(&block)
         @future = Pool.instance.future(&block)
       end
 
+      # @!attribute status
+      # @return [Integer]
+      # Delegated to the `block`'s return value.
+      
+      # @!attribute headers
+      # @return [Hash]
+      # Delegated to the `block`'s return value.
+      
+      # @!attribute body
+      # @return pHashie::Mash]
+      # Delegated to the `block`'s return value.
+      
       delegate :value => :@future
       delegate %i(status headers body) => :value
     end
 
     class Response < Hashie::Mash
+      # @!attribute status
+      # Integer
+      
+      # @!attribute headers
+      # Hash
+      
+      # @!attribute body
+      # Hashie::Mash
     end
 
 
