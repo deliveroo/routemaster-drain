@@ -72,14 +72,15 @@ module Routemaster
     end
 
 
-    def initialize(redis:nil)
+    def initialize(redis:nil, fetcher:nil)
       @redis   = redis || Config.cache_redis
       @expiry  = Config.cache_expiry
+      @fetcher = fetcher || Fetcher
     end
 
     # Bust the cache for a given URL
     def bust(url)
-      @redis.del(url)
+      @redis.del("cache:#{url}")
       publish(:cache_bust, url)
     end
 
@@ -110,7 +111,7 @@ module Routemaster
           "application/json"
       }
       headers['Accept-Language'] = locale if locale
-      response = Fetcher.get(url, headers: headers)
+      response = @fetcher.get(url, headers: headers)
 
       # store in redis
       @redis.hset(key, field, response.to_json)

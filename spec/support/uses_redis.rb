@@ -1,12 +1,13 @@
 require 'redis'
 require 'spec/support/uses_dotenv'
+require 'routemaster/config'
 
 module RspecSupportUsesRedis
   def uses_redis
     uses_dotenv
 
-    let(:redis) { Redis.new(url: ENV.fetch('REDIS_TEST_URL')) }
-    before { redis.flushdb }
+    before { Routemaster::Config.cache_redis.flushdb }
+    before { Routemaster::Config.drain_redis.flushdb }
   end
 end
 
