@@ -3,4 +3,4 @@
 --markup-provider=redcarpet
 --markup=markdown
 
-routemaster/**/*.rb - README.md LICENSE.txt
+lib/**/*.rb - README.md LICENSE.txt
