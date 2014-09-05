@@ -1,89 +1,52 @@
-# routemaster_client
+# routemaster-drain
 
-A Ruby API for the [Routemaster](https://github.com/HouseTrip/routemaster) event
-bus.
+A Rack-based event receiver for the
+[Routemaster](https://github.com/HouseTrip/routemaster) event bus.
 
-![Version](https://badge.fury.io/rb/routemaster-client.svg) 
-![Build](https://travis-ci.org/HouseTrip/routemaster_client.svg?branch=master)
+![Version](https://badge.fury.io/rb/routemaster-drain.svg) 
+![Build](https://travis-ci.org/HouseTrip/routemaster-drain.svg?branch=master)
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Sending events](#sending-events)
-- [Setting up a subscription](#setting-up-a-subscription)
-- [Receiving events](#receiving-events)
-- [Filtering receiver](#filtering-receiver)
-- [Monitoring Routemaster](#monitoring-routemaster)
-- [Internals](#internals)
-- [Contributing](#contributing)
-
-Older versions:
-[v0.0.1](https://github.com/HouseTrip/routemaster_client/blob/v0.0.1/README.md#routemaster_client),
-[v0.0.2](https://github.com/HouseTrip/routemaster_client/blob/v0.0.2/README.md#routemaster_client),
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'routemaster-client'
+    gem 'routemaster-drain'
 
-And then execute:
+### Configuration
 
-    $ bundle
+This gem is configured through the environment, making 12factor compliance
+easier.
 
-Or install it yourself as:
-
-    $ gem install routemaster-client
-
-## Usage
-
-**Configure** your client:
-
-```ruby
-require 'routemaster/client'
-client = RoutemasterClient.new(url: 'https://bus.example.com', uuid: 'john-doe')
-```
-
-You can also specify a timeout value in seconds if you like with the ```timeout``` option.
-
-```ruby
-RoutemasterClient.new(url: 'https://bus.example.com', uuid: 'john-doe', timeout: 2)
-```
-
-
-## Sending events
+- `ROUTEMASTER_DRAIN_TOKENS`: a comma-separated list of valid authentication
+  tokens, used by Routemaster to send you events.
+- `ROUTEMASTER_DRAIN_REDIS`: the URL of the Redis instance used for filtering
+  and dirty mapping. Required if you use either feature, ignored otherwise.
+  A namespace can be specified.
+  Example: `redis://user:s3cr3t@myhost:1234/12/ns`.
+- `ROUTEMASTER_CACHE_REDIS`: the URL of the Redis instance used for caching.
+  Required if you use the feature, ignored otherwise. Formatted like
+  `ROUTEMASTER_DRAIN_REDIS`.
+- `ROUTEMASTER_CACHE_EXPIRY`: if using the cache, for how long to cache
+  entries, in seconds. Default 1 year (31,536,000).
+- `ROUTEMASTER_CACHE_AUTH`: if using the cache, specifies what username/password
+  pairs to use to fetch resources. The format is a comma-separated list of
+  colon-separate lists of regexp, username, password values. Example:
+  `server1:user:p4ss,server2:user:p4ass`.
+- `ROUTEMASTER_QUEUE_NAME`: if using the cache, on which Resque queue the cache
+  population jobs should be enqueued.
 
 
-**Push** an event about an entity in the topic `widgets` with a callback URL:
+## General intro
 
-```ruby
-client.created('widgets', 'https://app.example.com/widgets/1')
-client.updated('widgets', 'https://app.example.com/widgets/2')
-client.noop('widgets', 'https://app.example.com/widgets/3')
-```
+`routemaster-drain` is mainly a collection of Rack middleware to receive and
+parse Routemaster events, filter them, and preemptively cache the corresponding
+resources.
 
-There are methods for the four canonical event types: `created`, `updated`,
-`deleted`, and `noop`.
+It provides prebuilt middleware stacks (`Basic`, `Mapping`, and `Caching`)
+illustrated below, or you can easily roll your own by combining middleware.
 
-`noop` is typically used when a subscriber is first connected (or reset), and
-the publisher floods with `noop`s for all existing entities so subscribers can
-refresh their view of the domain.
-
-
-## Setting up a subscription
-
-**Register** to be notified about `widgets` and `kitten` at most 60 seconds after
-events, in batches of at most 500 events, to a given callback URL:
-
-```ruby
-client.subscribe(
-  topics:   ['widgets', 'kitten'],
-  callback: 'https://app.example.com/events',
-  uuid:     'john-doe',
-  timeout:  60_000,
-  max:      500)
-```
-
-## Receiving events
+## Illustrated use cases
 
 
 **Receive** events at path `/events` using a Rack middleware:
