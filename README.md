@@ -5,14 +5,15 @@ A Rack-based event receiver for the
 
 ![Version](https://badge.fury.io/rb/routemaster-drain.svg) 
 ![Build](https://travis-ci.org/HouseTrip/routemaster-drain.svg?branch=master)
-[API docs](http://rubydoc.info/github/HouseTrip/routemaster-drain/frames)
+[![](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/HouseTrip/routemaster-drain/frames/file/README.md)
 
-`routemaster-drain` is mainly a collection of Rack middleware to receive and
+`routemaster-drain` is a collection of Rack middleware to receive and
 parse Routemaster events, filter them, and preemptively cache the corresponding
 resources.
 
-It provides prebuilt middleware stacks (`Basic`, `Mapping`, and `Caching`)
-illustrated below, or you can easily roll your own by combining middleware.
+It provides prebuilt middleware stacks (`Basic`, `Mapping`, and `Caching`) for
+typical use cases, illustrated below, or you can easily roll your own by
+combining middleware.
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
