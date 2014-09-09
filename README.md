@@ -5,6 +5,30 @@ A Rack-based event receiver for the
 
 ![Version](https://badge.fury.io/rb/routemaster-drain.svg) 
 ![Build](https://travis-ci.org/HouseTrip/routemaster-drain.svg?branch=master)
+[API docs](http://rubydoc.info/github/HouseTrip/routemaster-drain/frames)
+
+`routemaster-drain` is mainly a collection of Rack middleware to receive and
+parse Routemaster events, filter them, and preemptively cache the corresponding
+resources.
+
+It provides prebuilt middleware stacks (`Basic`, `Mapping`, and `Caching`)
+illustrated below, or you can easily roll your own by combining middleware.
+
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+  - [Installation](#installation)
+  - [Illustrated use cases](#illustrated-use-cases)
+    - [Simply receive events from Routemaster](#simply-receive-events-from-routemaster)
+    - [Receive change notifications without duplicates](#receive-change-notifications-without-duplicates)
+    - [Cache data for all notified resources](#cache-data-for-all-notified-resources)
+  - [Internals](#internals)
+    - [Dirty map](#dirty-map)
+    - [Filter](#filter)
+  - [Contributing](#contributing)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
 ## Installation
@@ -13,7 +37,7 @@ Add this line to your application's Gemfile:
 
     gem 'routemaster-drain'
 
-### Configuration
+**Configuration**
 
 This gem is configured through the environment, making 12factor compliance
 easier.
@@ -37,249 +61,186 @@ easier.
   population jobs should be enqueued.
 
 
-## General intro
-
-`routemaster-drain` is mainly a collection of Rack middleware to receive and
-parse Routemaster events, filter them, and preemptively cache the corresponding
-resources.
-
-It provides prebuilt middleware stacks (`Basic`, `Mapping`, and `Caching`)
-illustrated below, or you can easily roll your own by combining middleware.
 
 ## Illustrated use cases
 
 
-**Receive** events at path `/events` using a Rack middleware:
+### Simply receive events from Routemaster
+
+Provide a listener for events:
 
 ```ruby
-require 'routemaster/receiver/basic'
-
 class Listener
   def on_events_received(batch)
     batch.each do |event|
-      puts event['url']
+      puts event.url
     end
   end
 end
+```
 
-Wisper.add_listener(Listener.new, prefix: true)
+Each event is a `Hashie::Mash` and responds to `type` (one of `create`,
+`update`, `delete`, or `noop`), `url` (the resource), and `t` (the event
+timestamp, in milliseconds since the Epoch).
 
-use Routemaster::Receiver::Basic, {
-  path:    '/events',
-  uuid:    'demo'
-}
+Create the app that will process events:
+
+```ruby
+require 'routemaster/drain/basic'
+$app = Routemaster::Drain::Basic.new
+```
+
+Bind the app to your listener:
+
+```ruby
+$app.subscribe(Listener.new)
+```
+
+And finally, mount your app to your subscription path:
+
+```ruby
+# typically in config.ru
+map '/events' do
+  run $app
+end
 ```
 
 This relies on the excellent event bus from the [wisper
 gem](https://github.com/krisleech/wisper#wisper).
 
 
-## Filtering receiver
+### Receive change notifications without duplicates
 
-The filtering receiver, `Receiver::Filter`, 
-- reorders events by ignoring events older than the most recent one received);
-- avoids duplicate events, i.e. it doesn't notify you again about a given entity
-  before you've told it that you've processed it;
-- noop events are ignored.
+When reacting to changes of some resource, it's common to want to avoid
+receiving further change notifications until you've actually processed that
+resource.
 
-This is particularly convenient as a means to react to certain entities changing
-very frequently (or rather, faster than you can process them), without causing
-too much buffering in the bus.
+Possibly you'll want to process changes in batches at regular time intervals.
 
-It can be used synchronously or asynchronously.
+For this purpose, use `Routemaster::Drain::Mapping`:
 
+```ruby
+require 'routemaster/drain/mapping'
+$app = Routemaster::Drain::Mapping.new
+```
 
-### Synchronous filtered reception
+And mount it as usual:
 
-Simply provide `Receiver::Filter` with a dirty map (details below) and a Redis
-instance (used to memoize the latest known state of an entity).
+```ruby
+# in config.ru
+map('/events') { run $app }
+```
 
-The receiver broadcasts `:sweep_needed` to tell you that an entity needs to be
-processed, and you provide a sweeping listener.
+Instead of processing events, you'll check for changes in the dirty map:
 
-Caveats:
-- you're not told _what_ is to be swept; entities won't be swept in the order of
+```ruby
+require 'routemaster/dirty/map'
+$map = Routemaster::Dirty::Map.new
+
+every_5_minutes do
+  $map.sweep do |url|
+    # do something about this changed resource
+    true
+  end
+end
+```
+
+Until you've called `#sweep` and your block has returned `true`, you won't be
+bugged again — the dirty map acts as a buffer of changes (see below for
+internals).
+
+Notes:
+- You can limit the number of resources to be swept (`$map.sweep(123) { ... }`).
+- You can count the number of resources to be swept with `$map.count`.
+- You're not told _what_ is to be swept; entities won't be swept in the order of
   events received (much like Routemaster does not guarantee ordering).
 - If your sweeper fails, the dirty map will not be cleaned, so you can have
-  leftovers. It's good practice to regularly run `MAP.sweep { ... }` and perform
-  cleanup.
+  leftovers. It's good practice to regularly run `$map.sweep { ... }` and perform
+  cleanup regularly.
+- The map won't tell you if the resources has been changed, created, or deleted.
+  You'll have to figure it out with an API call.
+- You can still attach a listener to the app to get all events.
+
+
+### Cache data for all notified resources
+
+Another common use case is that you'll actually need the representation of the
+resources Routemaster tells you about.
+
+The `Caching` prebuilt app can do that for you, using Resque to populate the
+cache as events are received.
+
+For this purpose, use `Routemaster::Drain::Caching`:
 
 ```ruby
-require 'routemaster/receiver/filter'
-
-REDIS = Redis.new
-MAP   = Routemaster::Dirty::Map.new(REDIS)
-
-class Listener
-  def on_sweep_needed
-    MAP.sweep_one do |url|
-      puts url
-    end
-  end
-end
-
-Wisper.add_listener(Listener.new, prefix: true)
-
-use Routemaster::Receiver::Filter, {
-  path:      '/events',
-  uuid:      'demo',
-  dirty_map: MAP,
-  redis:     REDIS
-}
+require 'routemaster/drain/machine'
+$app = Routemaster::Drain:Caching.new
 ```
 
-### Asynchronous filtered reception
-
-The example assuming you're using Resque, although other job processing lbraries
-can be used.
-
-The setup is the same, with the exceptiong that the response to the
-`:sweep_needed` message will consist in enqueing a job.
+And mount it as usual:
 
 ```ruby
-require 'resque'
-require 'routemaster/dirty/map'
-require 'routemaster/receiver/filter'
-
-REDIS = Redis.new
-MAP   = Routemaster::Dirty::Map.new(REDIS)
-
-class SweepJob
-  def self.perform
-    MAP.sweep_one do |url|
-      puts url
-    end
-  end
-end
-
-class Listener
-  def on_sweep_needed
-    Resque.enqueue(SweepJob)
-  end
-end
-
-Wisper.add_listener(Listener.new, prefix: true)
-
-use Routemaster::Receiver::Filter, {
-  path:      '/events',
-  uuid:      'demo',
-  dirty_map: MAP,
-  redis:     REDIS
-}
+# in config.ru
+map('/events') { run $app }
 ```
 
-
-## Monitoring Routemaster
-
-**Monitor** the status of topics and subscriptions:
+You can still attach a listenenr if you want the incoming events. Typically,
+what you'll want is the cache:
 
 ```ruby
-client.monitor_topics
-#=> [ { name: 'widgets', publisher: 'john-doe', events: 12589 }, ...]
+require 'routemaster/cache'
+$cache = Routemaster::Cache.new
 
-client.monitor_subscriptions
-#=> [ {
-#     subscriber: 'bob',
-#     callback:   'https://app.example.com/events',
-#     topics:     ['widgets', 'kitten'],
-#     events:     { sent: 21_450, queued: 498, oldest: 59_603 }
-#  } ... ]
+response = @cache.fget('https://example.com/widgets/123')
+puts response.body.id
 ```
+
+In this example, is your app was notified by Routemaster about Widget #123, the
+cache will be very likely to be hit; and it will be invalidated automatically
+whenever the drain gets notified about a change on that widget.
+
+Note that `Cache#fget` is a future, so you can efficiently query many resources
+and have any `HTTP GET` requests (and cache queries) happen in parallel.
+
+See
+[rubydoc](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Cache)
+for more details on `Cache`.
 
 
 ## Internals
 
-The asynchronous receiver (`Receiver::Filter`) is built with two components
-which can also be used independently, `Dirty::Map` and `Dirty::Filter`
+The more elaborate drains are built with two components which can also be used
+independently,
+[`Dirty::Map`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map)
+and
+[`Dirty::Filter`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Filter).
 
 ### Dirty map
 
 A dirty map collects entities that have been created, updated, or deleted (or
-rather, their URLs).
-It can be used to delay your service's reaction to events, for instance combined
-with Resque.
+rather, their URLs).  It can be used to delay your service's reaction to events,
+for instance combined with Resque.
 
 A dirty map map gets _marked_ when an event about en entity gets processed that
 indicates a state change, and _swept_ to process those changes.
 
-Practically, instances of `Routemaster::Dirty::Map` will emit a `:dirty_entity`
-event when a URL is marked as dirty, and can be swept when an entity is
-"cleaned".
-If a URL is marked multiple times before being swept (e.g. for very volatile
-entities), the event will only by broadcast once.
+Practically, instances of
+[`Routemaster::Dirty::Map`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map)
+will emit a `:dirty_entity` event when a URL is marked as dirty, and can be
+swept when an entity is "cleaned".  If a URL is marked multiple times before
+being swept (e.g. for very volatile entities), the event will only by broadcast
+once.
 
-Here's an example of parallel deferred event processing.
+To sweep the map, you can for instance listen to this event and call
+[`#sweep_one`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map#sweep_one-instance_method).
 
-
-```ruby
-# Our dirty map. Just hook it to Redis.
-MAP = Routemaster::Dirty::Map.new(Redis.new)
-
-# The work to do — sweep the map, send an email
-class EmailOrderUpdatedJob
-  def self.perform
-    MAP.sweep_one do |url|
-      # download receipt from URL
-      # send email
-      true # otherwise it'll be swept again
-    end
-  end
-end
-
-# Listens to the receiver, marks the map for any event
-class ReceiverListener
-  def on_events_received(payload)
-    payload.each do |event|
-      next unless event['type'] == 'create'
-      MAP.mark(event['url'])
-    end
-  end
-end
-
-# Schedules a job whenever the map says something's dirty
-class MapListener
-  def on_dirty_entity(url)
-    Resque.enqueue(EmailOrderUpdatedJob)
-  end
-end
-
-# Bind everything together using Wisper
-MAP.subscribe(
-  MapListener.new,
-  prefix: true
-)
-Wisper.add_listener(
-  ReceiverListener.new,
-  scope:  Routemaster::Receiver::Basic,
-  prefix: true
-)
-```
-
-If you're not in a hurry and would rather run through batches (careful, as
-you'll have at most one worker sweeping the map):
-
-```ruby
-class EmailOrdersUpdatedJob
-  extend Resque::Plugins::Lock
-
-  def self.perform
-    MAP.sweep do |url|
-      # download receipt from URL
-      # send email
-      true
-    end
-  end
-end
-
-class ReceiverListener ...
-class MapListener ...
-MAP.subscribe ...
-Wisper.add_listener ...
-```
+If you're not in a hurry and would rather run through batches you can call
+[`#sweep`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map#sweep-instance_method)
+which will yield URLs until it runs out of dirty resources.
 
 ### Filter
 
-`Routemaster::Dirty::Filter` is a simple event listener for `Receiver::Basic`
+[`Routemaster::Dirty::Filter`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Filter) is a simple event filter
 that performs reordering. It ignores events older than the latest known
 information on an entity.
 
@@ -290,7 +251,7 @@ as in `Receiver::Filter` for instance.
 
 ## Contributing
 
-1. Fork it ( http://github.com/<my-github-username>/routemaster_client/fork )
+1. Fork it ( http://github.com/HouseTrip/routemaster-drain/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
