@@ -4,9 +4,11 @@ require 'hashie'
 require 'routemaster/config'
 
 module Routemaster
-  # Fetches URLs from JSON APIs
+  # Fetches URLs from JSON APIs.
   class Fetcher
     module ClassMethods
+      # Calls `get` with the same arguments on a memoized instance
+      # for the URL's host.
       def get(url, params:nil, headers:nil)
         _connection_for(url).get(url, params:params, headers:headers)
       end
@@ -25,6 +27,12 @@ module Routemaster
       @host = host
     end
 
+    # Performs a GET HTTP request for the `url`, with optional
+    # query parameters (`params`) and additional headers (`headers`).
+    #
+    # @return an object that responds to `status` (integer), `headers` (hash),
+    # and `body`. The body is a `Hashie::Mash` if the response was JSON, a
+    # string otherwise.
     def get(url, params:nil, headers:nil)
       r = _connection.get(url, params, headers)
       Hashie::Mash.new(status: r.status, headers: r.headers, body: r.body)

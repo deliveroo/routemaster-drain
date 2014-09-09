@@ -15,7 +15,7 @@ module Routemaster
   # Note that `Cache-Control` headers are intentionally ignored, as it is
   # assumed one will call {#bust} when the cache becomes stale.
   #
-  # This is for instance done automatically by {Middleware::Caching}
+  # This is for instance done automatically by {Middleware::Cache}
   # upon receiving events from Routemaster.
   #
   class Cache
@@ -121,7 +121,7 @@ module Routemaster
       Response.new(response)
     end
 
-    # Like {get}, but schedules any request in the background using a thread
+    # Like {#get}, but schedules any request in the background using a thread
     # pool. Handy to issue lots of requests in parallel.
     #
     # @return [FutureResponse], which responds to `status`, `headers`, and `body`

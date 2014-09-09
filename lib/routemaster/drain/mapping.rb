@@ -17,7 +17,7 @@ module Routemaster
     #
     # See the various corresponding middleware for details on operation:
     # {Middleware::RootPostOnly}, {Middleware::Authenticate},
-    # {Middleware::Parse}, {Middlewere::Filter}, {Middleware::Dirty},
+    # {Middleware::Parse}, {Middleware::Filter}, {Middleware::Dirty},
     # and {Terminator}.
     #
     class Mapping

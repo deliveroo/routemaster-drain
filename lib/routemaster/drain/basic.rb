@@ -12,7 +12,7 @@ module Routemaster
     #
     # See the various corresponding middleware for details on operation:
     # {Middleware::Authenticate}, {Middleware::Parse}, and terminates with
-    # {Rack::Terminator}.
+    # {Terminator}.
     #
     class Basic
       extend Forwardable
