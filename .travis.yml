@@ -3,6 +3,7 @@ services:
   - redis-server
 rvm:
   - 2.1.1
+  - 2.1.2
 script:
 - bundle exec rspec
 install:
