@@ -13,7 +13,7 @@ describe Routemaster::Middleware::Authenticate do
     post '/whatever'
   end
   
-  before { Wisper.add_listener(listener, scope: described_class.name, prefix: true) }
+  before { Wisper.subscribe(listener, scope: described_class.name, prefix: true) }
   after { Wisper::GlobalListeners.clear }
 
   context 'with valid credentials' do
