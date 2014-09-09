@@ -3,8 +3,10 @@
 A Rack-based event receiver for the
 [Routemaster](https://github.com/HouseTrip/routemaster) event bus.
 
-![Version](https://badge.fury.io/rb/routemaster-drain.svg) 
+![Version](https://badge.fury.io/rb/routemaster-drain.svg)
+&nbsp;
 ![Build](https://travis-ci.org/HouseTrip/routemaster-drain.svg?branch=master)
+&nbsp;
 [![](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/HouseTrip/routemaster-drain/frames/file/README.md)
 
 `routemaster-drain` is a collection of Rack middleware to receive and
