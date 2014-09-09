@@ -19,6 +19,7 @@ module Routemaster
       def call(env)
         env['routemaster.dirty'] = dirty = []
         env.fetch('routemaster.payload', []).each do |event|
+          next if event['type'] == 'noop'
           next unless @map.mark(event['url'])
           dirty << event['url']
         end
