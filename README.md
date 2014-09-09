@@ -177,7 +177,7 @@ For this purpose, use `Routemaster::Drain::Caching`:
 
 ```ruby
 require 'routemaster/drain/machine'
-$app = Routemaster::Drain:Caching.new
+$app = Routemaster::Drain::Caching.new
 ```
 
 And mount it as usual:
