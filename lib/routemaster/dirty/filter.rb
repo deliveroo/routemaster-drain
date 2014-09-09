@@ -23,7 +23,7 @@ module Routemaster
       # only the latest event for a given entity.
       #
       # Events are skipped if they are older than a previously processed
-      # event for the same entity; or if they are `noop` events.
+      # event for the same entity.
       #
       # Order of kept events is not guaranteed to be preserved.
       def run(payload)
@@ -34,9 +34,6 @@ module Routemaster
 
           # skip events older than what we already know
           next if known_state.t > event['t']
-
-          # skip noops
-          next unless %w(create update delete).include?(event['type'])
 
           new_state = State.new(event['url'], event['t'])
 
