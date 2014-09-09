@@ -3,9 +3,10 @@ source ENV.fetch('GEM_SOURCE', 'https://rubygems.org')
 # Specify your gem's dependencies in routemaster_client.gemspec
 gemspec
 
-# just here to avoid a safety warning
+# Just here to avoid a safety warning
 gem 'psych',        require: false
 
+# Used in builds and tests
 gem 'bundler',      require: false
 gem 'rake',         require: false
 gem 'guard-rspec',  require: false
