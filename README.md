@@ -45,8 +45,13 @@ Add this line to your application's Gemfile:
 This gem is configured through the environment, making 12factor compliance
 easier.
 
+Required:
+
 - `ROUTEMASTER_DRAIN_TOKENS`: a comma-separated list of valid authentication
   tokens, used by Routemaster to send you events.
+
+Optional:
+
 - `ROUTEMASTER_DRAIN_REDIS`: the URL of the Redis instance used for filtering
   and dirty mapping. Required if you use either feature, ignored otherwise.
   A namespace can be specified.
