@@ -101,7 +101,7 @@ $app = Routemaster::Drain::Basic.new
 Bind the app to your listener:
 
 ```ruby
-$app.subscribe(Listener.new)
+$app.subscribe(Listener.new, prefix: true)
 ```
 
 And finally, mount your app to your subscription path:
