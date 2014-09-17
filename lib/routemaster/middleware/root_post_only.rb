@@ -7,7 +7,7 @@ module Routemaster
       end
 
       def call(env)
-        return [404, {}, []] if env['PATH_INFO'] != '/'
+        return [404, {}, []] unless ['', '/'].include? env['PATH_INFO']
         return [405, {}, []] if env['REQUEST_METHOD'] != 'POST'
         @app.call(env)
       end
