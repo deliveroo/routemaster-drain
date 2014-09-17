@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    routemaster-drain (1.0.0)
+    routemaster-drain (1.0.1)
       faraday
       faraday_middleware
       hashie
