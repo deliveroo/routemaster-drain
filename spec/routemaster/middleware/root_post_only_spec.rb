@@ -22,6 +22,22 @@ describe Routemaster::Middleware::RootPostOnly do
       get '/why_not_even'
       expect(last_response.status).to eq(404)
     end
+
+    context 'when mounted under another path' do
+      let(:app) do
+        Rack::Builder.new do
+          map '/what' do
+            use Routemaster::Middleware::RootPostOnly
+            run ErrorRackApp.new
+          end
+        end
+      end
+
+      it 'passes for POST to mountpoint' do
+        post '/what'
+        expect(last_response.status).to eq(501)
+      end
+    end
   end
 end
 
