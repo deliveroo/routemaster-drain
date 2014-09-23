@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    routemaster-drain (1.0.1)
-      faraday
+    routemaster-drain (1.0.2)
+      faraday (>= 0.9.0)
       faraday_middleware
       hashie
       net-http-persistent
@@ -10,7 +10,7 @@ PATH
       redis-namespace
       resque
       thread
-      wisper
+      wisper (>= 1.4.0)
 
 GEM
   remote: http://eu.yarp.io/
@@ -58,7 +58,7 @@ GEM
       slop (~> 3.4)
     pry-nav (0.2.4)
       pry (>= 0.9.10, < 0.11.0)
-    psych (2.0.5)
+    psych (2.0.6)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
@@ -81,12 +81,12 @@ GEM
       rspec-core (~> 3.1.0)
       rspec-expectations (~> 3.1.0)
       rspec-mocks (~> 3.1.0)
-    rspec-core (3.1.2)
+    rspec-core (3.1.4)
       rspec-support (~> 3.1.0)
-    rspec-expectations (3.1.0)
+    rspec-expectations (3.1.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.1.0)
-    rspec-mocks (3.1.0)
+    rspec-mocks (3.1.1)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.0)
     safe_yaml (1.0.3)
@@ -98,7 +98,7 @@ GEM
     thor (0.19.1)
     thread (0.1.4)
     tilt (1.4.1)
-    timers (4.0.0)
+    timers (4.0.1)
       hitimes
     vegas (0.1.11)
       rack (>= 1.0.0)
