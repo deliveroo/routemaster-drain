@@ -13,7 +13,7 @@ PATH
       wisper (>= 1.4.0)
 
 GEM
-  remote: http://eu.yarp.io/
+  remote: https://rubygems.org/
   specs:
     addressable (2.3.6)
     celluloid (0.16.0)
@@ -59,7 +59,7 @@ GEM
     pry-nav (0.2.4)
       pry (>= 0.9.10, < 0.11.0)
     psych (2.0.6)
-    rack (1.5.2)
+    rack (1.6.2)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.2)
