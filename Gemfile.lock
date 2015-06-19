@@ -59,7 +59,7 @@ GEM
     pry-nav (0.2.4)
       pry (>= 0.9.10, < 0.11.0)
     psych (2.0.6)
-    rack (1.5.2)
+    rack (1.6.2)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.2)
