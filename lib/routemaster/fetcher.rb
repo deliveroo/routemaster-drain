@@ -39,7 +39,7 @@ module Routemaster
     end
 
     private
-    
+
     def _connection
       @_connection ||= Faraday.new do |f|
         f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
@@ -48,10 +48,9 @@ module Routemaster
         f.response :json, content_type: /\bjson/
         f.adapter  :net_http_persistent
 
-        # TODO: make these configurable
-        f.options.timeout      = 1.0
-        f.options.open_timeout = 1.0
-        f.ssl.verify           = false
+        f.options.timeout      = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
+        f.options.open_timeout = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
+        f.ssl.verify           = ENV.fetch('ROUTEMASTER_CACHE_VERIFY_SSL', 'false') == 'true'
       end
     end
 
