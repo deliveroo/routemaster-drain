@@ -67,8 +67,8 @@ Optional:
   `server1:user:p4ss,server2:user:p4ass`.
 - `ROUTEMASTER_QUEUE_NAME`: if using the cache, on which Resque queue the cache
   population jobs should be enqueued.
-
-
+- `ROUTEMASTER_CACHE_TIMEOUT`: if using the cache, how long before Faraday will timeout fetching the resource. Defaults to 1 second.
+- `ROUTEMASTER_CACHE_VERIFY_SSL`: if using the cache, whether to verify SSL when fetching the resource. Defaults to false.
 
 ## Illustrated use cases
 
