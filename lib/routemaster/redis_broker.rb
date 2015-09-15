@@ -27,8 +27,7 @@ module Routemaster
     private
 
     def _check_for_fork
-      return if Process.pid != @_pid
-      _cleanup
+      _cleanup unless Process.pid == @_pid
     end
 
     def _cleanup
