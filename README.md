@@ -1,13 +1,13 @@
 # routemaster-drain
 
 A Rack-based event receiver for the
-[Routemaster](https://github.com/HouseTrip/routemaster) event bus.
+[Routemaster](https://github.com/mezis/routemaster) event bus.
 
 [![Version](https://badge.fury.io/rb/routemaster-drain.svg)](https://rubygems.org/gems/routemaster-drain)
 &nbsp;
-[![Build](https://travis-ci.org/HouseTrip/routemaster-drain.svg?branch=master)](https://travis-ci.org/HouseTrip/routemaster-drain)
+[![Build](https://travis-ci.org/mezis/routemaster-drain.svg?branch=master)](https://travis-ci.org/mezis/routemaster-drain)
 &nbsp;
-[![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/HouseTrip/routemaster-drain/frames/file/README.md)
+[![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/mezis/routemaster-drain/frames/file/README.md)
 
 `routemaster-drain` is a collection of Rack middleware to receive and
 parse Routemaster events, filter them, and preemptively cache the corresponding
@@ -211,7 +211,7 @@ Note that `Cache#fget` is a future, so you can efficiently query many resources
 and have any `HTTP GET` requests (and cache queries) happen in parallel.
 
 See
-[rubydoc](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Cache)
+[rubydoc](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
 
 
@@ -219,9 +219,9 @@ for more details on `Cache`.
 
 The more elaborate drains are built with two components which can also be used
 independently,
-[`Dirty::Map`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map)
+[`Dirty::Map`](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Dirty/Map)
 and
-[`Dirty::Filter`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Filter).
+[`Dirty::Filter`](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Dirty/Filter).
 
 ### Dirty map
 
@@ -233,22 +233,22 @@ A dirty map map gets _marked_ when an event about en entity gets processed that
 indicates a state change, and _swept_ to process those changes.
 
 Practically, instances of
-[`Routemaster::Dirty::Map`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map)
+[`Routemaster::Dirty::Map`](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Dirty/Map)
 will emit a `:dirty_entity` event when a URL is marked as dirty, and can be
 swept when an entity is "cleaned".  If a URL is marked multiple times before
 being swept (e.g. for very volatile entities), the event will only by broadcast
 once.
 
 To sweep the map, you can for instance listen to this event and call
-[`#sweep_one`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map#sweep_one-instance_method).
+[`#sweep_one`](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Dirty/Map#sweep_one-instance_method).
 
 If you're not in a hurry and would rather run through batches you can call
-[`#sweep`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Map#sweep-instance_method)
+[`#sweep`](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Dirty/Map#sweep-instance_method)
 which will yield URLs until it runs out of dirty resources.
 
 ### Filter
 
-[`Routemaster::Dirty::Filter`](http://rubydoc.info/github/HouseTrip/routemaster-drain/Routemaster/Dirty/Filter) is a simple event filter
+[`Routemaster::Dirty::Filter`](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Dirty/Filter) is a simple event filter
 that performs reordering. It ignores events older than the latest known
 information on an entity.
 
@@ -259,7 +259,7 @@ as in `Receiver::Filter` for instance.
 
 ## Contributing
 
-1. Fork it ( http://github.com/HouseTrip/routemaster-drain/fork )
+1. Fork it ( http://github.com/mezis/routemaster-drain/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

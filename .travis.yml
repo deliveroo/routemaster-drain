@@ -1,16 +1,11 @@
 language: ruby
+cache: bundler
 services:
   - redis-server
 rvm:
-  - 2.1.1
-  - 2.1.2
+  - 2.0.0
+  - 2.1.9
+  - 2.2.5
+  - 2.3.1
 script:
 - bundle exec rspec
-install:
-- "./rebund/run download"
-- bundle install --path vendor/bundle
-after_script:
-- "./rebund/run upload"
-env:
-  global:
-    secure: BOuoRqbmovhZUAs6mpYo8yXEaHwOvloXsCaVKr84Aub5l9GlyoaPeOs2HDGzWMLXVSI+N1Zf4or+tqWwrwnWhrqb2rj4yVd6tp/qm0V8ICw34W7RL30eWYe/Dcw2uGROAqn56xAj2pXZZY4qLb4dgoXitM+riHkq8rPvqohywZ0=

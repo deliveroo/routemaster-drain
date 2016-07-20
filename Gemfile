@@ -1,4 +1,4 @@
-source ENV.fetch('GEM_SOURCE', 'https://rubygems.org')
+source 'https://rubygems.org'
 
 # Specify your gem's dependencies in routemaster_client.gemspec
 gemspec
@@ -14,4 +14,4 @@ gem 'webmock',      require: false
 gem 'pry-nav',      require: false
 gem 'rack-test',    require: false
 gem 'dotenv',       require: false
-
+gem 'rspec'
