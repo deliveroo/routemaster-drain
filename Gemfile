@@ -14,4 +14,5 @@ gem 'webmock',      require: false
 gem 'pry-nav',      require: false
 gem 'rack-test',    require: false
 gem 'dotenv',       require: false
+gem 'faraday',      require: false
 gem 'rspec'
