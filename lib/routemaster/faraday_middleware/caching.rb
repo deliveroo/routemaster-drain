@@ -11,7 +11,9 @@ module Routemaster::FaradayMiddleware
     def call(env)
       return app.call(env) unless env.method == :get
 
-      url, version, locale = url(env), version(env), locale(env)
+      url = url(env)
+      version = version(env)
+      locale = locale(env)
 
       options = {}.tap do |o|
         o[:locale]  = locale if locale
