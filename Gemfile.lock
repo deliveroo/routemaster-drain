@@ -118,7 +118,6 @@ PLATFORMS
 DEPENDENCIES
   bundler
   dotenv
-  faraday
   guard-rspec
   pry-nav
   psych
@@ -129,4 +128,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   1.13.1
+   1.13.6
