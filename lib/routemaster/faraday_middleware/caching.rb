@@ -21,7 +21,7 @@ module Routemaster::FaradayMiddleware
       end
 
       args = options.empty? ? [url] : [url, options]
-      cache.with_caching(*args) do
+      cache.fetch(*args) do
         app.call(env)
       end
     end

@@ -210,6 +210,19 @@ whenever the drain gets notified about a change on that widget.
 Note that `Cache#fget` is a future, so you can efficiently query many resources
 and have any `HTTP GET` requests (and cache queries) happen in parallel.
 
+Using `#get` and `#fget` will use the internal fetcher of `Cache`, which is based
+on Faraday. If you want to be able to use your own client for fetching the requests
+themselves, you can use `Cache#fetch` which accepts a block, following on from the
+above example, you can use it like so:
+
+```ruby
+require 'net/http'
+
+@cache.fetch('https://example.com/widgets/123') do |url|
+  Net::HTTP.get(URI.parse(url)) #=> String
+end
+ ```
+
 See
 [rubydoc](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.

@@ -15,8 +15,8 @@ describe Routemaster::FaradayMiddleware::Caching do
 
   context 'With supplied Accept and Accept-Language headers' do
     it 'parses url, version and locale from the request headers and passes \
-    them to the cache#with_caching' do
-      expect(cache).to receive(:with_caching).with('http://www.example.com/anything', version: '1', locale: 'en').and_yield
+    them to cache#fetch' do
+      expect(cache).to receive(:fetch).with('http://www.example.com/anything', version: '1', locale: 'en').and_yield
       expect_any_instance_of(described_class).to receive(:app) { app }
       expect(app).to receive(:call)
 
@@ -29,7 +29,7 @@ describe Routemaster::FaradayMiddleware::Caching do
 
   context 'Without Accept and Accept-Language headers' do
     it 'only calles cache#with_caching with the url' do
-      expect(cache).to receive(:with_caching).with('http://www.example.com/anything').and_yield
+      expect(cache).to receive(:fetch).with('http://www.example.com/anything').and_yield
       expect_any_instance_of(described_class).to receive(:app) { app }
       expect(app).to receive(:call)
 

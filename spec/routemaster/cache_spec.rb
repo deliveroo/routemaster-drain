@@ -25,7 +25,7 @@ describe Routemaster::Cache do
     )
   end
 
-  shared_examples 'a response getter' do 
+  shared_examples 'a response getter' do
     before do
       @counter = 0
       allow(fetcher).to receive(:get) do |url, **options|
@@ -95,6 +95,66 @@ describe Routemaster::Cache do
     let(:performer) { subject.method(:fget) }
 
     it_behaves_like 'a response getter'
+  end
+
+
+  describe '#fetch' do
+
+    let(:url) { "http://www.example.com" }
+    let(:custom_fetcher) { double }
+    let(:performer) {
+      ->(url, locale: nil, version: nil) {
+        subject.fetch(url, locale: locale, version: version) do |url, version, locale|
+          custom_fetcher.get(url, locale, version)
+        end
+      }
+    }
+
+    let(:incrementing_endpoint) {
+        i = 0
+        Proc.new {
+          i += 1
+          "I am a response #{i}"
+        }
+    }
+
+    it 'uses the cache' do
+      expect(custom_fetcher).to receive(:get).with(url, nil, nil).once do
+        incrementing_endpoint.call
+      end
+
+      3.times { performer.call(url) }
+
+      expect(performer.call(url)).to eq("I am a response 1")
+    end
+
+    context 'with a listener' do
+      before { subject.subscribe(listener) }
+
+      it 'emits :cache_miss' do
+        expect(custom_fetcher).to receive(:get).with(url, nil, nil).once do
+          incrementing_endpoint.call
+        end
+        expect(listener).to receive(:cache_miss)
+        performer.call(url)
+      end
+
+      it 'misses on different locale' do
+        expect(custom_fetcher).to receive(:get).with(url, anything, anything, &incrementing_endpoint).twice
+
+        expect(listener).to receive(:cache_miss).twice
+        expect(performer.call(url, locale: 'en')).to eq "I am a response 1"
+        expect(performer.call(url, locale: 'fr')).to eq "I am a response 2"
+      end
+
+      it 'emits :cache_miss' do
+        expect(custom_fetcher).to receive(:get).with(url, nil, nil, &incrementing_endpoint).once
+        allow(listener).to receive(:cache_miss)
+        performer.call(url)
+        expect(listener).to receive(:cache_hit)
+        performer.call(url)
+      end
+    end
   end
 
 
