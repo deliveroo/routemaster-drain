@@ -114,7 +114,12 @@ describe Routemaster::Cache do
         i = 0
         Proc.new {
           i += 1
-          "I am a response #{i}"
+
+          Hashie::Mash.new ({
+            status: 200,
+            body: "I am a response #{i}",
+            headers: nil
+          })
         }
     }
 
@@ -125,7 +130,7 @@ describe Routemaster::Cache do
 
       3.times { performer.call(url) }
 
-      expect(performer.call(url)).to eq("I am a response 1")
+      expect(performer.call(url).body).to eq("I am a response 1")
     end
 
     context 'with a listener' do
@@ -143,8 +148,8 @@ describe Routemaster::Cache do
         expect(custom_fetcher).to receive(:get).with(url, anything, anything, &incrementing_endpoint).twice
 
         expect(listener).to receive(:cache_miss).twice
-        expect(performer.call(url, locale: 'en')).to eq "I am a response 1"
-        expect(performer.call(url, locale: 'fr')).to eq "I am a response 2"
+        expect(performer.call(url, locale: 'en').body).to eq "I am a response 1"
+        expect(performer.call(url, locale: 'fr').body).to eq "I am a response 2"
       end
 
       it 'emits :cache_miss' do

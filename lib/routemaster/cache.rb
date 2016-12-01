@@ -103,9 +103,9 @@ module Routemaster
           "application/json"
         }
         headers['Accept-Language'] = locale if locale
-        @fetcher.get(url, headers: headers).to_json
+        @fetcher.get(url, headers: headers)
       end
-      Response.new(JSON.parse(response))
+      Response.new(response)
     end
 
     # Like {#get}, but schedules any request in the background using a thread
@@ -125,26 +125,29 @@ module Routemaster
     # @param version [Integer] The version to pass in headers, as `Accept: application/json;v=2`
     # @param locale [String] The language to request in the `Accept-Language`
     # header.
+    # @param  [Block] Block to fetch the url, which must return something that responds to `.to_json`
+    # and contain `status`, `headers`, and `body`
     #
-    # @return response [String], in whatever format that is returned by the supplied block (or in the cache)
+    # @return [Response] which responds to `status`, `headers, and `body`
     def fetch(url, version: nil, locale: nil)
       key   = "cache:#{url}"
       field = "v:#{version},l:#{locale}"
 
       # check cache
-      if payload = @redis.hget(key, field)
-        publish(:cache_hit, url)
-        return payload
-      end
+      response = if payload = @redis.hget(key, field)
+                   publish(:cache_hit, url)
+                   JSON.parse(payload)
+                 else
+                   yield(url, version, locale).tap do |resp|
+                     # store in redis
+                     @redis.hset(key, field, resp.to_json)
+                     @redis.expire(key, @expiry)
 
-      response = yield(url, version, locale)
+                     publish(:cache_miss, url)
+                   end
+                 end
 
-      # store in redis
-      @redis.hset(key, field, response)
-      @redis.expire(key, @expiry)
-
-      publish(:cache_miss, url)
-      response
+      Response.new(response)
     end
   end
 end

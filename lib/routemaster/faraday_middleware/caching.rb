@@ -21,9 +21,11 @@ module Routemaster::FaradayMiddleware
       end
 
       args = options.empty? ? [url] : [url, options]
-      cache.fetch(*args) do
-        app.call(env)
+      serialized_response = cache.fetch(*args) do
+        serialize(app.call(env))
       end
+
+      deserialize(serialized_response, env)
     end
 
     private
@@ -43,6 +45,20 @@ module Routemaster::FaradayMiddleware
 
     def locale(request_env)
       request_env.request_headers['Accept-Language']
+    end
+
+    def serialize(faraday_response)
+      {
+        status: faraday_response.status,
+        headers: faraday_response.headers,
+        body: faraday_response.body
+      }
+    end
+
+    def deserialize(serialized_response, env)
+      serialized_response[:response_headers] = serialized_response.delete :headers
+      env.update(serialized_response)
+      Faraday::Response.new(env)
     end
   end
 end

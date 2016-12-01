@@ -212,14 +212,19 @@ and have any `HTTP GET` requests (and cache queries) happen in parallel.
 
 Using `#get` and `#fget` will use the internal fetcher of `Cache`, which is based
 on Faraday. If you want to be able to use your own client for fetching the requests
-themselves, you can use `Cache#fetch` which accepts a block, following on from the
+themselves, you can use `Cache#fetch` which accepts a block which must return an object that responds to #to_json, with status, code and body fields. Following on from the
 above example, you can use it like so:
 
 ```ruby
-require 'net/http'
+require 'httparty'
 
 @cache.fetch('https://example.com/widgets/123') do |url|
-  Net::HTTP.get(URI.parse(url)) #=> String
+  {}.tap do |r|
+  	response = HTTParty.get(url)
+  	r.status = response.status
+  	r.code = response.code
+  	r.body = response.body
+  end #=> Hash {body:, status:, headers:}
 end
  ```
 
