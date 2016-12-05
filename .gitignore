@@ -5,3 +5,5 @@ pkg/
 tmp
 *.orig
 tags
+coverage/
+.byebug_history
