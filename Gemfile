@@ -17,3 +17,5 @@ gem 'dotenv',                     require: false
 gem 'codeclimate-test-reporter',  require: false
 gem 'simplecov'
 gem 'rspec'
+gem 'resque'
+gem 'sidekiq'

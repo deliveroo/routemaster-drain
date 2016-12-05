@@ -37,6 +37,10 @@ module Routemaster
       end
     end
 
+    def queue_adapter
+      ENV.fetch('ROUTEMASTER_QUEUE_ADAPTER', 'resque').to_sym
+    end
+
     def queue_name
       ENV.fetch('ROUTEMASTER_QUEUE_NAME', 'routemaster')
     end
