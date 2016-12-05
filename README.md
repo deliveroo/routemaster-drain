@@ -7,6 +7,8 @@ A Rack-based event receiver for the
 &nbsp;
 [![Build](https://travis-ci.org/mezis/routemaster-drain.svg?branch=master)](https://travis-ci.org/mezis/routemaster-drain)
 &nbsp;
+[![Code Climate](https://codeclimate.com/github/deliveroo/routemaster-drain/badges/gpa.svg)](https://codeclimate.com/github/deliveroo/routemaster-drain)
+[![Test Coverage](https://codeclimate.com/github/deliveroo/routemaster-drain/badges/coverage.svg)](https://codeclimate.com/github/deliveroo/routemaster-drain/coverage)
 [![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/mezis/routemaster-drain/frames/file/README.md)
 
 `routemaster-drain` is a collection of Rack middleware to receive and
