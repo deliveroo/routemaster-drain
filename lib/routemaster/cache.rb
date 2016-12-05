@@ -68,7 +68,12 @@ module Routemaster
     # Bust the cache for a given URL
     def bust(url)
       @redis.del("cache:#{url}")
-      publish(:cache_bust, url)
+      _publish(:cache_bust, url)
+    end
+
+    # This is because wisper makes broadcasting methods private
+    def _publish(event, url)
+      publish(event, url)
     end
 
     # Get the response from a URL, from the cache if possible.

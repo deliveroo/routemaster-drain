@@ -29,7 +29,7 @@ module Routemaster
           if response.success?
             @cache.hset(cache_key(env), cache_field(env), response.body)
             @cache.expire(cache_key(env), @expiry)
-            @listener.publish(:cache_miss, url(env)) if @listener
+            @listener._publish(:cache_miss, url(env)) if @listener
           end
         end
       end
@@ -38,7 +38,7 @@ module Routemaster
         payload = @cache.hget(cache_key(env), cache_field(env))
 
         if payload
-          @listener.publish(:cache_hit, url(env)) if @listener
+          @listener._publish(:cache_hit, url(env)) if @listener
           Faraday::Response.new(status: 200,
                                 body: payload,
                                 response_headers: {})
