@@ -38,7 +38,7 @@ module Routemaster
     # Wraps a future response, so it quacks exactly like an ordinary response.
     class FutureResponse
       extend Forwardable
-     
+
       # The `block` is expected to return a {Response}
       def initialize(&block)
         @future = Pool.instance.future(&block)
@@ -47,15 +47,15 @@ module Routemaster
       # @!attribute status
       # @return [Integer]
       # Delegated to the `block`'s return value.
-      
+
       # @!attribute headers
       # @return [Hash]
       # Delegated to the `block`'s return value.
-      
+
       # @!attribute body
       # @return pHashie::Mash]
       # Delegated to the `block`'s return value.
-      
+
       delegate :value => :@future
       delegate %i(status headers body) => :value
     end
@@ -63,10 +63,10 @@ module Routemaster
     class Response < Hashie::Mash
       # @!attribute status
       # Integer
-      
+
       # @!attribute headers
       # Hash
-      
+
       # @!attribute body
       # Hashie::Mash
     end
@@ -95,29 +95,16 @@ module Routemaster
     #
     # @return [Response], which responds to `status`, `headers`, and `body`.
     def get(url, version:nil, locale:nil)
-      key   = "cache:#{url}"
-      field = "v:#{version},l:#{locale}"
-
-      # check cache
-      if payload = @redis.hget(key, field)
-        publish(:cache_hit, url)
-        return Response.new(JSON.parse(payload))
-      end
-
-      # fetch data
-      headers = {
-        'Accept' => version ?
+      response = fetch(url, version: version, locale: locale) do
+        # fetch data
+        headers = {
+          'Accept' => version ?
           "application/json;v=#{version}" :
           "application/json"
-      }
-      headers['Accept-Language'] = locale if locale
-      response = @fetcher.get(url, headers: headers)
-
-      # store in redis
-      @redis.hset(key, field, response.to_json)
-      @redis.expire(key, @expiry)
-
-      publish(:cache_miss, url)
+        }
+        headers['Accept-Language'] = locale if locale
+        @fetcher.get(url, headers: headers)
+      end
       Response.new(response)
     end
 
@@ -128,6 +115,39 @@ module Routemaster
     # like [Response].
     def fget(*args)
       FutureResponse.new { get(*args) }
+    end
+
+    # Get the response from a URL fetched in a supplied block, from the cache if possible.
+    # Stores to the cache on misses.
+    #
+    # Different versions and locales are stored separately in the cache.
+    #
+    # @param version [Integer] The version to pass in headers, as `Accept: application/json;v=2`
+    # @param locale [String] The language to request in the `Accept-Language`
+    # header.
+    # @param  [Block] Block to fetch the url, which must return something that responds to `.to_json`
+    # and contain `status`, `headers`, and `body`
+    #
+    # @return [Response] which responds to `status`, `headers, and `body`
+    def fetch(url, version: nil, locale: nil)
+      key   = "cache:#{url}"
+      field = "v:#{version},l:#{locale}"
+
+      # check cache
+      response = if payload = @redis.hget(key, field)
+                   publish(:cache_hit, url)
+                   JSON.parse(payload)
+                 else
+                   yield(url, version, locale).tap do |resp|
+                     # store in redis
+                     @redis.hset(key, field, resp.to_json)
+                     @redis.expire(key, @expiry)
+
+                     publish(:cache_miss, url)
+                   end
+                 end
+
+      Response.new(response)
     end
   end
 end
