@@ -43,7 +43,7 @@ module Routemaster
     def _connection
       @_connection ||= Faraday.new do |f|
         f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
-        f.request  :basic_auth, *_uuid
+        f.basic_auth *_uuid if _uuid
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.adapter  :net_http_persistent
