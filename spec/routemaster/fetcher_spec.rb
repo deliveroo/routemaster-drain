@@ -41,7 +41,8 @@ describe Routemaster::Fetcher do
     it 'uses auth' do
       subject
       assert_requested(:get, /example/) do |req|
-        expect(req.uri.userinfo).to eq('username:s3cr3t')
+        credentials = Base64.strict_encode64('username:s3cr3t')
+        expect(req.headers['Authorization']).to eq("Basic #{credentials}")
       end
     end
 
