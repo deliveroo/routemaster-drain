@@ -1,17 +1,20 @@
 require 'spec_helper'
 require 'spec/support/uses_dotenv'
+require 'spec/support/uses_redis'
 require 'spec/support/uses_webmock'
 require 'routemaster/fetcher'
 require 'json'
 
 describe Routemaster::Fetcher do
   uses_dotenv
+  uses_redis
   uses_webmock
 
   describe '.get' do
     let(:url) { 'https://example.com/widgets/132' }
     let(:headers) {{}}
-    subject { described_class.get(url, headers: headers) }
+    let(:fetcher) { described_class.new }
+    subject { fetcher.get(url, headers: headers) }
 
     before do
       @req = stub_request(:get, /example\.com/).to_return(

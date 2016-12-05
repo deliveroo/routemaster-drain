@@ -8,9 +8,9 @@ describe Routemaster::Cache do
   uses_dotenv
   uses_redis
 
-  let(:fetcher) { double 'fetcher' }
+  let(:fetcher) { double('Fetcher') }
   let(:url) { make_url(1) }
-  let(:listener) { double 'listener' }
+  let(:listener) { double('listener') }
   subject { described_class.new(fetcher: fetcher) }
 
   def make_url(idx)
@@ -25,7 +25,7 @@ describe Routemaster::Cache do
     )
   end
 
-  shared_examples 'a response getter' do 
+  shared_examples 'a response getter' do
     before do
       @counter = 0
       allow(fetcher).to receive(:get) do |url, **options|
