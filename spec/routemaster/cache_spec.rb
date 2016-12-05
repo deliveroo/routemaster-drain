@@ -9,98 +9,103 @@ module Routemaster
     uses_dotenv
     uses_redis
 
-    let(:fetcher) { Fetcher.new(listener: listener) }
-    let(:url) { 'https://example.com/widgets/132' }
-    let(:cache) { Config.cache_redis }
-    let(:listener) { double('listener', publish: nil) }
-    subject { described_class.new(fetcher: fetcher) }
+    let(:url) { 'https://www.example.org/widgets/123' }
 
-    before do
-      allow(Config).to receive(:cache_auth).and_return('example.com' => ['test', 'test'])
-      @conn = Faraday.new do |builder|
-        builder.adapter :test do |stub|
-          stub.get(url) { |env| [ 200, {}, { id: 132, type: 'widget'}] }
-        end
-      end
-
-      allow(fetcher).to receive(:connection).and_return(@conn)
-    end
-
-    shared_examples 'a response getter' do
-      it 'fetches the url' do
-        expect(fetcher).to receive(:get).with(url, anything)
-        performer.call(url).status
-      end
-
-      it 'passes the locale header' do
-        expect(fetcher).to receive(:get) do |url, **options|
-          expect(options[:headers]['Accept-Language']).to eq('fr')
-        end.and_call_original
-        performer.call(url, locale: 'fr').status
-      end
-
-      it 'passes the version header' do
-        expect(fetcher).to receive(:get) do |url, **options|
-          expect(options[:headers]['Accept']).to eq('application/json;v=33')
-        end
-        performer.call(url, version: 33).status
-      end
-
-      it 'uses the cache' do
-        expect(@conn).to receive(:get).once
-        3.times { performer.call(url).status }
-      end
-
-      context 'with a listener' do
-        before { subject.subscribe(listener) }
-
-        it 'emits :cache_miss' do
-          expect(listener).to receive(:cache_miss)
-          performer.call(url).status
-        end
-
-        it 'misses on different locale' do
-          expect(listener).to receive(:cache_miss).twice
-          performer.call(url, locale: 'en').status
-          performer.call(url, locale: 'fr').status
-        end
-
-        it 'emits :cache_miss' do
-          allow(listener).to receive(:cache_miss)
-          performer.call(url).status
-          expect(listener).to receive(:cache_hit)
-          performer.call(url).status
-        end
-      end
-    end
-
+    subject { described_class.new }
 
     describe '#get' do
-      let(:performer) { subject.method(:get) }
+      let(:perform) { subject.get(url, **options) }
 
-      it_behaves_like 'a response getter'
-    end
+      context 'with no options' do
+        let(:perform) { subject.get(url) }
 
+        it 'calls get on the fetcher with no version and locale headers' do
+          expect_any_instance_of(Fetcher)
+            .to receive(:get)
+            .with(url, headers: { 'Accept' => 'application/json' })
 
-    describe '#fget' do
-      let(:performer) { subject.method(:fget) }
-
-      it_behaves_like 'a response getter'
-    end
-
-
-    describe '#bust' do
-      it 'causes next get to query' do
-        expect(@conn).to receive(:get).twice
-        subject.get(url)
-        subject.bust(url)
-        subject.get(url)
+          perform
+        end
       end
 
-      it 'emits :cache_bust' do
-        subject.subscribe(listener, prefix: true)
-        expect(listener).to receive(:on_cache_bust).once
-        subject.bust(url)
+      context 'with a specific version' do
+        let(:options) { { version: 2 } }
+
+        it 'calls get on the fetcher with version header' do
+          expect_any_instance_of(Fetcher)
+            .to receive(:get)
+            .with(url, headers: { 'Accept' => 'application/json;v=2' })
+
+          perform
+        end
+      end
+
+      context 'with a specific locale' do
+        let(:options) { { locale: 'fr' } }
+
+        it 'calls get on the fetcher with locale header' do
+          expect_any_instance_of(Fetcher)
+            .to receive(:get)
+            .with(url, headers: { 'Accept' => 'application/json', 'Accept-Language' => 'fr' })
+
+          perform
+        end
+      end
+    end
+
+    describe '#fget' do
+      let(:options) { {} }
+      let(:perform) { subject.fget(url, **options) }
+
+      context 'with no information needed' do
+        it 'does not perform a GET request until we ask for information' do
+          expect_any_instance_of(Fetcher)
+            .not_to receive(:get)
+
+          perform
+        end
+
+
+        it 'returns a FutureResponse' do
+          expect(perform).to be_an_instance_of(Cache::FutureResponse)
+        end
+      end
+
+      context 'with information about body, status or headers needed' do
+        %w(status headers body).each do |info|
+          it 'performs the actual GET request to fetch the information needed' do
+            expect_any_instance_of(Fetcher)
+              .to receive(:get)
+              .with(url, anything)
+              .and_return(double('FaradayResponse', info.to_sym => nil))
+
+            perform.public_send(info.to_sym)
+          end
+        end
+      end
+    end
+
+    describe '#bust' do
+      let(:cache)   { Config.cache_redis }
+      let(:perform) { subject.bust(url) }
+
+      before do
+        cache.set("cache:#{url}", "cached response")
+      end
+
+      it 'busts the cache for a given URL' do
+        expect { perform }
+          .to change { cache.get("cache:#{url}") }
+          .from('cached response')
+          .to(nil)
+      end
+
+      it 'publishes the cache_bust event for that URL' do
+        expect_any_instance_of(described_class)
+          .to receive(:publish)
+          .with(:cache_bust, url)
+
+        perform
       end
     end
   end

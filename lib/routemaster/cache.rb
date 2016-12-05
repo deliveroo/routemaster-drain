@@ -53,7 +53,7 @@ module Routemaster
       # Delegated to the `block`'s return value.
 
       # @!attribute body
-      # @return pHashie::Mash]
+      # @return [Hashie::Mash]
       # Delegated to the `block`'s return value.
 
       delegate :value => :@future
