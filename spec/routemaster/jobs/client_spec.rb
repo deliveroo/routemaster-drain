@@ -21,8 +21,8 @@ RSpec.describe Routemaster::Jobs::Client do
       it 'queues a Resque fetch job' do
         expect(adapter).to receive(:enqueue_to).with(
           'routemaster',
-          Routemaster::Jobs::CacheAndSweep,
-          'https://example.com/1')
+          Routemaster::Jobs::Backends::Resque::JobWrapper,
+          { 'class' => 'Routemaster::Jobs::CacheAndSweep', 'args' => ['https://example.com/1'] })
         perform
       end
     end
@@ -34,8 +34,8 @@ RSpec.describe Routemaster::Jobs::Client do
       it 'queues a Sidekiq fetch job' do
         expect(adapter).to receive(:push).with(
           'queue' => 'routemaster',
-          'class' => Routemaster::Jobs::CacheAndSweep,
-          'args' => ['https://example.com/1'])
+          'class' => Routemaster::Jobs::Backends::Sidekiq::JobWrapper,
+          'args' => [{ 'class' => 'Routemaster::Jobs::CacheAndSweep', 'args' => ['https://example.com/1'] }])
         perform
       end
     end

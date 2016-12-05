@@ -6,7 +6,7 @@ PATH
       faraday_middleware
       hashie
       net-http-persistent (< 3)
-      rack (~> 1.6.2)
+      rack (>= 1.6.2)
       redis-namespace
       thread
       wisper (~> 1.6.1)

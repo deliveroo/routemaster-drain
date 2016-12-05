@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency     'faraday', '>= 0.9.0'
   spec.add_runtime_dependency     'faraday_middleware'
   spec.add_runtime_dependency     'net-http-persistent', '< 3' # 3.x is currently incompatible with faraday
-  spec.add_runtime_dependency     'rack', '~> 1.6.2'
+  spec.add_runtime_dependency     'rack', '>= 1.6.2'
   spec.add_runtime_dependency     'wisper', '~> 1.6.1'
   spec.add_runtime_dependency     'hashie'
   spec.add_runtime_dependency     'redis-namespace'
