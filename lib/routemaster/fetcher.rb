@@ -1,3 +1,4 @@
+require 'base64'
 require 'faraday'
 require 'faraday_middleware'
 require 'hashie'
@@ -6,7 +7,7 @@ require 'routemaster/middleware/caching'
 
 module Routemaster
   class Fetcher
-    DEFAULT_MIDDLEWARES = [[Routemaster::Middleware::Caching]]
+    DEFAULT_MIDDLEWARE = Routemaster::Middleware::Caching
 
     #
     # Usage:
@@ -14,8 +15,9 @@ module Routemaster
     # You can extend Fetcher with custom middlewares like:
     # Fetcher.new(middlewares: [[MyCustomMiddleWare, option1, option2]])
     #
-    def initialize(middlewares: [])
-      @middlewares = DEFAULT_MIDDLEWARES + middlewares
+    def initialize(middlewares: [], listener: nil)
+      @listener = listener
+      @middlewares = generate_middlewares(middlewares)
     end
 
     # Performs a GET HTTP request for the `url`, with optional
@@ -24,16 +26,20 @@ module Routemaster
     # @return an object that responds to `status` (integer), `headers` (hash),
     # and `body`. The body is a `Hashie::Mash` if the response was JSON, a
     # string otherwise.
-    def get(url, params:nil, headers:nil)
+    def get(url, params: {}, headers: {})
       host = URI.parse(url).host
-      r = _connection.get(url, params, headers.merge(auth_header(host)))
-      Hashie::Mash.new(status: r.status, headers: r.headers, body: r.body)
+      connection.get(url, params, headers.merge(auth_header(host)))
     end
 
     private
 
-    def _connection
-      @_connection ||= Faraday.new do |f|
+    def generate_middlewares(middlewares)
+      default_middleware = [DEFAULT_MIDDLEWARE, listener: @listener]
+      middlewares.unshift(default_middleware)
+    end
+
+    def connection
+      @connection ||= Faraday.new do |f|
         f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
@@ -50,7 +56,7 @@ module Routemaster
     end
 
     def auth_header(host)
-      auth_string = Config.cache_auth.fetch(host, "").join(':')
+      auth_string = Config.cache_auth.fetch(host, []).join(':')
       { 'Authorization' => "Basic #{Base64.strict_encode64(auth_string)}" }
     end
   end

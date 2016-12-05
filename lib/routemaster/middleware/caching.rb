@@ -3,15 +3,15 @@ require 'wisper'
 module Routemaster
   module Middleware
     class Caching
-      include Wisper::Publisher
       KEY_TEMPLATE = 'cache:{url}'
       FIELD_TEMPLATE = 'v:{version},l:{locale}'
       VERSION_REGEX = /application\/json;v=(?<version>\S*)/.freeze
 
-      def initialize(app, cache: Config.cache_redis)
+      def initialize(app, cache: Config.cache_redis, listener: nil)
         @app = app
         @cache = cache
         @expiry  = Config.cache_expiry
+        @listener = listener
       end
 
       def call(env)
@@ -29,7 +29,7 @@ module Routemaster
           if response.success?
             @cache.hset(cache_key(env), cache_field(env), response.body)
             @cache.expire(cache_key(env), @expiry)
-            publish(:cache_miss, url(env))
+            @listener.publish(:cache_miss, url(env)) if @listener
           end
         end
       end
@@ -38,8 +38,10 @@ module Routemaster
         payload = @cache.hget(cache_key(env), cache_field(env))
 
         if payload
-          publish(:cache_hit, url(env))
-          Faraday::Response.new(status: 200, body: payload)
+          @listener.publish(:cache_hit, url(env)) if @listener
+          Faraday::Response.new(status: 200,
+                                body: payload,
+                                response_headers: {})
         end
       end
 

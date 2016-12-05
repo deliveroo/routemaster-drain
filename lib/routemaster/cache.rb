@@ -62,7 +62,7 @@ module Routemaster
 
     def initialize(redis:nil, fetcher:nil)
       @redis   = redis || Config.cache_redis
-      @fetcher = fetcher || Fetcher.new
+      @fetcher = fetcher || Fetcher.new(listener: self)
     end
 
     # Bust the cache for a given URL
@@ -96,8 +96,8 @@ module Routemaster
     #
     # @return [FutureResponse], which responds to `status`, `headers`, and `body`
     # like [Response].
-    def fget(*args)
-      FutureResponse.new { get(*args) }
+    def fget(url, version: nil, locale: nil)
+      FutureResponse.new { get(url, version: version, locale: locale) }
     end
   end
 end

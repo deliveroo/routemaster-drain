@@ -4,6 +4,8 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+require 'pry'
+
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.raise_errors_for_deprecations!
