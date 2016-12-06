@@ -2,6 +2,10 @@ module Routemaster
   module Jobs
     class Job
       class << self
+        def data_for(job_class, args)
+          { 'class' => job_class.to_s, 'args'  => args }
+        end
+
         def execute(job_data)
           job = create_job(job_data)
           job.perform(*job_data['args'])
