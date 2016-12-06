@@ -10,7 +10,7 @@ module Routemaster
         end
 
         def enqueue(queue, job_class, *args)
-          job_data = data_for(job_class, args)
+          job_data = Job.data_for(job_class, args)
           @adapter.enqueue_to(queue, JobWrapper, job_data)
         end
 
