@@ -8,8 +8,9 @@ RSpec.describe 'Requests with caching' do
   uses_dotenv
   uses_redis
 
+  let!(:log) { WEBrick::Log.new '/dev/null' }
   let(:service) do
-    WEBrick::HTTPServer.new(:Port => 8000, :DocumentRoot => Dir.pwd).tap do |server|
+    WEBrick::HTTPServer.new(Port: 8000, DocumentRoot: Dir.pwd, Logger: log).tap do |server|
       server.mount_proc '/test' do |req, res|
         res.body = { field: 'test' }.to_json
       end
@@ -21,18 +22,18 @@ RSpec.describe 'Requests with caching' do
       trap 'INT' do service.shutdown end
       service.start
     end
-    sleep(1) # leave sometime for the previous webrick to teardown
-    Process.detach(@pid)
+    sleep(0.5) # leave sometime for the previous webrick to teardown
   end
 
   after do
-    Process.kill('INT', @pid)
-    sleep(1) # leave sometime for the previous webrick to teardown
+    Process.kill('KILL', @pid)
+    Process.wait(@pid)
   end
 
   subject { Routemaster::Cache.new }
 
   describe 'GET request' do
+    let(:cache_keys) { ["cache:#{url}", "v:,l:"] }
     let(:url) { 'http://localhost:8000/test' }
 
     context 'when there is no previous cached response' do
@@ -42,9 +43,10 @@ RSpec.describe 'Requests with caching' do
       end
 
       it 'sets the new response onto the cache' do
-        expect { subject.get(url) }.to change {
-          Routemaster::Config.cache_redis.hget("cache:#{url}", "v:,l:")
-        }.from(nil).to("{\"field\":\"test\"}")
+        expect { subject.get(url) }
+          .to change { Routemaster::Config.cache_redis.hget(*cache_keys)}
+          .from(nil)
+          .to({ field: 'test'}.to_json)
       end
     end
 
@@ -54,7 +56,7 @@ RSpec.describe 'Requests with caching' do
       end
 
       it 'fetches the cached response' do
-        expect(subject.get(url).body).to eq("{\"field\":\"test\"}")
+        expect(subject.get(url).body).to eq({ field: 'test' }.to_json)
       end
 
       it 'does not make an http call' do
