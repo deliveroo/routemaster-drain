@@ -7,3 +7,5 @@ tmp
 tags
 *.swp
 *.swo
+coverage/
+.byebug_history
