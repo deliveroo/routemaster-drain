@@ -69,6 +69,10 @@ module Routemaster
         f.options.timeout      = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
         f.options.open_timeout = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
         f.ssl.verify           = ENV.fetch('ROUTEMASTER_CACHE_VERIFY_SSL', 'false') == 'true'
+
+        @middlewares.each do |middleware|
+          f.use(*middleware)
+        end
       end
     end
 

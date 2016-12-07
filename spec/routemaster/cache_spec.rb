@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
+require 'spec/support/uses_webmock'
 require 'routemaster/cache'
 require 'routemaster/fetcher'
 
@@ -8,23 +9,31 @@ module Routemaster
   describe Cache do
     uses_dotenv
     uses_redis
+    uses_webmock
 
-    let(:url) { 'https://www.example.org/widgets/123' }
+    let(:url) { 'https://www.example.com/widgets/123' }
 
-    subject { described_class.new }
+    before do
+      stub_request(:get, /example\.com/).to_return(
+        status:   200,
+        body:     { id: 123, type: 'widget' }.to_json,
+        headers:  {
+          'content-type' => 'application/json;v=1'
+        }
+      )
+    end
 
-    describe '#get' do
-      let(:perform) { subject.get(url, **options) }
-
+    shared_examples 'a GET request' do
       context 'with no options' do
-        let(:perform) { subject.get(url) }
+        let(:options) { {} }
 
         it 'calls get on the fetcher with no version and locale headers' do
           expect_any_instance_of(Fetcher)
             .to receive(:get)
             .with(url, headers: { 'Accept' => 'application/json' })
+            .and_call_original
 
-          perform
+          perform.status
         end
       end
 
@@ -35,8 +44,9 @@ module Routemaster
           expect_any_instance_of(Fetcher)
             .to receive(:get)
             .with(url, headers: { 'Accept' => 'application/json;v=2' })
+            .and_call_original
 
-          perform
+          perform.status
         end
       end
 
@@ -47,42 +57,23 @@ module Routemaster
           expect_any_instance_of(Fetcher)
             .to receive(:get)
             .with(url, headers: { 'Accept' => 'application/json', 'Accept-Language' => 'fr' })
+            .and_call_original
 
-          perform
+          perform.status
         end
       end
     end
 
+    describe '#get' do
+      let(:perform) { subject.get(url, **options) }
+
+      it_behaves_like 'a GET request'
+    end
+
     describe '#fget' do
-      let(:options) { {} }
       let(:perform) { subject.fget(url, **options) }
 
-      context 'with no information needed' do
-        it 'does not perform a GET request until we ask for information' do
-          expect_any_instance_of(Fetcher)
-            .not_to receive(:get)
-
-          perform
-        end
-
-
-        it 'returns a FutureResponse' do
-          expect(perform).to be_an_instance_of(Cache::FutureResponse)
-        end
-      end
-
-      context 'with information about body, status or headers needed' do
-        %w(status headers body).each do |info|
-          it 'performs the actual GET request to fetch the information needed' do
-            expect_any_instance_of(Fetcher)
-              .to receive(:get)
-              .with(url, anything)
-              .and_return(double('FaradayResponse', info.to_sym => nil))
-
-            perform.public_send(info.to_sym)
-          end
-        end
-      end
+      it_behaves_like 'a GET request'
     end
 
     describe '#bust' do
