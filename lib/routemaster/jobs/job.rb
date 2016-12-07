@@ -8,7 +8,7 @@ module Routemaster
 
         def execute(job_data)
           job = create_job(job_data)
-          job.perform(*job_data['args'])
+          job.new.perform(*job_data['args'])
         end
 
         private
