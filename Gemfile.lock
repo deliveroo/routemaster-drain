@@ -6,9 +6,8 @@ PATH
       faraday_middleware
       hashie
       net-http-persistent (< 3)
-      rack (~> 1.6.2)
+      rack (>= 1.6.2)
       redis-namespace
-      resque
       thread
       wisper (~> 1.6.1)
 
@@ -21,6 +20,8 @@ GEM
     codeclimate-test-reporter (1.0.3)
       simplecov
     coderay (1.1.1)
+    concurrent-ruby (1.0.2)
+    connection_pool (2.2.1)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     diff-lcs (1.2.5)
@@ -106,6 +107,11 @@ GEM
     ruby_dep (1.5.0)
     safe_yaml (1.0.4)
     shellany (0.0.1)
+    sidekiq (4.2.7)
+      concurrent-ruby (~> 1.0)
+      connection_pool (~> 2.2, >= 2.2.0)
+      rack-protection (>= 1.5.0)
+      redis (~> 3.2, >= 3.2.1)
     simplecov (0.12.0)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
@@ -139,8 +145,10 @@ DEPENDENCIES
   psych
   rack-test
   rake
+  resque
   routemaster-drain!
   rspec
+  sidekiq
   simplecov
   webmock
 

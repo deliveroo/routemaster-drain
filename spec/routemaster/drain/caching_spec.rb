@@ -12,7 +12,7 @@ describe Routemaster::Drain::Caching do
 
   let(:app) { described_class.new }
   let(:listener) { double 'listener' }
-  
+
   before { app.subscribe(listener, prefix: true) }
 
   let(:path)    { '/' }
@@ -40,7 +40,7 @@ describe Routemaster::Drain::Caching do
   end
 
   it 'schedules caching jobs' do
-    expect(Resque).to receive(:enqueue_to).exactly(3).times
+    expect_any_instance_of(Routemaster::Jobs::Client).to receive(:enqueue).exactly(3).times
     perform
   end
 end
