@@ -47,7 +47,7 @@ module Routemaster
 
       def cache_field(env)
         FIELD_TEMPLATE
-        .gsub('{version}', version(env).to_s)
+          .gsub('{version}', version(env).to_s)
           .gsub('{locale}', locale(env).to_s)
       end
 

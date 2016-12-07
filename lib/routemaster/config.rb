@@ -24,6 +24,16 @@ module Routemaster
       RedisBroker.instance.get(ENV.fetch('ROUTEMASTER_CACHE_REDIS'))
     end
 
+    def hosts
+      @hosts ||= begin
+                   hosts = ENV['ROUTEMASTER_DRAIN_HOSTS'].split(',')
+                   hosts.inject({}) do |res, host|
+                     key, val = host.split(':')
+                     res.merge(key => val)
+                   end
+                 end
+    end
+
     def cache_expiry
       Integer(ENV.fetch('ROUTEMASTER_CACHE_EXPIRY', 86_400 * 365))
     end
