@@ -8,7 +8,7 @@ module Routemaster
     # refreshed.
     # Typically +mark+ is called when notified state has changed (e.g. from the
     # bus) and +sweep+ when one wants to know what has changed.
-    # 
+    #
     # Use case: when some entites are very volatile, the map will hold a "dirty"
     # state for multiple updates until the client is ready to update.
     #

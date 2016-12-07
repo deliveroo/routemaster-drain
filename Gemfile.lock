@@ -127,7 +127,7 @@ GEM
     tilt (2.0.5)
     vegas (0.1.11)
       rack (>= 1.0.0)
-    webmock (2.3.0)
+    webmock (2.3.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff
