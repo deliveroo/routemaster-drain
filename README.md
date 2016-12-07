@@ -216,6 +216,27 @@ See
 [rubydoc](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
 
+## HTTP Client
+The Drain is using a Faraday http client for communication between services. The client
+comes with a convient caching mechanism as a default and supports custom response materialization.
+The Drain itself has a concept "HATEOAS" response that provides a common way of addressing resources.
+
+*NOTE* In order for the client to discover the resources that you are interested in, you need to call the `#discover(service_url)`
+method first 
+
+Example:
+
+```ruby
+require 'routemaster/fetcher'
+require 'routemaster/responses/hateoas_response'
+
+client = RouteMaster::Fetcher.new(response_class: Routemaster::Responses::HateoasResponse)
+
+client.discover('https://identity.deliveroo.com.dev')
+res = client.sessions.create(email: 'test@test.com', password: 'sup3rs3cr3t')
+res.user.show
+```
+
 
 ## Internals
 
