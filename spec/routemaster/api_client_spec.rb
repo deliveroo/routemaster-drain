@@ -2,10 +2,10 @@ require 'spec_helper'
 require 'spec/support/uses_dotenv'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_webmock'
-require 'routemaster/fetcher'
+require 'routemaster/api_client'
 require 'json'
 
-describe Routemaster::Fetcher do
+describe Routemaster::APIClient do
   uses_dotenv
   uses_redis
   uses_webmock
@@ -77,7 +77,7 @@ describe Routemaster::Fetcher do
     context 'when response_class is present' do
       before do
         class DummyResponse
-          def initialize(res); end
+          def initialize(res, client: nil); end
         end
       end
 

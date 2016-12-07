@@ -2,7 +2,7 @@ require 'wisper'
 
 module Routemaster
   module Middleware
-    class Caching
+    class ResponseCaching
       KEY_TEMPLATE = 'cache:{url}'
       FIELD_TEMPLATE = 'v:{version},l:{locale}'
       VERSION_REGEX = /application\/json;v=(?<version>\S*)/.freeze

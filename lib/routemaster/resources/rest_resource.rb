@@ -1,4 +1,4 @@
-require 'routemaster/fetcher'
+require 'routemaster/api_client'
 
 module Routemaster
   module Resources
@@ -7,7 +7,7 @@ module Routemaster
 
       def initialize(url, client: nil)
         @url = url
-        @client = client || Routemaster::Fetcher.new(response_class: Responses::HateoasResponse)
+        @client = client || Routemaster::APIClient.new(response_class: Responses::HateoasResponse)
       end
 
       def create(params)

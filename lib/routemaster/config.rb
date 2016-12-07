@@ -24,6 +24,10 @@ module Routemaster
       RedisBroker.instance.get(ENV.fetch('ROUTEMASTER_CACHE_REDIS'))
     end
 
+    #
+    # Given an ENV format of service:service_root_url,other_service:other_service_root_url
+    # Generate a hash of { service => service_root_url, other_service => other_service_root_url }
+    #
     def hosts
       @hosts ||= begin
                    hosts = ENV['ROUTEMASTER_DRAIN_HOSTS'].split(',')

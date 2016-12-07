@@ -1,4 +1,6 @@
 require 'faraday_middleware'
+require 'routemaster/api_client'
+require 'routemaster/responses/hateoas_response'
 require 'routemaster/resources/rest_resource'
 require 'forwardable'
 require 'json'
@@ -8,8 +10,12 @@ module Routemaster
     class HateoasResponse
       extend Forwardable
 
-      def initialize(response)
+      attr_reader :response
+      def_delegators :@response, :body, :status, :headers, :success?
+
+      def initialize(response, client: nil)
         @response = response
+        @client = client || Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
       end
 
       def method_missing(m, *args, &block)
@@ -18,7 +24,7 @@ module Routemaster
 
         if _links.keys.include?(normalized_method_name)
           unless respond_to?(method_name)
-            resource = Resources::RestResource.new(_links[normalized_method_name]['href'])
+            resource = Resources::RestResource.new(_links[normalized_method_name]['href'], client: @client)
 
             self.class.send(:define_method, method_name) do |*m_args|
               resource

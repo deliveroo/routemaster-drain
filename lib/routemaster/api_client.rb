@@ -3,16 +3,10 @@ require 'faraday'
 require 'faraday_middleware'
 require 'hashie'
 require 'routemaster/config'
-require 'routemaster/middleware/caching'
+require 'routemaster/middleware/response_caching'
 
 module Routemaster
-  class Fetcher
-    #
-    # Usage:
-    #
-    # You can extend Fetcher with custom middlewares like:
-    # Fetcher.new(middlewares: [[MyCustomMiddleWare, option1, option2]])
-    #
+  class APIClient
     def initialize(middlewares: [], listener: nil, response_class: nil)
       @listener = listener
       @middlewares = middlewares
@@ -51,7 +45,7 @@ module Routemaster
 
     def response_wrapper(&block)
       response = block.call
-      @response_class ? @response_class.new(response) : response
+      @response_class ? @response_class.new(response, client: self) : response
     end
 
     def connection
@@ -59,7 +53,7 @@ module Routemaster
         f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
-        f.use Routemaster::Middleware::Caching, listener: @listener
+        f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.adapter  :net_http_persistent
 
         @middlewares.each do |middleware|

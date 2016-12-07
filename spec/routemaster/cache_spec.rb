@@ -3,7 +3,7 @@ require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'spec/support/uses_webmock'
 require 'routemaster/cache'
-require 'routemaster/fetcher'
+require 'routemaster/api_client'
 
 module Routemaster
   describe Cache do
@@ -27,8 +27,8 @@ module Routemaster
       context 'with no options' do
         let(:options) { {} }
 
-        it 'calls get on the fetcher with no version and locale headers' do
-          expect_any_instance_of(Fetcher)
+        it 'calls get on the api client with no version and locale headers' do
+          expect_any_instance_of(APIClient)
             .to receive(:get)
             .with(url, headers: { 'Accept' => 'application/json' })
             .and_call_original
@@ -40,8 +40,8 @@ module Routemaster
       context 'with a specific version' do
         let(:options) { { version: 2 } }
 
-        it 'calls get on the fetcher with version header' do
-          expect_any_instance_of(Fetcher)
+        it 'calls get on the api client with version header' do
+          expect_any_instance_of(APIClient)
             .to receive(:get)
             .with(url, headers: { 'Accept' => 'application/json;v=2' })
             .and_call_original
@@ -53,8 +53,8 @@ module Routemaster
       context 'with a specific locale' do
         let(:options) { { locale: 'fr' } }
 
-        it 'calls get on the fetcher with locale header' do
-          expect_any_instance_of(Fetcher)
+        it 'calls get on the api client with locale header' do
+          expect_any_instance_of(APIClient)
             .to receive(:get)
             .with(url, headers: { 'Accept' => 'application/json', 'Accept-Language' => 'fr' })
             .and_call_original
