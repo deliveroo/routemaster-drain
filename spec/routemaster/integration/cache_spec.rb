@@ -33,7 +33,8 @@ RSpec.describe 'Requests with caching' do
   subject { Routemaster::Cache.new }
 
   describe 'GET request' do
-    let(:cache_keys) { ["cache:#{url}", "v:,l:"] }
+    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
+    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
     let(:url) { 'http://localhost:8000/test' }
 
     context 'when there is no previous cached response' do
@@ -44,9 +45,15 @@ RSpec.describe 'Requests with caching' do
 
       it 'sets the new response onto the cache' do
         expect { subject.get(url) }
-          .to change { Routemaster::Config.cache_redis.hget(*cache_keys)}
+          .to change { Routemaster::Config.cache_redis.hget(*body_cache_keys)}
           .from(nil)
           .to({ field: 'test'}.to_json)
+      end
+
+      it 'sets the response headers onto the cache' do
+        expect { subject.get(url) }
+          .to change { Routemaster::Config.cache_redis.hget(*headers_cache_keys)}
+          .from(nil)
       end
     end
 
@@ -61,7 +68,7 @@ RSpec.describe 'Requests with caching' do
 
       it 'does not make an http call' do
         response = subject.get(url)
-        expect(response.headers['server']).to be_nil
+        expect(response.env.request).to be_empty
       end
     end
   end

@@ -14,12 +14,12 @@ module Routemaster
       context 'link traversal' do
         let(:body) do
           {
-            '_links': {
-              'self': { 'href' => 'self_url' },
-              'resource_a': { 'href' => 'resource_a_url' },
-              'resource_b': { 'href' => 'resource_b_url' }
+            '_links' => {
+              'self' => { 'href' => 'self_url' },
+              'resource_a' => { 'href' => 'resource_a_url' },
+              'resource_b' => { 'href' => 'resource_b_url' }
             }
-          }.to_json
+          }
         end
 
         it 'creates a method for every key in _links attribute' do

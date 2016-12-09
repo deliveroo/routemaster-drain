@@ -20,7 +20,7 @@ module Routemaster
       describe '#show' do
         it 'gets to the given url' do
           expect(client).to receive(:get).with(url)
-          subject.show
+          subject.show(1)
         end
       end
 

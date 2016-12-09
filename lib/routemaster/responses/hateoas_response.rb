@@ -40,7 +40,7 @@ module Routemaster
       private
 
       def _links
-        @links ||= JSON.parse(@response.body).fetch('_links', {})
+        @links ||= @response.body.fetch('_links', {})
       end
     end
   end
