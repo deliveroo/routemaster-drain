@@ -1,4 +1,4 @@
-require 'routemaster/fetcher'
+require 'routemaster/api_client'
 require 'thread/pool'
 require 'thread/future'
 require 'singleton'
@@ -11,7 +11,7 @@ module Routemaster
   #
   # Emits `cache_bust`, `cache_hit`, and `cache_miss` events.
   #
-  # The requests themselves are handled by {Fetcher}.
+  # The requests themselves are handled by {APIClient}.
   # Note that `Cache-Control` headers are intentionally ignored, as it is
   # assumed one will call {#bust} when the cache becomes stale.
   #
@@ -60,9 +60,9 @@ module Routemaster
       delegate %i(status headers body) => :value
     end
 
-    def initialize(redis:nil, fetcher:nil)
+    def initialize(redis:nil, client:nil)
       @redis   = redis || Config.cache_redis
-      @fetcher = fetcher || Fetcher.new(listener: self)
+      @client = client || APIClient.new(listener: self)
     end
 
     # Bust the cache for a given URL
@@ -93,7 +93,7 @@ module Routemaster
           "application/json"
       }
       headers['Accept-Language'] = locale if locale
-      @fetcher.get(url, headers: headers)
+      @client.get(url, headers: headers)
     end
 
     # Like {#get}, but schedules any request in the background using a thread

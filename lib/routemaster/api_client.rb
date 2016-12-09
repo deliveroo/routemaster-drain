@@ -3,21 +3,14 @@ require 'faraday'
 require 'faraday_middleware'
 require 'hashie'
 require 'routemaster/config'
-require 'routemaster/middleware/caching'
+require 'routemaster/middleware/response_caching'
 
 module Routemaster
-  class Fetcher
-    DEFAULT_MIDDLEWARE = Routemaster::Middleware::Caching
-
-    #
-    # Usage:
-    #
-    # You can extend Fetcher with custom middlewares like:
-    # Fetcher.new(middlewares: [[MyCustomMiddleWare, option1, option2]])
-    #
-    def initialize(middlewares: [], listener: nil)
+  class APIClient
+    def initialize(middlewares: [], listener: nil, response_class: nil)
       @listener = listener
-      @middlewares = generate_middlewares(middlewares)
+      @middlewares = middlewares
+      @response_class = response_class
     end
 
     # Performs a GET HTTP request for the `url`, with optional
@@ -28,14 +21,31 @@ module Routemaster
     # string otherwise.
     def get(url, params: {}, headers: {})
       host = URI.parse(url).host
-      connection.get(url, params, headers.merge(auth_header(host)))
+      response_wrapper do
+        connection.get(url, params, headers.merge(auth_header(host)))
+      end
+    end
+
+    def post(url, body: {}, headers: {})
+      host = URI.parse(url).host
+      response_wrapper do
+        connection.post do |req|
+          req.url url
+          req.headers = headers.merge(auth_header(host))
+          req.body = body.to_json
+        end
+      end
+    end
+
+    def discover(url)
+      get(url)
     end
 
     private
 
-    def generate_middlewares(middlewares)
-      default_middleware = [DEFAULT_MIDDLEWARE, listener: @listener]
-      middlewares.unshift(default_middleware)
+    def response_wrapper(&block)
+      response = block.call
+      @response_class ? @response_class.new(response, client: self) : response
     end
 
     def connection
@@ -43,7 +53,12 @@ module Routemaster
         f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
+        f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.adapter  :net_http_persistent
+
+        @middlewares.each do |middleware|
+          f.use(*middleware)
+        end
 
         f.options.timeout      = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
         f.options.open_timeout = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f

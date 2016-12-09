@@ -28,6 +28,7 @@ combining middleware.
     - [Simply receive events from Routemaster](#simply-receive-events-from-routemaster)
     - [Receive change notifications without duplicates](#receive-change-notifications-without-duplicates)
     - [Cache data for all notified resources](#cache-data-for-all-notified-resources)
+  - [HTTP Client](#http-client)
   - [Internals](#internals)
     - [Dirty map](#dirty-map)
     - [Filter](#filter)
@@ -215,6 +216,54 @@ and have any `HTTP GET` requests (and cache queries) happen in parallel.
 See
 [rubydoc](http://rubydoc.info/github/mezis/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
+
+## HTTP Client
+The Drain is using a Faraday http client for communication between services. The client
+comes with a convenient caching mechanism as a default and supports custom response materialization.
+The Drain itself has the concept of "HATEOAS"(see below) response that provides a common way of addressing resources.
+
+** **In order for the client to discover the resources that you are interested in, you need to call the `#discover(service_url)`
+method first**
+
+Example:
+
+```ruby
+require 'routemaster/fetcher'
+require 'routemaster/responses/hateoas_response'
+
+client = Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+
+response = client.discover('https://identity.deliveroo.com.dev')
+session_create_response = response.sessions.create(email: 'test@test.com', password: 'sup3rs3cr3t')
+session_create_response.user.show(1)
+```
+
+### HATEOAS materialisation
+The client comes with optional HATEOAS response capabilities. They are optional, because drain itself doesn't need to use the HATEOAS
+response capabilities. Whenever the client is used outside of the drain it is **strongly** advised to be used with the HATEOAS response capabilities.
+The HATEOAS response will materialize methods based on the keys found under the `_links` key on the payload. The semantics are the following:
+
+
+```ruby
+# Given the following payload
+{
+  "_links" : {
+    "users" : { "href" : "https://identity.deliveroo.com.dev/users" },
+    "user"  : { "href" : "https://identity.deliveroo.com.dev/users/{id}", "templated" : true }
+  }
+}
+
+client = Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+response = client.discover('https://identity.deliveroo.com.dev')
+
+response.users.create(username: 'roo')
+#=> HateoasResponse
+response.users.index
+#=> HateoasResponse
+response.user.show(1)
+#=> HateoasResponse
+```
+
 
 
 ## Internals

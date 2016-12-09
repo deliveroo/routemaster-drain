@@ -8,11 +8,11 @@ describe Routemaster::Middleware::Authenticate do
   let(:app) { described_class.new(ErrorRackApp.new, options) }
   let(:listener) { double 'listener', on_authenticate: nil }
   let(:options) {{ uuid: 'demo' }}
-  
+
   def perform
     post '/whatever'
   end
-  
+
   before { Wisper.subscribe(listener, scope: described_class.name, prefix: true) }
   after { Wisper::GlobalListeners.clear }
 

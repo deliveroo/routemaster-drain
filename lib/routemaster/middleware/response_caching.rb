@@ -2,9 +2,10 @@ require 'wisper'
 
 module Routemaster
   module Middleware
-    class Caching
+    class ResponseCaching
       KEY_TEMPLATE = 'cache:{url}'
-      FIELD_TEMPLATE = 'v:{version},l:{locale}'
+      BODY_FIELD_TEMPLATE = 'v:{version},l:{locale},body'
+      HEADERS_FIELD_TEMPLATE = 'v:{version},l:{locale},headers'
       VERSION_REGEX = /application\/json;v=(?<version>\S*)/.freeze
 
       def initialize(app, cache: Config.cache_redis, listener: nil)
@@ -27,27 +28,38 @@ module Routemaster
           response = response_env.response
 
           if response.success?
-            @cache.hset(cache_key(env), cache_field(env), response.body)
-            @cache.expire(cache_key(env), @expiry)
+            @cache.multi do |multi|
+              multi.hset(cache_key(env), body_cache_field(env), response.body)
+              multi.hset(cache_key(env), headers_cache_field(env), Marshal.dump(response.headers))
+              multi.expire(cache_key(env), @expiry)
+            end
             @listener._publish(:cache_miss, url(env)) if @listener
           end
         end
       end
 
       def fetch_from_cache(env)
-        payload = @cache.hget(cache_key(env), cache_field(env))
+        body = @cache.hget(cache_key(env), body_cache_field(env))
+        headers = @cache.hget(cache_key(env), headers_cache_field(env))
 
-        if payload
+        if body && headers
           @listener._publish(:cache_hit, url(env)) if @listener
           Faraday::Response.new(status: 200,
-                                body: payload,
-                                response_headers: {})
+                                body: body,
+                                response_headers: Marshal.load(headers),
+                                request: {})
         end
       end
 
-      def cache_field(env)
-        FIELD_TEMPLATE
-        .gsub('{version}', version(env).to_s)
+      def body_cache_field(env)
+        BODY_FIELD_TEMPLATE
+          .gsub('{version}', version(env).to_s)
+          .gsub('{locale}', locale(env).to_s)
+      end
+
+      def headers_cache_field(env)
+        HEADERS_FIELD_TEMPLATE
+          .gsub('{version}', version(env).to_s)
           .gsub('{locale}', locale(env).to_s)
       end
 
