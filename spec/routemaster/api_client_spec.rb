@@ -65,6 +65,13 @@ describe Routemaster::APIClient do
       end
     end
 
+    describe '#fget' do
+      it 'GETs from the URL' do
+        subject { fetcher.fget(url, headers: headers) }
+        expect(@req).to have_been_requested
+      end
+    end
+
     it 'has :status, :headers, :body' do
       expect(subject.status).to eq(200)
       expect(subject.headers).to have_key('content-type')
