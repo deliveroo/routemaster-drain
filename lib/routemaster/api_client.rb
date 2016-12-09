@@ -4,6 +4,7 @@ require 'faraday_middleware'
 require 'hashie'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
+require 'routemaster/middleware/error_handling'
 
 module Routemaster
   class APIClient
@@ -55,6 +56,7 @@ module Routemaster
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.adapter  :net_http_persistent
+        f.use Routemaster::Middleware::ErrorHandling
 
         @middlewares.each do |middleware|
           f.use(*middleware)
@@ -63,10 +65,6 @@ module Routemaster
         f.options.timeout      = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
         f.options.open_timeout = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
         f.ssl.verify           = ENV.fetch('ROUTEMASTER_CACHE_VERIFY_SSL', 'false') == 'true'
-
-        @middlewares.each do |middleware|
-          f.use(*middleware)
-        end
       end
     end
 
