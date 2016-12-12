@@ -37,6 +37,10 @@ module Routemaster
         end
       end
 
+      def body_without_links
+        body.reject { |key, _| ['_links'].include?(key) }
+      end
+
       private
 
       def _links

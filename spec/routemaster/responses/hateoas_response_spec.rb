@@ -34,6 +34,16 @@ module Routemaster
         it 'raise an exception when requested link does not exist' do
           expect { subject.some_unsupported_link }.to raise_error(NoMethodError)
         end
+
+        describe '#body_without_links' do
+          before do
+            body.merge!('foo' => 'bar')
+          end
+
+          it 'returns the body without the _links key' do
+            expect(subject.body_without_links).to eq({ 'foo' => 'bar' })
+          end
+        end
       end
     end
   end
