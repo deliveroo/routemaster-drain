@@ -14,7 +14,7 @@ module Routemaster
         @client.post(@url, body: params)
       end
 
-      def show(id)
+      def show(id=nil)
         @client.get(@url.gsub('{id}', id.to_s))
       end
 
