@@ -51,6 +51,7 @@ module Routemaster
 
     def connection
       @connection ||= Faraday.new do |f|
+        f.request  :json
         f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
