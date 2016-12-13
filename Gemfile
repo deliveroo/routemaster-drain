@@ -9,13 +9,17 @@ gem 'psych',                      require: false
 # Used in builds and tests
 gem 'bundler',                    require: false
 gem 'rake',                       require: false
-gem 'guard-rspec',                require: false
 gem 'webmock',                    require: false
-gem 'pry-byebug',                 require: false
 gem 'rack-test',                  require: false
 gem 'dotenv',                     require: false
 gem 'codeclimate-test-reporter',  require: false
 gem 'simplecov'
-gem 'rspec'
 gem 'resque'
 gem 'sidekiq'
+
+group :development, :test do
+  gem 'guard-rspec',                require: false
+  gem 'pry-byebug',                 require: false
+  gem 'rspec'
+  gem 'appraisal'
+end
