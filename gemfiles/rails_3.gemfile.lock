@@ -31,6 +31,10 @@ GEM
       activesupport (= 3.2.14)
       builder (~> 3.0.0)
     activerecord (3.2.14)
+      activemodel (= 3.2.14)
+      activesupport (= 3.2.14)
+      arel (~> 3.0.2)
+      tzinfo (~> 0.3.29)
     activeresource (3.2.14)
       activemodel (= 3.2.14)
       activesupport (= 3.2.14)
@@ -43,6 +47,7 @@ GEM
       bundler
       rake
       thor (>= 0.14.0)
+    arel (3.0.3)
     builder (3.0.4)
     byebug (9.0.6)
     codeclimate-test-reporter (1.0.3)
@@ -108,7 +113,7 @@ GEM
     pry-byebug (3.4.2)
       byebug (~> 9.0)
       pry (~> 0.10)
-    psych (2.2.1)
+    psych (2.2.2)
     public_suffix (2.0.4)
     rack (1.4.7)
     rack-cache (1.6.1)
@@ -191,6 +196,7 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
+    tzinfo (0.3.52)
     vegas (0.1.11)
       rack (>= 1.0.0)
     webmock (2.3.1)
