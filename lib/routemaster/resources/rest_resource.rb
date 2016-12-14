@@ -21,6 +21,10 @@ module Routemaster
       def index
         @client.get(@url)
       end
+
+      def update(id=nil, params)
+        @client.patch(@url.gsub('{id}', id.to_s), body: params)
+      end
     end
   end
 end

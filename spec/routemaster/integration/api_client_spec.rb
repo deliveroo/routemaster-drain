@@ -5,6 +5,14 @@ require 'routemaster/api_client'
 require 'webrick'
 
 RSpec.describe 'Api client integration specs' do
+  module WEBrick
+    module HTTPServlet
+      class ProcHandler
+        alias do_PATCH do_GET
+      end
+    end
+  end
+
   uses_dotenv
   uses_redis
 
@@ -16,6 +24,11 @@ RSpec.describe 'Api client integration specs' do
           res.status = status_code
           res.body = { field: 'test' }.to_json
         end
+      end
+
+      server.mount_proc "/success" do |req, res|
+        res.status = 200
+        res.body = { field: 'test' }.to_json
       end
     end
   end
@@ -71,6 +84,27 @@ RSpec.describe 'Api client integration specs' do
 
     it 'raises an FatalResourceError on 500' do
       expect { subject.get(host + '/500') }.to raise_error(Routemaster::Errors::FatalResourceError)
+    end
+  end
+
+  describe 'PATCH request' do
+    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
+    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
+    let(:url) { "#{host}/success" }
+
+    context 'when there is a previous cached resource' do
+      before { subject.get(url) }
+      let(:cache) { Routemaster::Config.cache_redis }
+
+      it 'invalidates the cache on update' do
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+        subject.patch(url, body: {})
+
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
+
+        subject.get(url)
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+      end
     end
   end
 end
