@@ -30,6 +30,13 @@ module Routemaster
           subject.index
         end
       end
+
+      describe '#update' do
+        it 'gets to the given url' do
+          expect(client).to receive(:patch).with(url, body: params)
+          subject.update(1, params)
+        end
+      end
     end
   end
 end

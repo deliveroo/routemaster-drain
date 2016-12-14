@@ -33,7 +33,18 @@ module Routemaster
         connection.post do |req|
           req.url url
           req.headers = headers.merge(auth_header(host))
-          req.body = body.to_json
+          req.body = body
+        end
+      end
+    end
+
+    def patch(url, body: {}, headers: {})
+      host = URI.parse(url).host
+      response_wrapper do
+        connection.patch do |req|
+          req.url url
+          req.headers = headers.merge(auth_header(host))
+          req.body = body
         end
       end
     end

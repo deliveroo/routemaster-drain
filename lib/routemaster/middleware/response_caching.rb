@@ -16,7 +16,8 @@ module Routemaster
       end
 
       def call(env)
-        return @app.call(env) unless env.method == :get
+        @cache.del(cache_key(env)) if env.method == :patch
+        return @app.call(env) if env.method != :get
 
         fetch_from_cache(env) || fetch_from_service(env)
       end

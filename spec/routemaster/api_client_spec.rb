@@ -32,6 +32,14 @@ describe Routemaster::APIClient do
           'content-type' => 'application/json;v=1'
         }
       )
+
+      @patch_req = stub_request(:patch, /example\.com/).to_return(
+        status:   200,
+        body:     { id: 132, type: 'widget' }.to_json,
+        headers:  {
+          'content-type' => 'application/json;v=1'
+        }
+      )
     end
 
     it 'GETs from the URL' do
@@ -45,6 +53,15 @@ describe Routemaster::APIClient do
       it 'POSTs from the URL' do
         subject
         expect(@post_req).to have_been_requested
+      end
+    end
+
+    context 'PATCH request' do
+      subject { fetcher.patch(url, body: {}, headers: headers) }
+
+      it 'PATCH from the URL' do
+        subject
+        expect(@patch_req).to have_been_requested
       end
     end
 

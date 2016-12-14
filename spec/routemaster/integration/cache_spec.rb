@@ -58,9 +58,7 @@ RSpec.describe 'Requests with caching' do
     end
 
     context 'when there is a previous cached response' do
-      before do
-        subject.get(url)
-      end
+      before { subject.get(url) }
 
       it 'fetches the cached response' do
         expect(subject.get(url).body).to eq({ field: 'test' }.to_json)
