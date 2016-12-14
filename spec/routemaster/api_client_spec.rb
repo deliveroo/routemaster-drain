@@ -56,10 +56,10 @@ describe Routemaster::APIClient do
       end
     end
 
-    context 'PUT request' do
+    context 'PATCH request' do
       subject { fetcher.patch(url, body: {}, headers: headers) }
 
-      it 'PUTs from the URL' do
+      it 'PATCH from the URL' do
         subject
         expect(@patch_req).to have_been_requested
       end
