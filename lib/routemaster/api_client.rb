@@ -5,6 +5,7 @@ require 'hashie'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
+require 'routemaster/responses/future_response'
 
 module Routemaster
   class APIClient
@@ -47,6 +48,10 @@ module Routemaster
           req.body = body
         end
       end
+    end
+
+    def fget(url, headers: {})
+      Responses::FutureResponse.new { get(url, headers: headers) }
     end
 
     def discover(url)

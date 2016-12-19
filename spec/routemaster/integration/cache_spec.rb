@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'routemaster/cache'
+require 'routemaster/api_client'
 require 'webrick'
 
 RSpec.describe 'Requests with caching' do
@@ -30,7 +31,8 @@ RSpec.describe 'Requests with caching' do
     Process.wait(@pid)
   end
 
-  subject { Routemaster::Cache.new }
+  let(:api_client) { Routemaster::APIClient.new }
+  subject { Routemaster::Cache.new(client: api_client) }
 
   describe 'GET request' do
     let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
