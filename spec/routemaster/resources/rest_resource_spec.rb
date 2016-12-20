@@ -32,9 +32,16 @@ module Routemaster
       end
 
       describe '#update' do
-        it 'gets to the given url' do
+        it 'updates the given resource' do
           expect(client).to receive(:patch).with(url, body: params)
           subject.update(1, params)
+        end
+      end
+
+      describe '#destroy' do
+        it 'destroys the given resource' do
+          expect(client).to receive(:delete).with(url)
+          subject.destroy(1)
         end
       end
     end
