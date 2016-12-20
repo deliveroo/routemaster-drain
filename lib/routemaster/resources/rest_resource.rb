@@ -25,6 +25,10 @@ module Routemaster
       def update(id=nil, params)
         @client.patch(@url.gsub('{id}', id.to_s), body: params)
       end
+
+      def destroy(id=nil)
+        @client.delete(@url.gsub('{id}', id.to_s))
+      end
     end
   end
 end

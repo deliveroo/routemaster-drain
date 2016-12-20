@@ -49,6 +49,16 @@ module Routemaster
       end
     end
 
+    def delete(url, headers: {})
+      host = URI.parse(url).host
+      response_wrapper do
+        connection.delete do |req|
+          req.url url
+          req.headers = headers.merge(auth_header(host))
+        end
+      end
+    end
+
     def discover(url)
       get(url)
     end

@@ -61,7 +61,7 @@ module Routemaster
     end
 
     def initialize(redis:nil, client:nil)
-      @redis   = redis || Config.cache_redis
+      @redis  = redis || Config.cache_redis
       @client = client || APIClient.new(listener: self)
     end
 

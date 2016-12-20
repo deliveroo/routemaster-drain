@@ -107,4 +107,25 @@ RSpec.describe 'Api client integration specs' do
       end
     end
   end
+
+  describe 'DELETE request' do
+    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
+    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
+    let(:url) { "#{host}/success" }
+
+    context 'when there is a previous cached resource' do
+      before { subject.get(url) }
+      let(:cache) { Routemaster::Config.cache_redis }
+
+      it 'invalidates the cache on destroy' do
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+        subject.delete(url)
+
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
+
+        subject.get(url)
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+      end
+    end
+  end
 end
