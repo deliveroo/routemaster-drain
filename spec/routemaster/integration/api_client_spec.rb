@@ -51,39 +51,39 @@ RSpec.describe 'Api client integration specs' do
 
   describe 'error handling' do
     it 'raises an ResourceNotFoundError on 404' do
-      expect { subject.get(host + '/404') }.to raise_error(Routemaster::Errors::ResourceNotFoundError)
+      expect { subject.get(host + '/404') }.to raise_error(Routemaster::Errors::ResourceNotFound)
     end
 
     it 'raises an InvalidResourceError on 400' do
-      expect { subject.get(host + '/400') }.to raise_error(Routemaster::Errors::InvalidResourceError)
+      expect { subject.get(host + '/400') }.to raise_error(Routemaster::Errors::InvalidResource)
     end
 
     it 'raises an UnauthorizedResourceAccessError on 401' do
-      expect { subject.get(host + '/401') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccessError)
+      expect { subject.get(host + '/401') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccess)
     end
 
     it 'raises an UnauthorizedResourceAccessError on 403' do
-      expect { subject.get(host + '/403') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccessError)
+      expect { subject.get(host + '/403') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccess)
     end
 
     it 'raises an ConflictResourceError on 409' do
-      expect { subject.get(host + '/409') }.to raise_error(Routemaster::Errors::ConflictResourceError)
+      expect { subject.get(host + '/409') }.to raise_error(Routemaster::Errors::ConflictResource)
     end
 
     it 'raises an IncompatibleVersionError on 412' do
-      expect { subject.get(host + '/412') }.to raise_error(Routemaster::Errors::IncompatibleVersionError)
+      expect { subject.get(host + '/412') }.to raise_error(Routemaster::Errors::IncompatibleVersion)
     end
 
     it 'raises an InvalidResourceError on 413' do
-      expect { subject.get(host + '/413') }.to raise_error(Routemaster::Errors::InvalidResourceError)
+      expect { subject.get(host + '/413') }.to raise_error(Routemaster::Errors::InvalidResource)
     end
 
     it 'raises an ResourceThrottlingError on 429' do
-      expect { subject.get(host + '/429') }.to raise_error(Routemaster::Errors::ResourceThrottlingError)
+      expect { subject.get(host + '/429') }.to raise_error(Routemaster::Errors::ResourceThrottling)
     end
 
     it 'raises an FatalResourceError on 500' do
-      expect { subject.get(host + '/500') }.to raise_error(Routemaster::Errors::FatalResourceError)
+      expect { subject.get(host + '/500') }.to raise_error(Routemaster::Errors::FatalResource)
     end
   end
 
