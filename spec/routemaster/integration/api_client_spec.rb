@@ -50,39 +50,39 @@ RSpec.describe 'Api client integration specs' do
   let(:host) { 'http://localhost:8000' }
 
   describe 'error handling' do
-    it 'raises an ResourceNotFoundError on 404' do
+    it 'raises an ResourceNotFound on 404' do
       expect { subject.get(host + '/404') }.to raise_error(Routemaster::Errors::ResourceNotFound)
     end
 
-    it 'raises an InvalidResourceError on 400' do
+    it 'raises an InvalidResource on 400' do
       expect { subject.get(host + '/400') }.to raise_error(Routemaster::Errors::InvalidResource)
     end
 
-    it 'raises an UnauthorizedResourceAccessError on 401' do
+    it 'raises an UnauthorizedResourceAccess on 401' do
       expect { subject.get(host + '/401') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccess)
     end
 
-    it 'raises an UnauthorizedResourceAccessError on 403' do
+    it 'raises an UnauthorizedResourceAccess on 403' do
       expect { subject.get(host + '/403') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccess)
     end
 
-    it 'raises an ConflictResourceError on 409' do
+    it 'raises an ConflictResource on 409' do
       expect { subject.get(host + '/409') }.to raise_error(Routemaster::Errors::ConflictResource)
     end
 
-    it 'raises an IncompatibleVersionError on 412' do
+    it 'raises an IncompatibleVersion on 412' do
       expect { subject.get(host + '/412') }.to raise_error(Routemaster::Errors::IncompatibleVersion)
     end
 
-    it 'raises an InvalidResourceError on 413' do
+    it 'raises an InvalidResource on 413' do
       expect { subject.get(host + '/413') }.to raise_error(Routemaster::Errors::InvalidResource)
     end
 
-    it 'raises an ResourceThrottlingError on 429' do
+    it 'raises an ResourceThrottling on 429' do
       expect { subject.get(host + '/429') }.to raise_error(Routemaster::Errors::ResourceThrottling)
     end
 
-    it 'raises an FatalResourceError on 500' do
+    it 'raises an FatalResource on 500' do
       expect { subject.get(host + '/500') }.to raise_error(Routemaster::Errors::FatalResource)
     end
   end
