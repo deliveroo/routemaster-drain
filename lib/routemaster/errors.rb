@@ -9,7 +9,7 @@ module Routemaster
       end
 
       def errors
-        body['errors']
+        body.fetch('errors', {})
       end
 
       def message
@@ -27,44 +27,44 @@ module Routemaster
       end
     end
 
-    class UnauthorizedResourceAccessError < BaseError
+    class UnauthorizedResourceAccess < BaseError
       def message
         "Unauthorized Resource Access Error"
       end
     end
 
-    class InvalidResourceError < BaseError
+    class InvalidResource < BaseError
       def message
         "Invalid Resource Error"
       end
     end
 
-    class ResourceNotFoundError < BaseError
+    class ResourceNotFound < BaseError
       def message
         "Resource Not Found Error"
       end
     end
 
-    class FatalResourceError < BaseError
+    class FatalResource < BaseError
       def message
         "Fatal Resource Error. body: #{body}, url: #{env.url}, method: #{env.method}"
       end
     end
 
-    class ConflictResourceError < BaseError
+    class ConflictResource < BaseError
       def message
         "ConflictResourceError Resource Error"
       end
     end
 
-    class IncompatibleVersionError < BaseError
+    class IncompatibleVersion < BaseError
       def message
         headers = env.request_headers.select { |k, _| k != 'Authorization' }
         "Incompatible Version Error. headers: #{headers}, url: #{env.url}, method: #{env.method}"
       end
     end
 
-    class ResourceThrottlingError < BaseError
+    class ResourceThrottling < BaseError
       def message
         "Resource Throttling Error"
       end
