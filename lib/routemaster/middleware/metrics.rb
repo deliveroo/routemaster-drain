@@ -15,8 +15,13 @@ module Routemaster
         increment_req_count(request_tags(request_env))
 
         record_latency(request_tags(request_env)) do
-          @app.call(request_env).on_complete do |response_env|
-            increment_response_count(response_tags(response_env))
+          begin
+            @app.call(request_env).on_complete do |response_env|
+              increment_response_count(response_tags(response_env))
+            end
+          rescue Routemaster::Errors::BaseError => e
+            increment_response_count(response_tags(e.env))
+            raise e
           end
         end
       end
