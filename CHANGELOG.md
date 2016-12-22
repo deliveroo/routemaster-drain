@@ -1,3 +1,6 @@
+### 2.2.0 (2016-12-22)
+Add Telemetry support for requests and responses
+
 ### 2.1.0 (2016-12-14)
 Add support for PATCH requests
 
