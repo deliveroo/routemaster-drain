@@ -128,4 +128,45 @@ RSpec.describe 'Api client integration specs' do
       end
     end
   end
+
+  describe 'Telemetry' do
+    let(:metrics_client) { double('MetricsClient') }
+    let(:source_peer) { 'test_service' }
+    let(:url) { "#{host}/success" }
+
+    subject do
+      Routemaster::APIClient.new(metrics_client: metrics_client,
+                                 source_peer: source_peer)
+    end
+
+    context 'when metrics source peer is absent' do
+      subject { Routemaster::APIClient.new(metrics_client: metrics_client) }
+
+      it 'does not send metrics' do
+        expect(metrics_client).to receive(:increment).never
+        subject.get(url)
+      end
+    end
+
+    it 'does send request metrics' do
+      allow(metrics_client).to receive(:time).and_yield
+      allow(metrics_client).to receive(:increment)
+      expected_req_count_tags = ["source:test_service", "destination:localhost", "verb:get"]
+
+      expect(metrics_client).to receive(:increment).with('api_client.request.count', tags: expected_req_count_tags)
+
+      subject.get(url)
+    end
+
+    it 'does send response metrics' do
+      allow(metrics_client).to receive(:increment)
+      expected_res_count_tags = ["source:test_service", "destination:localhost", "status:200"]
+      expected_latency_tags = ["source:test_service", "destination:localhost", "verb:get"]
+
+      expect(metrics_client).to receive(:increment).with('api_client.response.count', tags: expected_res_count_tags)
+      expect(metrics_client).to receive(:time).with('api_client.latency', tags: expected_latency_tags).and_yield
+
+      subject.get(url)
+    end
+  end
 end
