@@ -5,13 +5,20 @@ require 'hashie'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
+require 'routemaster/middleware/metrics'
 
 module Routemaster
   class APIClient
-    def initialize(middlewares: [], listener: nil, response_class: nil)
+    def initialize(middlewares: [],
+                   listener: nil,
+                   response_class: nil,
+                   metrics_client: nil,
+                   source_peer: nil)
       @listener = listener
       @middlewares = middlewares
       @response_class = response_class
+      @metrics_client = metrics_client
+      @source_peer = source_peer
     end
 
     # Performs a GET HTTP request for the `url`, with optional
@@ -77,6 +84,7 @@ module Routemaster
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
+        f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
         f.adapter  :net_http_persistent
         f.use Routemaster::Middleware::ErrorHandling
 
