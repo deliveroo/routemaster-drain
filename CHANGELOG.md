@@ -1,3 +1,9 @@
+### 2.2.1 (2016-12-22)
+Fix logging for error responses
+
+- For unsuccessful responses rescue the raised error and
+send increment signal to metrics backend
+
 ### 2.2.0 (2016-12-22)
 Add Telemetry support for requests and responses
 
