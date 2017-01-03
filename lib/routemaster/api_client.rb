@@ -6,6 +6,7 @@ require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
+require 'routemaster/responses/future_response'
 
 module Routemaster
   class APIClient
@@ -32,6 +33,10 @@ module Routemaster
       response_wrapper do
         connection.get(url, params, headers.merge(auth_header(host)))
       end
+    end
+
+    def fget(url, params: {}, headers: {})
+      Responses::FutureResponse.new { get(url, params: {}, headers: {}) }
     end
 
     def post(url, body: {}, headers: {})

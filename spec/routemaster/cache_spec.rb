@@ -70,12 +70,6 @@ module Routemaster
       it_behaves_like 'a GET request'
     end
 
-    describe '#fget' do
-      let(:perform) { subject.fget(url, **options) }
-
-      it_behaves_like 'a GET request'
-    end
-
     describe '#bust' do
       let(:cache)   { Config.cache_redis }
       let(:perform) { subject.bust(url) }
