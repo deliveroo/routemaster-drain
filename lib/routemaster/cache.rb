@@ -1,9 +1,4 @@
 require 'routemaster/api_client'
-require 'thread/pool'
-require 'thread/future'
-require 'singleton'
-require 'delegate'
-require 'json'
 require 'wisper'
 
 module Routemaster
@@ -21,46 +16,7 @@ module Routemaster
   class Cache
     include Wisper::Publisher
 
-    # A pool of threads, used for parallel/future request processing.
-    class Pool < SimpleDelegator
-      include Singleton
-
-      def initialize
-        Thread.pool(5, 20).tap do |p|
-          # TODO: configurable pool size and trim timeout?
-          p.auto_trim!
-          p.idle_trim! 10 # 10 seconds
-          super p
-        end
-      end
-    end
-
-    # Wraps a future response, so it quacks exactly like an ordinary response.
-    class FutureResponse
-      extend Forwardable
-
-      # The `block` is expected to return a {Response}
-      def initialize(&block)
-        @future = Pool.instance.future(&block)
-      end
-
-      # @!attribute status
-      # @return [Integer]
-      # Delegated to the `block`'s return value.
-
-      # @!attribute headers
-      # @return [Hash]
-      # Delegated to the `block`'s return value.
-
-      # @!attribute body
-      # @return [Hashie::Mash]
-      # Delegated to the `block`'s return value.
-
-      delegate :value => :@future
-      delegate %i(status headers body) => :value
-    end
-
-    def initialize(redis:nil, client:nil)
+    def initialize(redis: nil, client: nil)
       @redis  = redis || Config.cache_redis
       @client = client || APIClient.new(listener: self)
     end
@@ -87,13 +43,7 @@ module Routemaster
     #
     # @return [Response], which responds to `status`, `headers`, and `body`.
     def get(url, version: nil, locale: nil)
-      headers = {
-        'Accept' => version ?
-          "application/json;v=#{version}" :
-          "application/json"
-      }
-      headers['Accept-Language'] = locale if locale
-      @client.get(url, headers: headers)
+      @client.get(url, headers: headers(version: version, locale: locale))
     end
 
     # Like {#get}, but schedules any request in the background using a thread
@@ -102,7 +52,16 @@ module Routemaster
     # @return [FutureResponse], which responds to `status`, `headers`, and `body`
     # like [Response].
     def fget(url, version: nil, locale: nil)
-      FutureResponse.new { get(url, version: version, locale: locale) }
+      @client.fget(url, headers: headers(version: version, locale: locale))
+    end
+
+    private
+
+    def headers(version: nil, locale: nil)
+      @headers ||= {}.tap do |hash|
+        hash['Accept'] = version ? "application/json;v=#{version}" : "application/json"
+        hash['Accept-Language'] = locale if locale
+      end
     end
   end
 end

@@ -87,6 +87,26 @@ RSpec.describe 'Api client integration specs' do
     end
   end
 
+  describe 'Future GET request' do
+    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
+    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
+    let(:url) { "#{host}/success" }
+
+    context 'when there is a previous cached resource' do
+      let(:cache) { Routemaster::Config.cache_redis }
+
+      it 'returns the response from within the future' do
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
+
+        future = subject.fget(url)
+        expect(future).to be_an_instance_of(Routemaster::Responses::FutureResponse)
+
+        future.value
+        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+      end
+    end
+  end
+
   describe 'PATCH request' do
     let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
     let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
