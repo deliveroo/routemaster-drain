@@ -99,9 +99,16 @@ module Routemaster
               allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.build(chocolates_response, client: client)}
             end
 
-            it 'creates a method with the resource name that returns a list of the resources' do
+            specify 'using the index action returns an enuerable response with all chocolates on the page' do
+              expect(subject.chocolates.index).to be_a(HateoasResponse)
               expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
               expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+            end
+
+            specify 'the chocolates can also be accesses directly as an attribute of the response' do
+              expect(subject.chocolates.index.chocolates).to be_a(Enumerable)
+              expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
+              expect(subject.chocolates.index.chocolates.map(&:url)).to eq chocolate_urls
             end
           end
 
@@ -156,10 +163,10 @@ module Routemaster
               expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
             end
 
-            specify 'the chocolates can also be accessed directly as an attribute of the page' do
-              expect(subject.chocolates.index).to be_a(Enumerable)
+            specify 'the chocolates can also be accessed directly as an attribute of the response' do
+              expect(subject.chocolates.index.chocolates).to be_a(Enumerable)
               expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+              expect(subject.chocolates.index.chocolates.map(&:url)).to eq chocolate_urls
             end
           end
         end

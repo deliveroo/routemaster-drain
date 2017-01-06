@@ -65,13 +65,21 @@ module Routemaster
 
       private
 
+      def paginated_and_first_page?
+        @response.body.has_key?('page') && @response.body['page'] == 1
+      end
+
       def build_resource(resource_name)
         resource = _links[resource_name]
         if resource.is_a? Hash
           build_resource_from_href(resource['href'])
         else
           # Must be an Array
-          list_of_resources(resource)
+          if paginated_and_first_page?
+            lazy_list_of_resources_in_pages(resource_name, resource)
+          else
+            list_of_resources(resource)
+          end
         end
       end
 
@@ -116,10 +124,11 @@ module Routemaster
 
         def initialize(response, resource_name, client: nil)
           super(response, client: client)
+          resource = _links[resource_name]
           if paginated_and_first_page?
-            @resources = lazy_list_of_resources_in_pages(resource_name, _links[resource_name])
+            @resources = lazy_list_of_resources_in_pages(resource_name, resource)
           else
-            @resources = list_of_resources(_links[resource_name])
+            @resources = list_of_resources(resource)
           end
         end
 
@@ -127,13 +136,8 @@ module Routemaster
           @resources ||= []
           @resources.each(&block)
         end
-
-        private
-
-        def paginated_and_first_page?
-          @response.body.has_key?('page') && @response.body['page'] == 1
-        end
       end
+
     end
   end
 end
