@@ -4,7 +4,8 @@ require 'routemaster/responses/hateoas_response'
 module Routemaster
   module Responses
     RSpec.describe HateoasResponse do
-      let(:response) { double('Response', status: status, body: body, headers: headers) }
+      let(:env) { double('Env', url: URI.parse('http://example.com/washing_machines')) }
+      let(:response) { double('Response', status: status, body: body, headers: headers, env: env) }
       let(:status) { 200 }
       let(:body) { {}.to_json }
       let(:headers) { {} }
@@ -22,7 +23,8 @@ module Routemaster
               'resource_cs' => [
                 { 'href' => 'resource_c_1_url' },
                 { 'href' => 'resource_c_2_url' }
-              ]
+              ],
+              'chocolates' => { 'href' => 'http://example.com/chocolates' }
             }
           }
         end
@@ -74,7 +76,7 @@ module Routemaster
         end
 
         context 'with a paginated response' do
-          let(:body) do
+          let(:chocolates_body_1) do
             {
               'page' => 1,
               'per_page' => 2,
@@ -82,42 +84,54 @@ module Routemaster
               '_links' => {
                 'self' => { 'href' => 'self_url' },
                 'prev' => nil,
-                'next' => 'page_2_url',
+                'next' => 'http://example.com/chocolates?page=2',
                 'chocolates' => [
-                  { 'href' => 'chocolate_1_url' },
-                  { 'href' => 'chocolate_2_url' }
+                  { 'href' => 'http://example.com/chocolates/1' },
+                  { 'href' => 'http://example.com/chocolates/2' }
                 ]
               }
             }
           end
 
-          let(:body2) do
+          let(:chocolates_body_2) do
             {
               'page' => 2,
               'per_page' => 2,
               'total' => 3,
               '_links' => {
                 'self' => { 'href' => 'self_url' },
-                'prev' => 'page_1_url',
+                'prev' => 'http://example.com/chocolates',
                 'next' => nil,
                 'chocolates' => [
-                  { 'href' => 'chocolate_3_url' }
+                  { 'href' => 'http://example.com/chocolates/3' }
                 ]
               }
             }
           end
 
-          let(:response2) { double('Response', status: status, body: body2, headers: headers) }
+
+          let(:chocolates_env_1) { double('Env', url: URI.parse('http://example.com/chocolates')) }
+          let(:chocolates_response_1) { double('Response', status: status, body: chocolates_body_1, headers: headers, env: chocolates_env_1) }
+          let(:chocolates_env_2) { double('Env', url: URI.parse('http://example.com/chocolates?page=2')) }
+          let(:chocolates_response_2) { double('Response', status: status, body: chocolates_body_2, headers: headers, env: chocolates_env_2) }
+
+          let(:chocolate_urls) { ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3'] }
 
           before do
-            allow(client).to receive(:get).with('page_2_url') { described_class.new(response2, client: client)}
+            allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.new(chocolates_response_1, client: client)}
+            allow(client).to receive(:get).with('http://example.com/chocolates?page=2') { described_class.new(chocolates_response_2, client: client)}
           end
 
-          it 'returns an enumerator with all the chocolates' do
-            chocolate_urls = ['chocolate_1_url', 'chocolate_2_url', 'chocolate_3_url']
-            expect(subject.chocolates).to be_a(Enumerator)
-            expect(subject.chocolates).to all(be_a(Resources::RestResource))
-            expect(subject.chocolates.map(&:url)).to eq chocolate_urls
+          specify 'using the index action returns an enumerable response with all the chocolates from every page' do
+            expect(subject.chocolates.index).to be_a(HateoasResponse)
+            expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
+            expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+          end
+
+          specify 'the chocolates can also be accessed directly as an attribute of the page' do
+            expect(subject.chocolates.index).to be_a(Enumerable)
+            expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
+            expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
           end
         end
       end

@@ -13,9 +13,24 @@ module Routemaster
       attr_reader :response
       def_delegators :@response, :body, :status, :headers, :success?
 
+      module EnumeratesResources
+        include Enumerable
+
+        def each &block
+          @resources ||= []
+          @resources.each &block
+        end
+      end
+
       def initialize(response, client: nil)
         @response = response
         @client = client || Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+        if contains_a_list_with_the_same_key_as_the_path?
+          extend EnumeratesResources
+          if paginated_and_first_page?
+            @resources = lazy_list_of_resources_in_pages(resource_name, _links[resource_name])
+          end
+        end
       end
 
       def method_missing(m, *args, &block)
@@ -35,7 +50,7 @@ module Routemaster
       end
 
       def body_without_links
-        body.reject { |key, _| ['_links'].include?(key) }
+        body.tap { |b| b.delete('_links') }
       end
 
       def has?(link)
@@ -44,14 +59,22 @@ module Routemaster
 
       private
 
-      def build_resource(resource_name)
-        resource = _links[resource_name]
+      def contains_a_list_with_the_same_key_as_the_path?
+        _links.keys.include? resource_name
+      end
+
+      def resource_name
+        @response.env.url.path.split('/').last
+      end
+
+      def build_resource(sub_resource_name)
+        resource = _links[sub_resource_name]
         if resource.is_a? Hash
           build_resource_from_href(resource['href'])
         else
           # Must be an Array
           if paginated_and_first_page?
-            lazy_list_of_resources_in_pages(resource_name, resource)
+            lazy_list_of_resources_in_pages(sub_resource_name, resource)
           else
             list_of_resources(resource)
           end
