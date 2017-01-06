@@ -79,7 +79,7 @@ module Routemaster
 
     def response_wrapper(&block)
       response = block.call
-      @response_class ? @response_class.new(response, client: self) : response
+      @response_class ? @response_class.build(response, client: self) : response
     end
 
     def connection

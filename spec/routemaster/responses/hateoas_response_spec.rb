@@ -11,7 +11,7 @@ module Routemaster
       let(:headers) { {} }
       let(:client) { double }
 
-      subject { described_class.new(response, client: client) }
+      subject { described_class.build(response, client: client) }
 
       context 'link traversal' do
         let(:body) do

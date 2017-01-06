@@ -94,6 +94,9 @@ describe Routemaster::APIClient do
     context 'when response_class is present' do
       before do
         class DummyResponse
+          def self.build(*args)
+            new(*args)
+          end
           def initialize(res, client: nil); end
         end
       end
