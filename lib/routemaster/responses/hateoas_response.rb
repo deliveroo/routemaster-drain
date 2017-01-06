@@ -15,7 +15,7 @@ module Routemaster
 
       class << self
         def build(response, client: nil)
-          if contains_a_list_with_the_same_key_as_the_path?(response) && paginated_and_first_page?(response)
+          if contains_a_list_with_the_same_key_as_the_path?(response)
             EnumerableHateoasResponse.new(response, resource_name(response), client: client)
           else
             HateoasResponse.new(response, client: client)
@@ -28,9 +28,6 @@ module Routemaster
           response.body['_links'].keys.include? resource_name(response)
         end
 
-        def paginated_and_first_page?(response)
-          response.body.has_key?('page') && response.body['page'] == 1
-        end
 
         def resource_name(response)
           response.env.url.path.split('/').last
@@ -119,12 +116,22 @@ module Routemaster
 
         def initialize(response, resource_name, client: nil)
           super(response, client: client)
-          @resources = lazy_list_of_resources_in_pages(resource_name, _links[resource_name])
+          if paginated_and_first_page?
+            @resources = lazy_list_of_resources_in_pages(resource_name, _links[resource_name])
+          else
+            @resources = list_of_resources(_links[resource_name])
+          end
         end
 
         def each(&block)
           @resources ||= []
           @resources.each(&block)
+        end
+
+        private
+
+        def paginated_and_first_page?
+          @response.body.has_key?('page') && @response.body['page'] == 1
         end
       end
     end

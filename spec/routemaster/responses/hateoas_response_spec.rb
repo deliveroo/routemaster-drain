@@ -75,63 +75,92 @@ module Routemaster
           end
         end
 
-        context 'with a paginated response' do
-          let(:chocolates_body_1) do
-            {
-              'page' => 1,
-              'per_page' => 2,
-              'total' => 3,
-              '_links' => {
-                'self' => { 'href' => 'self_url' },
-                'prev' => nil,
-                'next' => 'http://example.com/chocolates?page=2',
-                'chocolates' => [
-                  { 'href' => 'http://example.com/chocolates/1' },
-                  { 'href' => 'http://example.com/chocolates/2' }
-                ]
-              }
-            }
-          end
-
-          let(:chocolates_body_2) do
-            {
-              'page' => 2,
-              'per_page' => 2,
-              'total' => 3,
-              '_links' => {
-                'self' => { 'href' => 'self_url' },
-                'prev' => 'http://example.com/chocolates',
-                'next' => nil,
-                'chocolates' => [
-                  { 'href' => 'http://example.com/chocolates/3' }
-                ]
-              }
-            }
-          end
-
-
-          let(:chocolates_env_1) { double('Env', url: URI.parse('http://example.com/chocolates')) }
-          let(:chocolates_response_1) { double('Response', status: status, body: chocolates_body_1, headers: headers, env: chocolates_env_1) }
-          let(:chocolates_env_2) { double('Env', url: URI.parse('http://example.com/chocolates?page=2')) }
-          let(:chocolates_response_2) { double('Response', status: status, body: chocolates_body_2, headers: headers, env: chocolates_env_2) }
-
+        context 'collections' do
           let(:chocolate_urls) { ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3'] }
 
-          before do
-            allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.new(chocolates_response_1, client: client)}
-            allow(client).to receive(:get).with('http://example.com/chocolates?page=2') { described_class.new(chocolates_response_2, client: client)}
+          context 'with a non-paginated response' do
+            let(:chocolates_body) do
+              {
+                '_links' => {
+                  'self' => { 'href' => 'self_url' },
+                  'chocolates' => [
+                    { 'href' => 'http://example.com/chocolates/1' },
+                    { 'href' => 'http://example.com/chocolates/2' },
+                    { 'href' => 'http://example.com/chocolates/3' }
+                   ]
+                }
+              }
+            end
+
+            let(:chocolates_env) { double('Env', url: URI.parse('http://example.com/chocolates')) }
+            let(:chocolates_response) { double('Response', status: status, body: chocolates_body, headers: headers, env: chocolates_env) }
+
+            before do
+              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.build(chocolates_response, client: client)}
+            end
+
+            it 'creates a method with the resource name that returns a list of the resources' do
+              expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
+              expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+            end
           end
 
-          specify 'using the index action returns an enumerable response with all the chocolates from every page' do
-            expect(subject.chocolates.index).to be_a(HateoasResponse)
-            expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
-            expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
-          end
+          context 'with a paginated response' do
+            let(:chocolates_body_1) do
+              {
+                'page' => 1,
+                'per_page' => 2,
+                'total' => 3,
+                '_links' => {
+                  'self' => { 'href' => 'self_url' },
+                  'prev' => nil,
+                  'next' => 'http://example.com/chocolates?page=2',
+                  'chocolates' => [
+                    { 'href' => 'http://example.com/chocolates/1' },
+                    { 'href' => 'http://example.com/chocolates/2' }
+                   ]
+                }
+              }
+            end
 
-          specify 'the chocolates can also be accessed directly as an attribute of the page' do
-            expect(subject.chocolates.index).to be_a(Enumerable)
-            expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
-            expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+            let(:chocolates_body_2) do
+              {
+                'page' => 2,
+                'per_page' => 2,
+                'total' => 3,
+                '_links' => {
+                  'self' => { 'href' => 'self_url' },
+                  'prev' => 'http://example.com/chocolates',
+                  'next' => nil,
+                  'chocolates' => [
+                    { 'href' => 'http://example.com/chocolates/3' }
+                  ]
+                }
+              }
+            end
+
+            let(:chocolates_env_1) { double('Env', url: URI.parse('http://example.com/chocolates')) }
+            let(:chocolates_response_1) { double('Response', status: status, body: chocolates_body_1, headers: headers, env: chocolates_env_1) }
+            let(:chocolates_env_2) { double('Env', url: URI.parse('http://example.com/chocolates?page=2')) }
+            let(:chocolates_response_2) { double('Response', status: status, body: chocolates_body_2, headers: headers, env: chocolates_env_2) }
+
+
+            before do
+              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.build(chocolates_response_1, client: client)}
+              allow(client).to receive(:get).with('http://example.com/chocolates?page=2') { described_class.build(chocolates_response_2, client: client)}
+            end
+
+            specify 'using the index action returns an enumerable response with all the chocolates from every page' do
+              expect(subject.chocolates.index).to be_a(HateoasResponse)
+              expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
+              expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+            end
+
+            specify 'the chocolates can also be accessed directly as an attribute of the page' do
+              expect(subject.chocolates.index).to be_a(Enumerable)
+              expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
+              expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+            end
           end
         end
       end
