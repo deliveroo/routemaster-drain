@@ -18,8 +18,13 @@ module Routemaster
         @client.get(@url.gsub('{id}', id.to_s))
       end
 
-      def index
-        @client.get(@url)
+      def index(params: {}, filters: {})
+        params_and_filters = params.merge(filters)
+        if params_and_filters == {}
+          @client.get(@url)
+        else
+          @client.get(@url, params: filters.merge(params))
+        end
       end
 
       def update(id=nil, params)

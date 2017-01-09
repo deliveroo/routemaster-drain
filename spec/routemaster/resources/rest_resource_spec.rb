@@ -29,6 +29,13 @@ module Routemaster
           expect(client).to receive(:get).with(url)
           subject.index
         end
+
+        context 'params and filter options' do
+          it 'merges the two together to call the client with' do
+            expect(client).to receive(:get).with(url, params: { first_name: 'Jeff', per_page: 10 })
+            subject.index(filters: { first_name: 'Jeff' }, params: { per_page: 10 })
+          end
+        end
       end
 
       describe '#update' do
