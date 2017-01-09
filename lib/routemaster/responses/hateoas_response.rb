@@ -26,7 +26,7 @@ module Routemaster
           unless respond_to?(method_name)
             resource = Resources::RestResource.new(_links[normalized_method_name]['href'], client: @client)
 
-            self.class.send(:define_method, method_name) do |*m_args|
+            define_singleton_method(method_name) do |*m_args|
               resource
             end
 
