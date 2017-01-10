@@ -1,16 +1,11 @@
-### 2.2.1 (2016-12-22)
-Fix logging for error responses
+### 2.2.2 (2017-01-10)
 
-- For unsuccessful responses rescue the raised error and
-send increment signal to metrics backend
-
-### 2.2.0 (2016-12-22)
-Add Telemetry support for requests and responses
-
-### 2.1.0 (2016-12-14)
-Add support for PATCH requests
-
-- Invalidate cached response (if any) on PATCH
+- Fix logging for error responses:
+  For unsuccessful responses rescue the raised error and
+  send increment signal to metrics backend
+- Add Telemetry support for requests and responses
+- Add support for PATCH requests. 
+  Invalidate cached response (if any) on PATCH
 
 ### 2.0.0 (2016-12-14)
 
