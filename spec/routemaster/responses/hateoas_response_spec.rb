@@ -11,7 +11,7 @@ module Routemaster
       let(:headers) { {} }
       let(:client) { double }
 
-      subject { described_class.build(response, client: client) }
+      subject { described_class.new(response, client: client) }
 
       context 'link traversal' do
         let(:body) do
@@ -96,11 +96,11 @@ module Routemaster
             let(:chocolates_response) { double('Response', status: status, body: chocolates_body, headers: headers, env: chocolates_env) }
 
             before do
-              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.build(chocolates_response, client: client)}
+              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.new(chocolates_response, client: client)}
             end
 
             specify 'using the index action returns an enuerable response with all chocolates on the page' do
-              expect(subject.chocolates.index).to be_a(HateoasResponse)
+              expect(subject.chocolates.index).to be_a(EnumerableHateoasResponse)
               expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
               expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
             end
@@ -153,20 +153,14 @@ module Routemaster
 
 
             before do
-              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.build(chocolates_response_1, client: client)}
-              allow(client).to receive(:get).with('http://example.com/chocolates?page=2') { described_class.build(chocolates_response_2, client: client)}
+              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.new(chocolates_response_1, client: client)}
+              allow(client).to receive(:get).with('http://example.com/chocolates?page=2') { described_class.new(chocolates_response_2, client: client)}
             end
 
             specify 'using the index action returns an enumerable response with all the chocolates from every page' do
-              expect(subject.chocolates.index).to be_a(HateoasResponse)
+              expect(subject.chocolates.index).to be_a(EnumerableHateoasResponse)
               expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
               expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
-            end
-
-            specify 'the chocolates can also be accessed directly as an attribute of the response' do
-              expect(subject.chocolates.index.chocolates).to be_a(Enumerable)
-              expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.chocolates.map(&:url)).to eq chocolate_urls
             end
           end
         end
