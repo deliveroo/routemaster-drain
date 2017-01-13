@@ -1,10 +1,14 @@
+### 2.2.3 (2017-01-13)
+
+- Fix 404 breaking CacheAndSweep job run
+
 ### 2.2.2 (2017-01-10)
 
 - Fix logging for error responses:
   For unsuccessful responses rescue the raised error and
   send increment signal to metrics backend
 - Add Telemetry support for requests and responses
-- Add support for PATCH requests. 
+- Add support for PATCH requests.
   Invalidate cached response (if any) on PATCH
 
 ### 2.0.0 (2016-12-14)
