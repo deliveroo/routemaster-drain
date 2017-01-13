@@ -8,7 +8,10 @@ module Routemaster
     class CacheAndSweep
       def perform(url)
         Dirty::Map.new.sweep_one(url) do
-          Cache.new.get(url)
+          begin
+            Cache.new.get(url)
+          rescue Errors::ResourceNotFound
+          end
         end
       end
     end
