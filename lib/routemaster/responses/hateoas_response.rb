@@ -41,6 +41,10 @@ module Routemaster
         body.reject { |key, _| ['_links'].include?(key) }
       end
 
+      def has?(link)
+        _links.has_key?(link.to_s)
+      end
+
       private
 
       def _links

@@ -44,6 +44,16 @@ module Routemaster
             expect(subject.body_without_links).to eq({ 'foo' => 'bar' })
           end
         end
+
+        describe '#has?' do
+          it 'returns true for an existing link' do
+            expect(subject.has?(:resource_a)).to be_truthy
+          end
+
+          it 'returns false for a non existing link' do
+            expect(subject.has?(:other_resource)).to be_falsy
+          end
+        end
       end
     end
   end
