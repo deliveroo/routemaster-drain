@@ -4,8 +4,7 @@ require 'routemaster/responses/hateoas_response'
 module Routemaster
   module Responses
     RSpec.describe HateoasResponse do
-      let(:env) { double('Env', url: URI.parse('http://example.com/washing_machines')) }
-      let(:response) { double('Response', status: status, body: body, headers: headers, env: env) }
+      let(:response) { double('Response', status: status, body: body, headers: headers, env: double) }
       let(:status) { 200 }
       let(:body) { {}.to_json }
       let(:headers) { {} }
@@ -76,7 +75,38 @@ module Routemaster
         end
 
         context 'collections' do
-          let(:chocolate_urls) { ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3'] }
+          let(:chocolate_1_body) do
+            {
+              'name' => 'Lindor',
+              '_links' => {
+                'self' => { 'href' => 'http://example.com/chocolates/1' },
+              }
+            }
+          end
+
+          let(:chocolate_2_body) do
+            {
+              'name' => 'Cadburys',
+              '_links' => {
+                'self' => { 'href' => 'http://example.com/chocolates/2' },
+              }
+            }
+          end
+
+          let(:chocolate_3_body) do
+            {
+              'name' => 'Dairy Milk',
+              '_links' => {
+                'self' => { 'href' => 'http://example.com/chocolates/2' },
+              }
+            }
+          end
+
+          before do
+            stub_url_with_body('http://example.com/chocolates/1', chocolate_1_body, fget: true)
+            stub_url_with_body('http://example.com/chocolates/2', chocolate_2_body, fget: true)
+            stub_url_with_body('http://example.com/chocolates/3', chocolate_3_body, fget: true)
+          end
 
           context 'with a non-paginated response' do
             let(:chocolates_body) do
@@ -92,28 +122,32 @@ module Routemaster
               }
             end
 
-            let(:chocolates_env) { double('Env', url: URI.parse('http://example.com/chocolates')) }
-            let(:chocolates_response) { double('Response', status: status, body: chocolates_body, headers: headers, env: chocolates_env) }
-
             before do
-              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.new(chocolates_response, client: client)}
+              stub_url_with_body('http://example.com/chocolates', chocolates_body)
             end
 
             specify 'using the index action returns an enuerable response with all chocolates on the page' do
               expect(subject.chocolates.index).to be_a(EnumerableHateoasResponse)
               expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+              expect(subject.chocolates.index.map(&:url))
+                .to eq ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3']
             end
 
             specify 'the chocolates can also be accesses directly as an attribute of the response' do
               expect(subject.chocolates.index.chocolates).to be_a(Enumerable)
               expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.chocolates.map(&:url)).to eq chocolate_urls
+              expect(subject.chocolates.index.chocolates.map(&:url))
+                .to eq ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3']
+            end
+
+            specify 'using the future index action returns an enuerable response with all chocolates on the page' do
+              expect(subject.chocolates.future_index).to all(be_a(HateoasResponse))
+              expect(subject.chocolates.future_index.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
             end
           end
 
           context 'with a paginated response' do
-            let(:chocolates_body_1) do
+            let(:chocolates_page_1_body) do
               {
                 'page' => 1,
                 'per_page' => 2,
@@ -130,7 +164,7 @@ module Routemaster
               }
             end
 
-            let(:chocolates_body_2) do
+            let(:chocolates_page_2_body) do
               {
                 'page' => 2,
                 'per_page' => 2,
@@ -146,25 +180,34 @@ module Routemaster
               }
             end
 
-            let(:chocolates_env_1) { double('Env', url: URI.parse('http://example.com/chocolates')) }
-            let(:chocolates_response_1) { double('Response', status: status, body: chocolates_body_1, headers: headers, env: chocolates_env_1) }
-            let(:chocolates_env_2) { double('Env', url: URI.parse('http://example.com/chocolates?page=2')) }
-            let(:chocolates_response_2) { double('Response', status: status, body: chocolates_body_2, headers: headers, env: chocolates_env_2) }
-
-
             before do
-              allow(client).to receive(:get).with('http://example.com/chocolates') { described_class.new(chocolates_response_1, client: client)}
-              allow(client).to receive(:get).with('http://example.com/chocolates?page=2') { described_class.new(chocolates_response_2, client: client)}
+              stub_url_with_body('http://example.com/chocolates', chocolates_page_1_body)
+              stub_url_with_body('http://example.com/chocolates?page=2', chocolates_page_2_body)
             end
 
             specify 'using the index action returns an enumerable response with all the chocolates from every page' do
               expect(subject.chocolates.index).to be_a(EnumerableHateoasResponse)
               expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.map(&:url)).to eq chocolate_urls
+              expect(subject.chocolates.index.map(&:url))
+                .to eq ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3']
+            end
+
+            specify 'using the future index action returns an enuerable response with all chocolates on the page' do
+              expect(subject.chocolates.future_index).to all(be_a(HateoasResponse))
+              expect(subject.chocolates.future_index.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
             end
           end
         end
       end
     end
   end
+end
+
+def stub_url_with_body(url, body, fget: false)
+  method = fget ? :fget : :get
+
+  faraday_env = double('Env', url: URI.parse(url))
+  faraday_response = double('Response', status: 200, body: body, headers: {}, env: faraday_env)
+  response = described_class.new(faraday_response, client: client)
+  allow(client).to receive(method).with(url) { response }
 end

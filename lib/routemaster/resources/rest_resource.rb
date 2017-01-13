@@ -15,17 +15,21 @@ module Routemaster
         @client.post(@url, body: params)
       end
 
+      def future_show(id=nil)
+        @client.fget(@url.gsub('{id}', id.to_s))
+      end
+
       def show(id=nil)
         @client.get(@url.gsub('{id}', id.to_s))
       end
 
+      def future_index(params: {}, filters: {})
+        hateoas_response = helper(params: params, filters: filters)
+        Responses::EnumerableHateoasResponse.new(hateoas_response, future: true)
+      end
+
       def index(params: {}, filters: {})
-        params_and_filters = params.merge(filters)
-        hateoas_response = if params_and_filters == {}
-                             @client.get(@url)
-                           else
-                             @client.get(@url, params: params_and_filters)
-                           end
+        hateoas_response = helper(params: params, filters: filters)
         Responses::EnumerableHateoasResponse.new(hateoas_response)
       end
 
@@ -35,6 +39,17 @@ module Routemaster
 
       def destroy(id=nil)
         @client.delete(@url.gsub('{id}', id.to_s))
+      end
+
+      private
+
+      def helper(params:, filters:)
+        params_and_filters = params.merge(filters)
+        if params_and_filters == {}
+          return @client.get(@url)
+        else
+          return @client.get(@url, params: params_and_filters)
+        end
       end
     end
   end
