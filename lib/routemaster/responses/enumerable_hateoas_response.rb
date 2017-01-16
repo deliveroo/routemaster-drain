@@ -31,7 +31,7 @@ module Routemaster
 
           page_hateoas_response = @hateoas_response
           while(page_hateoas_response.next_page_link)
-            page_hateoas_response = get_next_page(page_hateoas_response.next_page_link)
+            page_hateoas_response = client.get(page_hateoas_response.next_page_link)
             resources = page_hateoas_response.send(resource_name)
             shovel_resources_into_yielder(resources, y)
           end
@@ -42,10 +42,6 @@ module Routemaster
         resources.each do |r|
           yielder << r
         end
-      end
-
-      def get_next_page(link)
-        client.get(link)
       end
     end
   end

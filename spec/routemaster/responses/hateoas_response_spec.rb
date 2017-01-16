@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'routemaster/responses/hateoas_response'
+require 'thread/future'
 
 module Routemaster
   module Responses
@@ -19,13 +20,30 @@ module Routemaster
               'self' => { 'href' => 'self_url' },
               'resource_a' => { 'href' => 'resource_a_url' },
               'resource_b' => { 'href' => 'resource_b_url' },
-              'resource_cs' => [
-                { 'href' => 'resource_c_1_url' },
-                { 'href' => 'resource_c_2_url' }
-              ],
               'chocolates' => { 'href' => 'http://example.com/chocolates' }
             }
           }
+        end
+
+        let(:resource_c_1_body) do
+          {
+            '_links' => {
+              'self' => { 'href' => 'http://example.com/resource_cs/1' },
+            }
+          }
+        end
+
+        let(:resource_c_2_body) do
+          {
+            '_links' => {
+              'self' => { 'href' => 'http://example.com/resource_cs/2' },
+            }
+          }
+        end
+
+        before do
+          stub_url_with_body('http://example.com/resource_cs/1', resource_c_1_body, fget: true)
+          stub_url_with_body('http://example.com/resource_cs/2', resource_c_2_body, fget: true)
         end
 
         describe 'singular resources' do
@@ -34,15 +52,6 @@ module Routemaster
             expect(subject.resource_a).to be_a(Resources::RestResource)
             expect(subject.resource_b.url).to eq('resource_b_url')
             expect(subject.resource_b).to be_a(Resources::RestResource)
-          end
-        end
-
-        describe 'collection resources' do
-          it 'creates a list for keys with a list resource' do
-            expect(subject.resource_cs.first.url).to eq('resource_c_1_url')
-            expect(subject.resource_cs.first).to be_a(Resources::RestResource)
-            expect(subject.resource_cs.last.url).to eq('resource_c_2_url')
-            expect(subject.resource_cs.last).to be_a(Resources::RestResource)
           end
         end
 
@@ -78,6 +87,7 @@ module Routemaster
           let(:chocolate_1_body) do
             {
               'name' => 'Lindor',
+              'products' => ['Milk Truffles', 'Gold Reindeer'],
               '_links' => {
                 'self' => { 'href' => 'http://example.com/chocolates/1' },
               }
@@ -87,6 +97,7 @@ module Routemaster
           let(:chocolate_2_body) do
             {
               'name' => 'Cadburys',
+              'products' => ['Cream Egg'],
               '_links' => {
                 'self' => { 'href' => 'http://example.com/chocolates/2' },
               }
@@ -96,6 +107,7 @@ module Routemaster
           let(:chocolate_3_body) do
             {
               'name' => 'Dairy Milk',
+              'products' => [],
               '_links' => {
                 'self' => { 'href' => 'http://example.com/chocolates/2' },
               }
@@ -126,23 +138,17 @@ module Routemaster
               stub_url_with_body('http://example.com/chocolates', chocolates_body)
             end
 
-            specify 'using the index action returns an enuerable response with all chocolates on the page' do
-              expect(subject.chocolates.index).to be_a(EnumerableHateoasResponse)
-              expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.map(&:url))
-                .to eq ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3']
-            end
-
             specify 'the chocolates can also be accesses directly as an attribute of the response' do
               expect(subject.chocolates.index.chocolates).to be_a(Enumerable)
-              expect(subject.chocolates.index.chocolates).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.chocolates.map(&:url))
-                .to eq ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3']
+              expect(subject.chocolates.index.chocolates).to all(be_a(HateoasResponse))
+              expect(subject.chocolates.index.chocolates.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
+              expect(subject.chocolates.index.chocolates.map(&:products)).to eq([["Milk Truffles", "Gold Reindeer"], ["Cream Egg"], []])
             end
 
             specify 'using the future index action returns an enuerable response with all chocolates on the page' do
-              expect(subject.chocolates.future_index).to all(be_a(HateoasResponse))
-              expect(subject.chocolates.future_index.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
+              expect(subject.chocolates.index).to all(be_a(HateoasResponse))
+              expect(subject.chocolates.index.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
+              expect(subject.chocolates.index.map(&:products)).to eq([["Milk Truffles", "Gold Reindeer"], ["Cream Egg"], []])
             end
           end
 
@@ -185,16 +191,9 @@ module Routemaster
               stub_url_with_body('http://example.com/chocolates?page=2', chocolates_page_2_body)
             end
 
-            specify 'using the index action returns an enumerable response with all the chocolates from every page' do
-              expect(subject.chocolates.index).to be_a(EnumerableHateoasResponse)
-              expect(subject.chocolates.index).to all(be_a(Resources::RestResource))
-              expect(subject.chocolates.index.map(&:url))
-                .to eq ['http://example.com/chocolates/1', 'http://example.com/chocolates/2', 'http://example.com/chocolates/3']
-            end
-
-            specify 'using the future index action returns an enuerable response with all chocolates on the page' do
-              expect(subject.chocolates.future_index).to all(be_a(HateoasResponse))
-              expect(subject.chocolates.future_index.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
+            specify 'using the index action returns an enuerable response with all chocolates on the page' do
+              expect(subject.chocolates.index).to all(be_a(HateoasResponse))
+              expect(subject.chocolates.index.map(&:name)).to eq(["Lindor", "Cadburys", "Dairy Milk"])
             end
           end
         end
@@ -208,6 +207,10 @@ def stub_url_with_body(url, body, fget: false)
 
   faraday_env = double('Env', url: URI.parse(url))
   faraday_response = double('Response', status: 200, body: body, headers: {}, env: faraday_env)
-  response = described_class.new(faraday_response, client: client)
+  if fget
+    response = Thread.future { described_class.new(faraday_response, client: client) }
+  else
+    response = described_class.new(faraday_response, client: client)
+  end
   allow(client).to receive(method).with(url) { response }
 end

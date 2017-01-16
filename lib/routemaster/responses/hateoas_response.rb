@@ -13,7 +13,6 @@ module Routemaster
 
       def initialize(response, client: nil)
         @response = response
-        @build_resources_with_futures = false
         @client = client || Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
       end
 
@@ -52,33 +51,34 @@ module Routemaster
         @_next_page_link ||= _links.fetch('next', nil)
       end
 
-      def build_resources_with_futures!
-        @build_resources_with_futures = true
-      end
-
       private
 
-      def build_resource(resource_name)
-        resource = _links[resource_name]
+      def build_resource(name)
+        resource = _links[name]
         if resource.is_a? Hash
           build_resource_from_href(resource['href'])
         else
-          list_of_resources(resource)
+          build_list_of_resources(resource)
         end
       end
 
-      def list_of_resources(list)
-        list.map do |single_resource|
-          build_resource_from_href(single_resource['href'])
+      def build_list_of_resources(list)
+        Enumerator.new do |yielder|
+          futures = list.map do |single_resource|
+            build_resource_from_href(single_resource['href']).future_show
+          end
+
+          futures.each do |future|
+            yielder << future.value
+          end
         end
       end
 
       def build_resource_from_href(href)
-        if @build_resources_with_futures
-          Resources::RestResource.new(href, client: @client).future_show
-        else
-          Resources::RestResource.new(href, client: @client)
-        end
+        Resources::RestResource.new(href, client: @client)
+      end
+
+      def build_and_show_resource_from_href(href)
       end
 
       def _links

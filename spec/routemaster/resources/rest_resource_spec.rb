@@ -45,26 +45,6 @@ module Routemaster
         end
       end
 
-      describe '#future_index' do
-        let(:hateoas_response) { double }
-
-        before do
-          expect(Responses::FutureEnumerableHateoasResponse).to receive(:new).with(hateoas_response)
-        end
-
-        it 'gets to the given url and constructs a future_enumerable_hateoas_response' do
-          expect(client).to receive(:get).with(url) { hateoas_response }
-          subject.future_index
-        end
-
-        context 'params and filter options' do
-          it 'merges the two together to call the client with' do
-            expect(client).to receive(:get).with(url, params: { first_name: 'Jeff', per_page: 10 }) { hateoas_response }
-            subject.future_index(filters: { first_name: 'Jeff' }, params: { per_page: 10 })
-          end
-        end
-      end
-
       describe '#update' do
         it 'updates the given resource' do
           expect(client).to receive(:patch).with(url, body: params)
