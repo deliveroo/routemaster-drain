@@ -13,26 +13,24 @@ module Routemaster
 
       def initialize(response, client: nil)
         @response = response
+        @build_resources_with_futures = false
         @client = client || Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
       end
 
-      def method_missing(m, *args, **kwargs, &block)
-        future = kwargs.fetch(:future) { false }
-
+      def method_missing(m, *args, &block)
         method_name = m.to_s
         normalized_method_name = method_name == '_self' ? 'self' : method_name
 
         if _links.keys.include?(normalized_method_name)
           unless respond_to?(method_name)
-            define_singleton_method(method_name) do |*m_args, **m_kwargs|
-              future = m_kwargs.fetch(:future) { false }
-              build_resource(normalized_method_name, future: future)
+            define_singleton_method(method_name) do
+              build_resource(normalized_method_name)
             end
           end
-          self.send(method_name, future: future)
+          self.send(method_name)
         elsif body.keys.include?(normalized_method_name)
           unless respond_to?(method_name)
-            define_singleton_method(method_name) do |*m_args, **m_kwargs|
+            define_singleton_method(method_name) do
               body[method_name]
             end
           end
@@ -54,25 +52,29 @@ module Routemaster
         @_next_page_link ||= _links.fetch('next', nil)
       end
 
+      def build_resources_with_futures!
+        @build_resources_with_futures = true
+      end
+
       private
 
-      def build_resource(resource_name, future:)
+      def build_resource(resource_name)
         resource = _links[resource_name]
         if resource.is_a? Hash
-          build_resource_from_href(resource['href'], future: future)
+          build_resource_from_href(resource['href'])
         else
-          list_of_resources(resource, future: future)
+          list_of_resources(resource)
         end
       end
 
-      def list_of_resources(list, future:)
+      def list_of_resources(list)
         list.map do |single_resource|
-          build_resource_from_href(single_resource['href'], future: future)
+          build_resource_from_href(single_resource['href'])
         end
       end
 
-      def build_resource_from_href(href, future:)
-        if future
+      def build_resource_from_href(href)
+        if @build_resources_with_futures
           Resources::RestResource.new(href, client: @client).future_show
         else
           Resources::RestResource.new(href, client: @client)

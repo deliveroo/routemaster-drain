@@ -8,8 +8,7 @@ module Routemaster
 
       def_delegators :@hateoas_response, :method_missing, :response, :client
 
-      def initialize(hateoas_response, future: false)
-        @future = future
+      def initialize(hateoas_response)
         @hateoas_response = hateoas_response
         @resources = lazy_list_of_resources_in_pages
       end
@@ -21,21 +20,19 @@ module Routemaster
 
       private
 
-      attr_reader :future
-
       def resource_name
         response.env.url.path.split('/').last
       end
 
       def lazy_list_of_resources_in_pages
         Enumerator.new do |y|
-          resources = @hateoas_response.send(resource_name, future: future)
+          resources = @hateoas_response.send(resource_name)
           shovel_resources_into_yielder(resources, y)
 
-          hateoas_response = @hateoas_response
-          while(hateoas_response.next_page_link)
-            hateoas_response = client.get(hateoas_response.next_page_link)
-            resources = hateoas_response.send(resource_name, future: future)
+          page_hateoas_response = @hateoas_response
+          while(page_hateoas_response.next_page_link)
+            page_hateoas_response = get_next_page(page_hateoas_response.next_page_link)
+            resources = page_hateoas_response.send(resource_name)
             shovel_resources_into_yielder(resources, y)
           end
         end
@@ -45,6 +42,10 @@ module Routemaster
         resources.each do |r|
           yielder << r
         end
+      end
+
+      def get_next_page(link)
+        client.get(link)
       end
     end
   end

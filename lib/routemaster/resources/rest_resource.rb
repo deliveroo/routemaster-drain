@@ -1,5 +1,6 @@
 require 'routemaster/api_client'
 require 'routemaster/responses/enumerable_hateoas_response'
+require 'routemaster/responses/future_enumerable_hateoas_response'
 
 module Routemaster
   module Resources
@@ -25,7 +26,7 @@ module Routemaster
 
       def future_index(params: {}, filters: {})
         hateoas_response = helper(params: params, filters: filters)
-        Responses::EnumerableHateoasResponse.new(hateoas_response, future: true)
+        Responses::FutureEnumerableHateoasResponse.new(hateoas_response)
       end
 
       def index(params: {}, filters: {})
