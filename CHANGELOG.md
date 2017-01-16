@@ -1,9 +1,6 @@
-### 2.3.3 (2017-01-13)
+### 2.3.0 (2017-01-16)
 
 - Add #has? method on HateoasResponse of identifying resource without invocation
-
-### 2.2.3 (2017-01-13)
-
 - Fix 404 breaking CacheAndSweep job run
 
 ### 2.2.2 (2017-01-10)
