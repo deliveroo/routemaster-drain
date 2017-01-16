@@ -315,3 +315,8 @@ as in `Receiver::Filter` for instance.
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+Do not bump version numbers on branches (a maintainer will do this when cutting
+a release); but please do describe your changes in the `CHANGELOG` (at the top,
+without a version number).
+
