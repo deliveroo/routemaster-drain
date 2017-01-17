@@ -238,6 +238,13 @@ RSpec.describe 'Api client integration specs' do
       res = subject.discover(url)
       expect(res.resources.index(filters: { first_name: 'roo' }).count).to eq(5)
     end
+
+    it 'does not make any http requests to fetch resources any if just the index method is called' do
+      resources = subject.discover(url).resources
+
+      expect(subject).to receive(:get).with("http://localhost:8000/resources", anything).once
+      resources.index
+    end
   end
 
   describe 'Telemetry' do

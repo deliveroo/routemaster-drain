@@ -34,20 +34,19 @@ module Routemaster
 
       def initialize(response, client: nil)
         super(response, client: client)
-        @collection = resources_from_body
       end
 
       def each(&block)
-        @collection.each do |entry|
-          block.call(entry.value)
+        resources_from_body.each do |entry|
+          block.call(entry)
         end
       end
 
       private
 
       def resources_from_body
-        resources = init_futures_from_urls_in_body
-        resources += self.next.index.collection if has?(:next)
+        resources = init_futures_from_urls_in_body.map(&:value)
+        resources += self.next.index.to_a if has?(:next)
         resources
       end
 
