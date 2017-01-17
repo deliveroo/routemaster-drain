@@ -1,16 +1,14 @@
 require 'faraday_middleware'
 require 'routemaster/api_client'
-require 'routemaster/responses/hateoas_response'
 require 'routemaster/resources/rest_resource'
 require 'forwardable'
-require 'json'
 
 module Routemaster
   module Responses
     class HateoasResponse
       extend Forwardable
 
-      attr_reader :response
+      attr_reader :response, :client
       def_delegators :@response, :body, :status, :headers, :success?
 
       def initialize(response, client: nil)
@@ -24,28 +22,61 @@ module Routemaster
 
         if _links.keys.include?(normalized_method_name)
           unless respond_to?(method_name)
-            resource = Resources::RestResource.new(_links[normalized_method_name]['href'], client: @client)
-
-            define_singleton_method(method_name) do |*m_args|
-              resource
+            define_singleton_method(method_name) do
+              build_resource(normalized_method_name)
             end
-
-            resource
           end
+          self.send(method_name)
+        elsif body.keys.include?(normalized_method_name)
+          unless respond_to?(method_name)
+            define_singleton_method(method_name) do
+              body[method_name]
+            end
+          end
+          self.send(method_name)
         else
           super
         end
       end
 
       def body_without_links
-        body.reject { |key, _| ['_links'].include?(key) }
+        body.tap { |b| b.delete('_links') }
       end
 
       def has?(link)
         _links.has_key?(link.to_s)
       end
 
+      def next_page_link
+        @_next_page_link ||= _links.fetch('next', nil)
+      end
+
       private
+
+      def build_resource(name)
+        resource = _links[name]
+        if resource.is_a? Hash
+          build_resource_from_href(resource['href'])
+        else
+          build_list_of_resources(resource)
+        end
+      end
+
+      def build_list_of_resources(list)
+        Enumerator.new do |yielder|
+          futures = list.map do |single_resource|
+            @client.fget(single_resource['href'])
+          end
+
+          futures.each do |future|
+            yielder << future.value
+          end
+        end
+      end
+
+      def build_resource_from_href(href)
+        Resources::RestResource.new(href, client: @client)
+      end
 
       def _links
         @links ||= @response.body.fetch('_links', {})

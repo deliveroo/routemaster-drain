@@ -1,4 +1,5 @@
 require 'routemaster/api_client'
+require 'routemaster/responses/enumerable_hateoas_response'
 
 module Routemaster
   module Resources
@@ -18,8 +19,14 @@ module Routemaster
         @client.get(@url.gsub('{id}', id.to_s))
       end
 
-      def index
-        @client.get(@url)
+      def index(params: {}, filters: {})
+        params_and_filters = params.merge(filters)
+        hateoas_response = if params_and_filters == {}
+                             @client.get(@url)
+                           else
+                             @client.get(@url, params: params_and_filters)
+                           end
+        Responses::EnumerableHateoasResponse.new(hateoas_response)
       end
 
       def update(id=nil, params)
