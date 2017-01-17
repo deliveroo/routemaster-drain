@@ -57,7 +57,7 @@ module Routemaster
           next if key == 'self'
 
           if urls.is_a?(Array)
-            urls.each { |url| resources << @client.fget(url['href']) }
+            return urls.map { |url| @client.fget(url['href']) }
           end
         end
       end

@@ -30,6 +30,84 @@ RSpec.describe 'Api client integration specs' do
         res.status = 200
         res.body = { field: 'test' }.to_json
       end
+
+      server.mount_proc "/resources/1" do |req, res|
+        res['Content-Type'] = 'application/json'
+        res.status = 200
+        res.body = { attribute: 'value' }.to_json
+      end
+
+      server.mount_proc "/discover" do |req, res|
+        res['Content-Type'] = 'application/json'
+        res.status = 200
+        res.body = { _links: { resources: { href: 'http://localhost:8000/resources' } } }.to_json
+      end
+
+      server.mount_proc "/resources" do |req, res|
+        res['Content-Type'] = 'application/json'
+        res.status = 200
+        case req.query_string
+        when "first_name=roo"
+          res.body = {
+            _links: {
+              self: {
+                href: "http://localhost:8000/resourcess?first_name=roo&page=1&per_page=2"
+              },
+              first: {
+                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+              },
+              last: {
+                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+              },
+              next: {
+                href: "http://localhost:8000/resources?first_name=roo&page=2&per_page=2"
+              },
+              resources: [
+                { href: 'http://localhost:8000/resources/1' },
+                { href: 'http://localhost:8000/resources/1' }
+              ]
+            }
+          }.to_json
+        when "first_name=roo&page=2&per_page=2"
+          res.body = {
+            _links: {
+              self: {
+                href: "http://localhost:8000/resourcess?first_name=roo&page=2&per_page=2"
+              },
+              first: {
+                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+              },
+              last: {
+                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+              },
+              next: {
+                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+              },
+              resources: [
+                { href: 'http://localhost:8000/resources/1' },
+                { href: 'http://localhost:8000/resources/1' }
+              ]
+            }
+          }.to_json
+        when "first_name=roo&page=3&per_page=2"
+          res.body = {
+            _links: {
+              self: {
+                href: "http://localhost:8000/resourcess?first_name=roo&page=3&per_page=2"
+              },
+              first: {
+                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+              },
+              last: {
+                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+              },
+              resources: [
+                { href: 'http://localhost:8000/resources/1' }
+              ]
+            }
+          }.to_json
+        end
+      end
     end
   end
 
@@ -146,6 +224,19 @@ RSpec.describe 'Api client integration specs' do
         subject.get(url)
         expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
       end
+    end
+  end
+
+  describe 'INDEX request' do
+    let(:url) { 'http://localhost:8000/discover' }
+
+    subject do
+      Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+    end
+
+    it 'traverses through pagination next all links that match the request params' do
+      res = subject.discover(url)
+      expect(res.resources.index(filters: { first_name: 'roo' }).count).to eq(5)
     end
   end
 
