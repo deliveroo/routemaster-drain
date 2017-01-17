@@ -65,7 +65,7 @@ module Routemaster
       def build_list_of_resources(list)
         Enumerator.new do |yielder|
           futures = list.map do |single_resource|
-            build_resource_from_href(single_resource['href']).future_show
+            @client.fget(single_resource['href'])
           end
 
           futures.each do |future|
@@ -76,9 +76,6 @@ module Routemaster
 
       def build_resource_from_href(href)
         Resources::RestResource.new(href, client: @client)
-      end
-
-      def build_and_show_resource_from_href(href)
       end
 
       def _links

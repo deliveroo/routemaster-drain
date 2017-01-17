@@ -15,10 +15,6 @@ module Routemaster
         @client.post(@url, body: params)
       end
 
-      def future_show(id=nil)
-        @client.fget(@url.gsub('{id}', id.to_s))
-      end
-
       def show(id=nil)
         @client.get(@url.gsub('{id}', id.to_s))
       end

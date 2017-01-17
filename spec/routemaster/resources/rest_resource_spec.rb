@@ -24,13 +24,6 @@ module Routemaster
         end
       end
 
-      describe '#future_show' do
-        it 'fgets to the given url' do
-          expect(client).to receive(:fget).with(url)
-          subject.future_show(1)
-        end
-      end
-
       describe '#index' do
         it 'gets to the given url' do
           expect(client).to receive(:get).with(url)
