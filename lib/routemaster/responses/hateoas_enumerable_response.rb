@@ -1,7 +1,7 @@
 #
 # HateoasEnumerableResponse
-# On initialize we scan and append on @collection futures
-# based on the items returned from the querie
+# On initialize we scan and expose all resourcs in the collection via .each
+# based on the items returned from the query
 # i.e:
 #   Given:
 #   {
@@ -29,8 +29,6 @@ module Routemaster
   module Responses
     class HateoasEnumerableResponse < HateoasResponse
       include Enumerable
-
-      attr_reader :collection
 
       def initialize(response, client: nil)
         super(response, client: client)

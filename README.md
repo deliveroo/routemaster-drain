@@ -238,6 +238,20 @@ session_create_response = response.sessions.create(email: 'test@test.com', passw
 session_create_response.user.show(1)
 ```
 
+The index method returns an Enumerable response to fetch all items in a paginated collection with the options of passing filters.
+
+```
+users = response.users
+user_index_response = users.index(filters: {first_name: 'Jeff'})
+total_users = user_index_response.total_users
+
+puts "printing names of all #{total_users} users"
+user_index_response.each do |user|
+  puts user.full_name
+end
+```
+
+
 ### HATEOAS materialisation
 The client comes with optional HATEOAS response capabilities. They are optional, because drain itself doesn't need to use the HATEOAS
 response capabilities. Whenever the client is used outside of the drain it is **strongly** advised to be used with the HATEOAS response capabilities.
