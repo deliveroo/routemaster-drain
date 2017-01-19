@@ -18,8 +18,10 @@ module Routemaster
         @client.get(@url.gsub('{id}', id.to_s))
       end
 
-      def index
-        @client.get(@url)
+      def index(params: {}, filters: {})
+        @client.with_response Responses::HateoasEnumerableResponse do |client|
+          client.get(@url, params: params.merge(filters))
+        end
       end
 
       def update(id=nil, params)

@@ -1,7 +1,4 @@
 require 'faraday_middleware'
-require 'routemaster/api_client'
-require 'routemaster/responses/hateoas_response'
-require 'routemaster/resources/rest_resource'
 require 'forwardable'
 require 'json'
 

@@ -25,8 +25,12 @@ module Routemaster
       end
 
       describe '#index' do
+        before do
+          allow(client).to receive(:with_response).and_yield(client)
+        end
+
         it 'gets to the given url' do
-          expect(client).to receive(:get).with(url)
+          expect(client).to receive(:get).with(url, params: {})
           subject.index
         end
       end
