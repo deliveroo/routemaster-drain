@@ -1,3 +1,5 @@
+require 'routemaster/jobs'
+
 module Routemaster
   module Jobs
     class Job
