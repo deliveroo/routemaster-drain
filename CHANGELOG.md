@@ -1,3 +1,9 @@
+### 2.3.1 (2017-01-31)
+
+- Introduce index traversal mechanism.
+- Fix jobs loading issue when Routemaster::Jobs is not defined while executing
+`Kernel.const_get`.
+
 ### 2.3.0 (2017-01-16)
 
 - Add #has? method on HateoasResponse of identifying resource without invocation
