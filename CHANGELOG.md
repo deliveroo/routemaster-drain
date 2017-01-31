@@ -1,4 +1,4 @@
-### 2.3.1 (2017-01-31)
+### 2.3.3 (2017-01-31)
 
 - Introduce index traversal mechanism.
 - Fix jobs loading issue when Routemaster::Jobs is not defined while executing
