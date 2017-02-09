@@ -14,13 +14,13 @@ module Routemaster
         @client.post(@url, body: params)
       end
 
-      def show(id=nil)
-        @client.get(@url.gsub('{id}', id.to_s))
+      def show(id=nil, enable_caching: true)
+        @client.get(@url.gsub('{id}', id.to_s), options: { enable_caching: enable_caching })
       end
 
-      def index(params: {}, filters: {})
-        @client.with_response Responses::HateoasEnumerableResponse do |client|
-          client.get(@url, params: params.merge(filters))
+      def index(params: {}, filters: {}, enable_caching: false)
+        @client.with_response(Responses::HateoasEnumerableResponse) do |client|
+          client.get(@url, params: params.merge(filters), options: { enable_caching: enable_caching })
         end
       end
 
