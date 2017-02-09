@@ -3,6 +3,7 @@
 - Introduce index traversal mechanism.
 - Fix jobs loading issue when Routemaster::Jobs is not defined while executing
 `Kernel.const_get`.
+- Make response caching configurable. Make index request to not cache the responses with the urls
 
 ### 2.3.0 (2017-01-16)
 

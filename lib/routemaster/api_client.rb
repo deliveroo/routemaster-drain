@@ -31,10 +31,16 @@ module Routemaster
     # @return an object that responds to `status` (integer), `headers` (hash),
     # and `body`. The body is a `Hashie::Mash` if the response was JSON, a
     # string otherwise.
-    def get(url, params: {}, headers: {})
+    def get(url, params: {}, headers: {}, options: {})
       host = URI.parse(url).host
+      enable_caching = options.fetch(:enable_caching, true)
+
       response_wrapper do
-        connection.get(url, params, headers.merge(auth_header(host)))
+        request_headers = headers.
+          merge(auth_header(host)).
+          merge(response_cache_opt_headers(enable_caching))
+
+        connection.get(url, params, request_headers)
       end
     end
 
@@ -116,6 +122,10 @@ module Routemaster
     def auth_header(host)
       auth_string = Config.cache_auth.fetch(host, []).join(':')
       { 'Authorization' => "Basic #{Base64.strict_encode64(auth_string)}" }
+    end
+
+    def response_cache_opt_headers(value)
+      { Routemaster::Middleware::ResponseCaching::RESPONSE_CACHING_OPT_HEADER => value.to_s }
     end
   end
 end

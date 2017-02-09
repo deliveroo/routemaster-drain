@@ -7,6 +7,7 @@ module Routemaster
       BODY_FIELD_TEMPLATE = 'v:{version},l:{locale},body'
       HEADERS_FIELD_TEMPLATE = 'v:{version},l:{locale},headers'
       VERSION_REGEX = /application\/json;v=(?<version>\S*)/.freeze
+      RESPONSE_CACHING_OPT_HEADER = 'X-routemaster_drain.opt_cache'.freeze
 
       def initialize(app, cache: Config.cache_redis, listener: nil)
         @app = app
@@ -28,23 +29,27 @@ module Routemaster
         @app.call(env).on_complete do |response_env|
           response = response_env.response
 
-          if response.success?
+          if response.success? && cache_enabled?(env)
             @cache.multi do |multi|
               multi.hset(cache_key(env), body_cache_field(env), response.body)
               multi.hset(cache_key(env), headers_cache_field(env), Marshal.dump(response.headers))
               multi.expire(cache_key(env), @expiry)
             end
+
             @listener._publish(:cache_miss, url(env)) if @listener
           end
         end
       end
 
       def fetch_from_cache(env)
+        return nil unless cache_enabled?(env)
+
         body = @cache.hget(cache_key(env), body_cache_field(env))
         headers = @cache.hget(cache_key(env), headers_cache_field(env))
 
         if body && headers
           @listener._publish(:cache_hit, url(env)) if @listener
+
           Faraday::Response.new(status: 200,
                                 body: body,
                                 response_headers: Marshal.load(headers),
@@ -78,6 +83,10 @@ module Routemaster
 
       def locale(env)
         env.request_headers['Accept-Language']
+      end
+
+      def cache_enabled?(env)
+        env.request_headers[RESPONSE_CACHING_OPT_HEADER].to_s == 'true'
       end
     end
   end

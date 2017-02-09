@@ -19,7 +19,7 @@ module Routemaster
 
       describe '#show' do
         it 'gets to the given url' do
-          expect(client).to receive(:get).with(url)
+          expect(client).to receive(:get).with(url, options: { enable_caching: true })
           subject.show(1)
         end
       end
@@ -30,7 +30,7 @@ module Routemaster
         end
 
         it 'gets to the given url' do
-          expect(client).to receive(:get).with(url, params: {})
+          expect(client).to receive(:get).with(url, params: {}, options: { enable_caching: false })
           subject.index
         end
       end
