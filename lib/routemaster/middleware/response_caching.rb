@@ -30,11 +30,9 @@ module Routemaster
           response = response_env.response
 
           if response.success? && cache_enabled?(env)
-            @cache.multi do |multi|
-              multi.hset(cache_key(env), body_cache_field(env), response.body)
-              multi.hset(cache_key(env), headers_cache_field(env), Marshal.dump(response.headers))
-              multi.expire(cache_key(env), @expiry)
-            end
+            @cache.hset(cache_key(env), body_cache_field(env), response.body)
+            @cache.hset(cache_key(env), headers_cache_field(env), Marshal.dump(response.headers))
+            @cache.expire(cache_key(env), @expiry)
 
             @listener._publish(:cache_miss, url(env)) if @listener
           end
