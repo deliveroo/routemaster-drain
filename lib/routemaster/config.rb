@@ -17,11 +17,11 @@ module Routemaster
     extend Classmethods
 
     def drain_redis
-      RedisBroker.instance.get(ENV.fetch('ROUTEMASTER_DRAIN_REDIS'))
+      RedisBroker.instance.get(:drain_redis, urls: ENV.fetch('ROUTEMASTER_DRAIN_REDIS').split(','))
     end
 
     def cache_redis
-      RedisBroker.instance.get(ENV.fetch('ROUTEMASTER_CACHE_REDIS'))
+      RedisBroker.instance.get(:cache_redis, urls: ENV.fetch('ROUTEMASTER_CACHE_REDIS').split(','))
     end
 
     #

@@ -30,10 +30,11 @@ module Routemaster
           response = response_env.response
 
           if response.success? && cache_enabled?(env)
-            @cache.multi do |multi|
-              multi.hset(cache_key(env), body_cache_field(env), response.body)
-              multi.hset(cache_key(env), headers_cache_field(env), Marshal.dump(response.headers))
-              multi.expire(cache_key(env), @expiry)
+            namespaced_key = "#{@cache.namespace}:#{cache_key(env)}"
+            @cache.redis.node_for(namespaced_key).multi do |node|
+              node.hset(namespaced_key, body_cache_field(env), response.body)
+              node.hset(namespaced_key, headers_cache_field(env), Marshal.dump(response.headers))
+              node.expire(namespaced_key, @expiry)
             end
 
             @listener._publish(:cache_miss, url(env)) if @listener

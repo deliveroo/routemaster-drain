@@ -1,4 +1,5 @@
 require 'redis-namespace'
+require 'redis/distributed'
 require 'uri'
 require 'singleton'
 
@@ -11,13 +12,13 @@ module Routemaster
       _cleanup
     end
 
-    def get(url)
+    def get(name, urls: [])
       _check_for_fork
-      @_connections[url] ||= begin
-        parsed_url = URI.parse(url)
-        namespace = parsed_url.path.split('/')[2] || 'rm'
-        Redis::Namespace.new(namespace, redis: Redis.new(url: url))
-      end
+      @_connections[name] ||= begin
+                                parsed_url = URI.parse(urls.first)
+                                namespace = parsed_url.path.split('/')[2] || 'rm'
+                                Redis::Namespace.new(namespace, redis: Redis::Distributed.new(urls))
+                              end
     end
 
     def cleanup
