@@ -1,4 +1,5 @@
 require 'wisper'
+require 'routemaster/event_index'
 
 module Routemaster
   module Middleware
@@ -19,7 +20,7 @@ module Routemaster
       def call(env)
         @cache.del(cache_key(env)) if %i(patch delete).include?(env.method)
         return @app.call(env) if env.method != :get
-
+        @event_index = Routemaster::EventIndex.new(url(env)).current
         fetch_from_cache(env) || fetch_from_service(env)
       end
 
@@ -34,6 +35,7 @@ module Routemaster
             @cache.redis.node_for(namespaced_key).multi do |node|
               node.hset(namespaced_key, body_cache_field(env), response.body)
               node.hset(namespaced_key, headers_cache_field(env), Marshal.dump(response.headers))
+              node.hset(namespaced_key, :event_index, @event_index)
               node.expire(namespaced_key, @expiry)
             end
 
@@ -44,18 +46,20 @@ module Routemaster
 
       def fetch_from_cache(env)
         return nil unless cache_enabled?(env)
-
         body = @cache.hget(cache_key(env), body_cache_field(env))
         headers = @cache.hget(cache_key(env), headers_cache_field(env))
+        event_index =  @cache.hget(cache_key(env), :event_index)
 
-        if body && headers
-          @listener._publish(:cache_hit, url(env)) if @listener
+        return nil unless event_index.to_i == @event_index && body && headers
 
-          Faraday::Response.new(status: 200,
-                                body: body,
-                                response_headers: Marshal.load(headers),
-                                request: {})
-        end
+
+        @listener._publish(:cache_hit, url(env)) if @listener
+
+        Faraday::Response.new(status: 200,
+                              body: body,
+                              response_headers: Marshal.load(headers),
+                              request: {})
+
       end
 
       def body_cache_field(env)
