@@ -1,10 +1,10 @@
 require 'wisper'
 require 'routemaster/event_index'
+require 'routemaster/cache_keys'
 
 module Routemaster
   module Middleware
     class ResponseCaching
-      KEY_TEMPLATE = 'cache:{url}'
       BODY_FIELD_TEMPLATE = 'v:{version},l:{locale},body'
       HEADERS_FIELD_TEMPLATE = 'v:{version},l:{locale},headers'
       VERSION_REGEX = /application\/json;v=(?<version>\S*)/.freeze
@@ -33,9 +33,10 @@ module Routemaster
           if response.success? && cache_enabled?(env)
             namespaced_key = "#{@cache.namespace}:#{cache_key(env)}"
             @cache.redis.node_for(namespaced_key).multi do |node|
-              node.hset(namespaced_key, body_cache_field(env), response.body)
-              node.hset(namespaced_key, headers_cache_field(env), Marshal.dump(response.headers))
-              node.hset(namespaced_key, :event_index, @event_index)
+             node.hmset(namespaced_key,
+                        body_cache_field(env), response.body,
+                        headers_cache_field(env), Marshal.dump(response.headers),
+                        :most_recent_index, @event_index)
               node.expire(namespaced_key, @expiry)
             end
 
@@ -46,12 +47,13 @@ module Routemaster
 
       def fetch_from_cache(env)
         return nil unless cache_enabled?(env)
-        body = @cache.hget(cache_key(env), body_cache_field(env))
-        headers = @cache.hget(cache_key(env), headers_cache_field(env))
-        event_index =  @cache.hget(cache_key(env), :event_index)
+        body, headers, most_recent_index, current_index = @cache.hmget(cache_key(env),
+                                                                       body_cache_field(env),
+                                                                       headers_cache_field(env),
+                                                                       :most_recent_index,
+                                                                       :current_index)
 
-        return nil unless event_index.to_i == @event_index && body && headers
-
+        return nil unless most_recent_index.to_i == current_index.to_i && body && headers
 
         @listener._publish(:cache_hit, url(env)) if @listener
 
@@ -59,7 +61,6 @@ module Routemaster
                               body: body,
                               response_headers: Marshal.load(headers),
                               request: {})
-
       end
 
       def body_cache_field(env)
@@ -75,7 +76,7 @@ module Routemaster
       end
 
       def cache_key(env)
-        KEY_TEMPLATE.gsub('{url}', url(env))
+        CacheKeys.new(url(env)).url_key
       end
 
       def url(env)

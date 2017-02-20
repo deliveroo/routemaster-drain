@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
+require 'spec/support/breakpoint_class'
 require 'routemaster/cache'
 require 'webrick'
 
@@ -34,7 +35,8 @@ RSpec.describe 'Requests with caching' do
 
   describe 'GET request' do
     let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:event_index_cache_keys) { ["cache:#{url}", "event_index"] }
+    let(:most_recent_index_cache_keys) { ["cache:#{url}", "most_recent_index"] }
+    let(:current_index_cache_keys) { ["cache:#{url}", "current_index"] }
     let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
     let(:url) { 'http://localhost:8000/test' }
 
@@ -54,7 +56,7 @@ RSpec.describe 'Requests with caching' do
       it "sets the event_index onto the cache" do
         current = Routemaster::EventIndex.new(url).increment
         expect { subject.get(url) }
-          .to change { Routemaster::Config.cache_redis.hget(*event_index_cache_keys)}
+          .to change { Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)}
           .from(nil)
           .to(current.to_s)
       end
@@ -86,6 +88,35 @@ RSpec.describe 'Requests with caching' do
           response = subject.get(url)
           expect(response.env.request).not_to be_empty
         end
+      end
+    end
+
+    context "when two requests interleave" do
+      before do
+        breakpoint_class(Routemaster::Middleware::ResponseCaching, :fetch_from_service )
+        processes = 2.times.collect do
+          ForkBreak::Process.new do
+            current = Routemaster::EventIndex.new(url).increment
+            subject.get(url)
+          end
+        end
+        processes.first.run_until(:before_fetch_from_service).wait
+        processes.last.finish.wait
+        processes.first.finish.wait
+      end
+
+      it "should leave v1 as the most recent index" do
+        expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '1'
+      end
+
+      it "should leave v2 in as the current index" do
+        expect(Routemaster::Config.cache_redis.hget(*current_index_cache_keys)).to eq '2'
+      end
+
+      it "should perform another service request when queried" do
+        response = subject.get(url)
+        expect(response.env.request).not_to be_empty
+        expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '2'
       end
     end
   end

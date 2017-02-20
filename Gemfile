@@ -22,4 +22,5 @@ group :development, :test do
   gem 'pry-byebug',                 require: false
   gem 'rspec'
   gem 'appraisal'
+  gem 'fork_break'
 end

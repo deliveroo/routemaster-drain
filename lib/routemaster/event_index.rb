@@ -1,18 +1,23 @@
+require 'routemaster/cache_keys'
 module Routemaster
   class EventIndex
-    attr_reader :url, :store
+    attr_reader :url, :cache
 
-    def initialize(url, store: Config.cache_redis)
+    def initialize(url, cache: Config.cache_redis)
       @url = url
-      @store = store
+      @cache = cache
+    end
+
+    def key
+      CacheKeys.new(url).url_key
     end
 
     def increment
-      store.incr("event_index:#{url}").to_i
+      cache.hincrby(key, 'current_index', 1).to_i
     end
 
     def current
-      (store.get("event_index:#{url}") || 0).to_i
+      (cache.hget(key, 'current_index') || 0).to_i
     end
   end
 end
