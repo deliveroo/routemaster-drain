@@ -66,6 +66,9 @@ GEM
     faraday_middleware (0.10.1)
       faraday (>= 0.7.4, < 1.0)
     ffi (1.9.14)
+    fork (1.0.1)
+    fork_break (0.1.4)
+      fork (= 1.0.1)
     formatador (0.2.5)
     guard (2.14.0)
       formatador (>= 0.2.4)
@@ -213,6 +216,7 @@ DEPENDENCIES
   bundler
   codeclimate-test-reporter
   dotenv
+  fork_break
   guard-rspec
   pry-byebug
   psych
