@@ -1,6 +1,6 @@
 require 'wisper'
 require 'routemaster/event_index'
-require 'routemaster/cache_keys'
+require 'routemaster/cache_key'
 
 module Routemaster
   module Middleware
@@ -76,7 +76,7 @@ module Routemaster
       end
 
       def cache_key(env)
-        CacheKeys.new(url(env)).url_key
+        CacheKey.url_key(url(env))
       end
 
       def url(env)

@@ -34,7 +34,7 @@ describe Routemaster::Drain::Caching do
     perform
   end
 
-  it 'increments the ' do
+  it 'increments the event index' do
     ei_double = double(increment: 1)
     allow(Routemaster::EventIndex).to receive(:new).and_return(ei_double)
     expect(ei_double).to receive(:increment).exactly(3).times
