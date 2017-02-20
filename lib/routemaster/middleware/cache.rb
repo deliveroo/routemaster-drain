@@ -17,7 +17,6 @@ module Routemaster
       def call(env)
         env.fetch('routemaster.dirty', []).each do |url|
           EventIndex.new(url).increment
-          @cache.bust(url)
           @client.enqueue(@queue, Routemaster::Jobs::CacheAndSweep, url)
         end
         @app.call(env)

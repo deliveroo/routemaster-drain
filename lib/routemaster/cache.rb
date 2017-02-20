@@ -1,4 +1,5 @@
 require 'routemaster/api_client'
+require 'routemaster/cache_keys'
 require 'wisper'
 
 module Routemaster
@@ -23,7 +24,7 @@ module Routemaster
 
     # Bust the cache for a given URL
     def bust(url)
-      @redis.del("cache:#{url}")
+      @redis.del(Routemaster::CacheKeys.new(url).url_key)
       _publish(:cache_bust, url)
     end
 

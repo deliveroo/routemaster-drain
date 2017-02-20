@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'spec/support/rack_test'
 require 'routemaster/middleware/cache'
+require 'routemaster/event_index'
 
 RSpec.describe Routemaster::Middleware::Cache do
   # busts the cache for each dirty url
@@ -18,8 +19,10 @@ RSpec.describe Routemaster::Middleware::Cache do
   describe '#call' do
     let(:payload) { ['https://example.com/1'] }
 
-    it 'busts the cache' do
-      expect(cache).to receive(:bust).with(payload.first)
+    it 'increments the event_index' do
+      ei_double = double(increment: 1)
+      expect(Routemaster::EventIndex).to receive(:new).with(payload.first).and_return(ei_double)
+      expect(ei_double).to receive(:increment)
       perform
     end
 
@@ -29,6 +32,3 @@ RSpec.describe Routemaster::Middleware::Cache do
     end
   end
 end
-
-
-

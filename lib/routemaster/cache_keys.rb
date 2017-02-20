@@ -1,6 +1,6 @@
 module Routemaster
   class CacheKeys
-    attr_reader :url, :store
+    attr_reader :url
 
     KEY_TEMPLATE = 'cache:{url}'
 

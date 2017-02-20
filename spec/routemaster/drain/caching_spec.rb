@@ -34,8 +34,10 @@ describe Routemaster::Drain::Caching do
     perform
   end
 
-  it 'busts the cache' do
-    expect_any_instance_of(Routemaster::Cache).to receive(:bust).exactly(3).times
+  it 'increments the ' do
+    ei_double = double(increment: 1)
+    allow(Routemaster::EventIndex).to receive(:new).and_return(ei_double)
+    expect(ei_double).to receive(:increment).exactly(3).times
     perform
   end
 
@@ -44,4 +46,3 @@ describe Routemaster::Drain::Caching do
     perform
   end
 end
-
