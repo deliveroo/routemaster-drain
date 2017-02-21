@@ -9,7 +9,9 @@ module Routemaster
     end
 
     def increment
-      cache.hincrby(CacheKey.url_key(url), 'current_index', 1).to_i
+      i = cache.hincrby(CacheKey.url_key(url), 'current_index', 1).to_i
+      Config.logger.debug("DRAIN: Increment #{@url} to #{i}") if Config.logger.debug?
+      i
     end
 
     def current

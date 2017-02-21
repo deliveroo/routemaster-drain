@@ -32,6 +32,10 @@ module Routemaster
           if response.success? && cache_enabled?(env)
             namespaced_key = "#{@cache.namespace}:#{cache_key(env)}"
             @cache.redis.node_for(namespaced_key).multi do |node|
+            if Config.logger.debug?
+              Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
+            end
+
              node.hmset(namespaced_key,
                         body_cache_field(env), response.body,
                         headers_cache_field(env), Marshal.dump(response.headers),
@@ -46,13 +50,14 @@ module Routemaster
 
       def fetch_from_cache(env)
         return nil unless cache_enabled?(env)
-        body, headers, most_recent_index, current_index = @cache.hmget(cache_key(env),
-                                                                       body_cache_field(env),
-                                                                       headers_cache_field(env),
-                                                                       :most_recent_index,
-                                                                       :current_index)
+        body, headers, most_recent_index, current_index = currently_cached_content(env)
 
-        return nil unless most_recent_index.to_i == current_index.to_i && body && headers
+        if most_recent_index.to_i == current_index.to_i && body && headers
+          Config.logger.debug("DRAIN: Cache hit #{url(env)} - index_recent: #{most_recent_index.to_i}") if Config.logger.debug?
+        else
+          Config.logger.debug("DRAIN: Cache miss #{url(env)} - index_recent: #{most_recent_index.to_i}") if Config.logger.debug?
+          return nil
+        end
 
         @listener._publish(:cache_hit, url(env)) if @listener
 
@@ -96,6 +101,14 @@ module Routemaster
 
       def event_index(env)
         Routemaster::EventIndex.new(url(env)).current
+      end
+
+      def currently_cached_content(env)
+        @cache.hmget(cache_key(env),
+                     body_cache_field(env),
+                     headers_cache_field(env),
+                     :most_recent_index,
+                     :current_index)
       end
     end
   end
