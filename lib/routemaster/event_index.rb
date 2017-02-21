@@ -1,4 +1,6 @@
 require 'routemaster/cache_key'
+require 'routemaster/config'
+
 module Routemaster
   class EventIndex
     attr_reader :url, :cache

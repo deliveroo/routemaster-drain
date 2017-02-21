@@ -20,6 +20,7 @@ module Routemaster
         env['routemaster.dirty'] = dirty = []
         env.fetch('routemaster.payload', []).each do |event|
           next if event['type'] == 'noop'
+          EventIndex.new(event['url']).increment
           next unless @map.mark(event['url'])
           dirty << event['url']
         end
@@ -28,6 +29,3 @@ module Routemaster
     end
   end
 end
-
-
-
