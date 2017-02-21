@@ -32,11 +32,10 @@ module Routemaster
           if response.success? && cache_enabled?(env)
             namespaced_key = "#{@cache.namespace}:#{cache_key(env)}"
             @cache.redis.node_for(namespaced_key).multi do |node|
-            if Config.logger.debug?
-              Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
-            end
-
-             node.hmset(namespaced_key,
+              if Config.logger.debug?
+                Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
+              end
+              node.hmset(namespaced_key,
                         body_cache_field(env), response.body,
                         headers_cache_field(env), Marshal.dump(response.headers),
                         :most_recent_index, event_index)
@@ -60,7 +59,7 @@ module Routemaster
         end
 
         @listener._publish(:cache_hit, url(env)) if @listener
-
+        
         Faraday::Response.new(status: 200,
                               body: body,
                               response_headers: Marshal.load(headers),

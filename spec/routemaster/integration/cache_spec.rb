@@ -92,31 +92,58 @@ RSpec.describe 'Requests with caching' do
     end
 
     context "when two requests interleave" do
-      before do
-        breakpoint_class(Routemaster::Middleware::ResponseCaching, :fetch_from_service )
-        processes = 2.times.collect do
+      let(:processes){
+        2.times.collect do
           ForkBreak::Process.new do
             current = Routemaster::EventIndex.new(url).increment
             subject.get(url)
           end
         end
-        processes.first.run_until(:before_fetch_from_service).wait
-        processes.last.finish.wait
-        processes.first.finish.wait
+      }
+
+      context "if there is a delay when we request" do
+        before do
+          breakpoint_class(Routemaster::Middleware::ResponseCaching, :fetch_from_service )
+          processes.first.run_until(:before_fetch_from_service).wait
+          processes.last.finish.wait
+          processes.first.finish.wait
+        end
+
+        it "should leave v1 as the most recent index" do
+          expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '1'
+        end
+
+        it "should leave v2 in as the current index" do
+          expect(Routemaster::Config.cache_redis.hget(*current_index_cache_keys)).to eq '2'
+        end
+
+        it "should perform another service request when queried" do
+          response = subject.get(url)
+          expect(response.env.request).not_to be_empty
+          expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '2'
+        end
       end
 
-      it "should leave v1 as the most recent index" do
-        expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '1'
-      end
+      context "if there is a delay when we check the cache" do
+        before do
+          breakpoint_class(Routemaster::Middleware::ResponseCaching, :currently_cached_content )
+          processes.first.run_until(:after_currently_cached_content).wait
+          processes.last.finish.wait
+          processes.first.finish.wait
+        end
 
-      it "should leave v2 in as the current index" do
-        expect(Routemaster::Config.cache_redis.hget(*current_index_cache_keys)).to eq '2'
-      end
+        it "should leave v2 as the most recent index" do
+          expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '2'
+        end
 
-      it "should perform another service request when queried" do
-        response = subject.get(url)
-        expect(response.env.request).not_to be_empty
-        expect(Routemaster::Config.cache_redis.hget(*most_recent_index_cache_keys)).to eq '2'
+        it "should leave v2 in as the current index" do
+          expect(Routemaster::Config.cache_redis.hget(*current_index_cache_keys)).to eq '2'
+        end
+
+        it "should not perform another service request when queried" do
+          response = subject.get(url)
+          expect(response.env.request).to be_empty
+        end
       end
     end
   end
