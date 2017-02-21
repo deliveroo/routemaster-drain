@@ -20,13 +20,12 @@ module Routemaster
       def call(env)
         @cache.del(cache_key(env)) if %i(patch delete).include?(env.method)
         return @app.call(env) if env.method != :get
-        @event_index = Routemaster::EventIndex.new(url(env)).current
-        fetch_from_cache(env) || fetch_from_service(env)
+        fetch_from_cache(env) || fetch_from_service(env, event_index(env))
       end
 
       private
 
-      def fetch_from_service(env)
+      def fetch_from_service(env, event_index)
         @app.call(env).on_complete do |response_env|
           response = response_env.response
 
@@ -36,7 +35,7 @@ module Routemaster
              node.hmset(namespaced_key,
                         body_cache_field(env), response.body,
                         headers_cache_field(env), Marshal.dump(response.headers),
-                        :most_recent_index, @event_index)
+                        :most_recent_index, event_index)
               node.expire(namespaced_key, @expiry)
             end
 
@@ -93,6 +92,10 @@ module Routemaster
 
       def cache_enabled?(env)
         env.request_headers[RESPONSE_CACHING_OPT_HEADER].to_s == 'true'
+      end
+
+      def event_index(env)
+        Routemaster::EventIndex.new(url(env)).current
       end
     end
   end
