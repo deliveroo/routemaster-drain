@@ -30,7 +30,7 @@ module Routemaster
     end
 
     def invalidate(url)
-      EventIndex.new(url).increment
+      EventIndex.new(url, cache: @redis).increment
     end
 
     # This is because wisper makes broadcasting methods private

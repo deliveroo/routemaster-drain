@@ -95,7 +95,7 @@ RSpec.describe 'Requests with caching' do
       let(:processes){
         2.times.collect do
           ForkBreak::Process.new do
-            current = Routemaster::EventIndex.new(url).increment
+            subject.invalidate(url)
             subject.get(url)
           end
         end

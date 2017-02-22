@@ -9,7 +9,7 @@ RSpec.describe Routemaster::Middleware::Cache do
   let(:terminator) { ErrorRackApp.new }
   let(:app) { described_class.new(terminator, **options) }
   let(:client) { Routemaster::Jobs::Client.new }
-  let(:cache) { instance_double(Routemaster::Cache, bust: nil) }
+  let(:cache) { instance_double(Routemaster::Cache, bust: nil, invalidate: nil) }
   let(:options) {{ cache: cache, client: client }}
 
   let(:perform) do
@@ -20,9 +20,7 @@ RSpec.describe Routemaster::Middleware::Cache do
     let(:payload) { ['https://example.com/1'] }
 
     it 'increments the event_index' do
-      ei_double = double(increment: 1)
-      expect(Routemaster::EventIndex).to receive(:new).with(payload.first).and_return(ei_double)
-      expect(ei_double).to receive(:increment)
+      expect(cache).to receive(:invalidate)
       perform
     end
 
