@@ -1,5 +1,6 @@
 require 'routemaster/api_client'
 require 'routemaster/cache_key'
+require 'routemaster/event_index'
 require 'wisper'
 
 module Routemaster
@@ -26,6 +27,10 @@ module Routemaster
     def bust(url)
       @redis.del(Routemaster::CacheKey.url_key(url))
       _publish(:cache_bust, url)
+    end
+
+    def invalidate(url)
+      EventIndex.new(url).increment
     end
 
     # This is because wisper makes broadcasting methods private
