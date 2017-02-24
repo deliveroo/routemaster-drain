@@ -17,8 +17,9 @@ RSpec.describe 'Api client integration specs' do
   uses_redis
 
   let!(:log) { WEBrick::Log.new '/dev/null' }
+  let(:port) { 8000 }
   let(:service) do
-    WEBrick::HTTPServer.new(Port: 8000, DocumentRoot: Dir.pwd, Logger: log).tap do |server|
+    WEBrick::HTTPServer.new(Port: port, DocumentRoot: Dir.pwd, Logger: log).tap do |server|
       [400, 401, 403, 404, 409, 412, 413, 429, 500].each do |status_code|
         server.mount_proc "/#{status_code}" do |req, res|
           res.status = status_code
@@ -40,7 +41,7 @@ RSpec.describe 'Api client integration specs' do
       server.mount_proc "/discover" do |req, res|
         res['Content-Type'] = 'application/json'
         res.status = 200
-        res.body = { _links: { resources: { href: 'http://localhost:8000/resources' } } }.to_json
+        res.body = { _links: { resources: { href: "http://localhost:#{port}/resources" } } }.to_json
       end
 
       server.mount_proc "/resources" do |req, res|
@@ -51,20 +52,20 @@ RSpec.describe 'Api client integration specs' do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:8000/resourcess?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resourcess?first_name=roo&page=1&per_page=2"
               },
               first: {
-                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               next: {
-                href: "http://localhost:8000/resources?first_name=roo&page=2&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=2&per_page=2"
               },
               resources: [
-                { href: 'http://localhost:8000/resources/1' },
-                { href: 'http://localhost:8000/resources/1' }
+                { href: "http://localhost:#{port}/resources/1" },
+                { href: "http://localhost:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -72,20 +73,20 @@ RSpec.describe 'Api client integration specs' do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:8000/resourcess?first_name=roo&page=2&per_page=2"
+                href: "http://localhost:#{port}/resourcess?first_name=roo&page=2&per_page=2"
               },
               first: {
-                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               next: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               resources: [
-                { href: 'http://localhost:8000/resources/1' },
-                { href: 'http://localhost:8000/resources/1' }
+                { href: "http://localhost:#{port}/resources/1" },
+                { href: "http://localhost:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -93,16 +94,16 @@ RSpec.describe 'Api client integration specs' do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:8000/resourcess?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resourcess?first_name=roo&page=3&per_page=2"
               },
               first: {
-                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               resources: [
-                { href: 'http://localhost:8000/resources/1' }
+                { href: "http://localhost:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -113,6 +114,7 @@ RSpec.describe 'Api client integration specs' do
 
   before do
     @pid = fork do
+      # $stderr.close
       trap 'INT' do service.shutdown end
       service.start
     end
@@ -127,6 +129,7 @@ RSpec.describe 'Api client integration specs' do
         break
       end
     end
+    # sleep(0.5) # leave sometime for the previous webrick to teardown
   end
 
   after do
@@ -135,7 +138,7 @@ RSpec.describe 'Api client integration specs' do
   end
 
   subject { Routemaster::APIClient.new }
-  let(:host) { 'http://localhost:8000' }
+  let(:host) { "http://localhost:#{port}" }
 
   describe 'error handling' do
     it 'raises an ResourceNotFound on 404' do
@@ -238,7 +241,7 @@ RSpec.describe 'Api client integration specs' do
   end
 
   describe 'INDEX request' do
-    let(:url) { 'http://localhost:8000/discover' }
+    let(:url) { "http://localhost:#{port}/discover" }
 
     subject do
       Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
@@ -252,7 +255,7 @@ RSpec.describe 'Api client integration specs' do
     it 'does not make any http requests to fetch resources any if just the index method is called' do
       resources = subject.discover(url).resources
 
-      expect(subject).to receive(:get).with("http://localhost:8000/resources", anything).once
+      expect(subject).to receive(:get).with("http://localhost:#{port}/resources", anything).once
       resources.index
     end
   end
