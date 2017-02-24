@@ -121,6 +121,7 @@ RSpec.describe 'Api client integration specs' do
   before do
     @pid = fork do
       # $stderr.close
+      $stderr.close
       trap 'INT' do service.shutdown end
       service.start
     end
