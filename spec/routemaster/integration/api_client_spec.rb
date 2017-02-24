@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'routemaster/api_client'
+require 'routemaster/cache'
 require 'webrick'
 
 RSpec.describe 'Api client integration specs' do
@@ -11,6 +12,10 @@ RSpec.describe 'Api client integration specs' do
         alias do_PATCH do_GET
       end
     end
+  end
+
+  def now
+    (Time.now.to_f * 1e6).to_i
   end
 
   uses_dotenv
@@ -35,7 +40,7 @@ RSpec.describe 'Api client integration specs' do
       server.mount_proc "/resources/1" do |req, res|
         res['Content-Type'] = 'application/json'
         res.status = 200
-        res.body = { attribute: 'value' }.to_json
+        res.body = { attribute: 'value', updated_at: now }.to_json
       end
 
       server.mount_proc "/discover" do |req, res|
@@ -178,67 +183,55 @@ RSpec.describe 'Api client integration specs' do
     end
   end
 
-  describe 'Future GET request' do
-    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
-    let(:url) { "#{host}/success" }
 
-    context 'when there is a previous cached resource' do
-      let(:cache) { Routemaster::Config.cache_redis }
+  describe 'caching behaviour' do
+    let(:url) { "#{host}/resources/1" }
+    def timestamp ; subject.get(url).body.updated_at ; end
 
-      it 'returns the response from within the future' do
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
+    describe 'GET requests' do
+      context 'when the resource was fetched' do
+        let!(:cached_stamp) { timestamp }
+        let(:fetched_stamp) { timestamp }
 
-        future = subject.fget(url)
-        expect(future).to be_an_instance_of(Routemaster::Responses::FutureResponse)
+        it 'returns the cached response' do
+          expect(fetched_stamp).to eq(cached_stamp)
+        end
 
-        future.value
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+        context 'when the cache gets busted' do
+          before { Routemaster::Cache.new.bust(url) }
+
+          it 'returns a fresh response' do
+            expect(fetched_stamp).to be > cached_stamp
+          end
+        end
+      end
+    end
+
+    describe 'PATCH request' do
+      context 'when the resource was fetched' do
+        let!(:cached_stamp) { timestamp }
+        let(:fetched_stamp) { timestamp }
+
+        it 'invalidates the cache on update' do
+          subject.patch(url, body: {})
+          expect(fetched_stamp).to be > cached_stamp
+        end
+      end
+    end
+
+    describe 'DELETE request' do
+      context 'when the resource was fetched' do
+        let!(:cached_stamp) { timestamp }
+        let(:fetched_stamp) { timestamp }
+
+        it 'invalidates the cache on destroy' do
+          subject.delete(url)
+          expect(fetched_stamp).to be > cached_stamp
+        end
       end
     end
   end
 
-  describe 'PATCH request' do
-    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
-    let(:url) { "#{host}/success" }
-
-    context 'when there is a previous cached resource' do
-      before { subject.get(url) }
-      let(:cache) { Routemaster::Config.cache_redis }
-
-      it 'invalidates the cache on update' do
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-        subject.patch(url, body: {})
-
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
-
-        subject.get(url)
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-      end
-    end
-  end
-
-  describe 'DELETE request' do
-    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
-    let(:url) { "#{host}/success" }
-
-    context 'when there is a previous cached resource' do
-      before { subject.get(url) }
-      let(:cache) { Routemaster::Config.cache_redis }
-
-      it 'invalidates the cache on destroy' do
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-        subject.delete(url)
-
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
-
-        subject.get(url)
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-      end
-    end
-  end
 
   describe 'INDEX request' do
     let(:url) { "http://localhost:#{port}/discover" }
