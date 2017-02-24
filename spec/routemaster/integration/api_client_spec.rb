@@ -116,7 +116,17 @@ RSpec.describe 'Api client integration specs' do
       trap 'INT' do service.shutdown end
       service.start
     end
-    sleep(0.5) # leave sometime for the previous webrick to teardown
+    # wait until the server is up
+    Timeout.timeout(1) do
+      loop do
+        begin
+          TCPSocket.new('localhost', '8000')
+        rescue Errno::ECONNREFUSED
+          next
+        end
+        break
+      end
+    end
   end
 
   after do
