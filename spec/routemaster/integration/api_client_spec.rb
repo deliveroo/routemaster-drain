@@ -1,20 +1,12 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
+require 'spec/support/server'
 require 'routemaster/api_client'
 require 'routemaster/cache'
-require 'webrick'
 require 'dogstatsd'
 
 RSpec.describe 'Api client integration specs' do
-  module WEBrick
-    module HTTPServlet
-      class ProcHandler
-        alias do_PATCH do_GET
-      end
-    end
-  end
-
   def now
     (Time.now.to_f * 1e6).to_i
   end
@@ -22,10 +14,9 @@ RSpec.describe 'Api client integration specs' do
   uses_dotenv
   uses_redis
 
-  let!(:log) { WEBrick::Log.new '/dev/null' }
   let(:port) { 8000 }
   let(:service) do
-    WEBrick::HTTPServer.new(Port: port, DocumentRoot: Dir.pwd, Logger: log).tap do |server|
+    TestServer.new(port) do |server|
       [400, 401, 403, 404, 409, 412, 413, 429, 500].each do |status_code|
         server.mount_proc "/#{status_code}" do |req, res|
           res.status = status_code
@@ -118,31 +109,8 @@ RSpec.describe 'Api client integration specs' do
     end
   end
 
-  before do
-    @pid = fork do
-      # $stderr.close
-      $stderr.close
-      trap 'INT' do service.shutdown end
-      service.start
-    end
-    # wait until the server is up
-    Timeout.timeout(1) do
-      loop do
-        begin
-          TCPSocket.new('localhost', '8000')
-        rescue Errno::ECONNREFUSED
-          next
-        end
-        break
-      end
-    end
-    # sleep(0.5) # leave sometime for the previous webrick to teardown
-  end
-
-  after do
-    Process.kill('KILL', @pid)
-    Process.wait(@pid)
-  end
+  before { service.start }
+  after { service.stop }
 
   subject { Routemaster::APIClient.new }
   let(:host) { "http://localhost:#{port}" }

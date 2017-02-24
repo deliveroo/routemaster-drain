@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
+require 'spec/support/server'
 require 'routemaster/cache'
 require 'webrick'
 
@@ -10,25 +11,15 @@ RSpec.describe 'Requests with caching' do
 
   let!(:log) { WEBrick::Log.new '/dev/null' }
   let(:service) do
-    WEBrick::HTTPServer.new(Port: 8000, DocumentRoot: Dir.pwd, Logger: log).tap do |server|
+    TestServer.new(8000) do |server|
       server.mount_proc '/test' do |req, res|
         res.body = { field: 'test' }.to_json
       end
     end
   end
 
-  before do
-    @pid = fork do
-      trap 'INT' do service.shutdown end
-      service.start
-    end
-    sleep(0.5) # leave sometime for the previous webrick to teardown
-  end
-
-  after do
-    Process.kill('KILL', @pid)
-    Process.wait(@pid)
-  end
+  before { service.start }
+  after { service.stop }
 
   subject { Routemaster::Cache.new }
 
