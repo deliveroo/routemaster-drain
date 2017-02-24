@@ -51,7 +51,7 @@ GEM
       guard (~> 2.1)
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
-    hashdiff (0.3.1)
+    hashdiff (0.3.2)
     hashie (3.4.6)
     json (2.0.2)
     listen (3.1.5)
@@ -73,7 +73,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     psych (2.2.1)
-    public_suffix (2.0.4)
+    public_suffix (2.0.5)
     rack (1.6.5)
     rack-protection (1.5.3)
       rack
@@ -128,7 +128,7 @@ GEM
     tilt (2.0.5)
     vegas (0.1.11)
       rack (>= 1.0.0)
-    webmock (2.3.1)
+    webmock (2.3.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff
