@@ -12,13 +12,11 @@ gem "codeclimate-test-reporter", :require => false
 gem "simplecov"
 gem "resque"
 gem "sidekiq"
+gem "guard-rspec", :require => false
+gem "pry", :require => false
+gem "rspec", :require => false
+gem "appraisal", :require => false
+gem "dogstatsd", :require => false
 gem "rails", "3.2.14"
-
-group :development, :test do
-  gem "guard-rspec", :require => false
-  gem "pry-byebug", :require => false
-  gem "rspec"
-  gem "appraisal"
-end
 
 gemspec :path => "../"
