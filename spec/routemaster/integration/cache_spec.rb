@@ -30,7 +30,6 @@ describe Routemaster::Cache do
 
   before { WebMock.disable_net_connect!(allow_localhost: true) }
 
-
   shared_examples 'a cached GET' do
     let(:url) { 'http://localhost:8000/test' }
 
@@ -39,7 +38,7 @@ describe Routemaster::Cache do
     context 'when there is no previous cached response' do
       it 'makes a HTTP request' do
         perform.call
-        expect(WebMock).to have_requested(:get, 'http://localhost:8000/test')
+        expect(WebMock).to have_requested(:get, url) 
       end
 
       it 'returns fresh headers' do

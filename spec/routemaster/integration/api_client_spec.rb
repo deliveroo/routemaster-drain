@@ -1,18 +1,20 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
+require 'spec/support/uses_webmock'
 require 'spec/support/server'
 require 'routemaster/api_client'
 require 'routemaster/cache'
 require 'dogstatsd'
 
-RSpec.describe 'Api client integration specs' do
+describe Routemaster::APIClient do
   def now
     (Time.now.to_f * 1e6).to_i
   end
 
   uses_dotenv
   uses_redis
+  uses_webmock
 
   let(:port) { 8000 }
   let(:service) do
@@ -112,7 +114,8 @@ RSpec.describe 'Api client integration specs' do
   before { service.start }
   after { service.stop }
 
-  subject { Routemaster::APIClient.new }
+  before { WebMock.disable_net_connect!(allow_localhost: true) }
+
   let(:host) { "http://localhost:#{port}" }
 
   describe 'error handling' do
