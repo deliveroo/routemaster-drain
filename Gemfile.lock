@@ -20,7 +20,6 @@ GEM
       bundler
       rake
       thor (>= 0.14.0)
-    byebug (9.0.6)
     codeclimate-test-reporter (1.0.3)
       simplecov
     coderay (1.1.1)
@@ -30,6 +29,7 @@ GEM
       safe_yaml (~> 1.0.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
+    dogstatsd (2.0.0)
     dotenv (2.1.1)
     faraday (0.11.0)
       multipart-post (>= 1.2, < 3)
@@ -72,9 +72,6 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    pry-byebug (3.4.2)
-      byebug (~> 9.0)
-      pry (~> 0.10)
     psych (2.2.1)
     public_suffix (2.0.4)
     rack (1.6.5)
@@ -144,9 +141,10 @@ DEPENDENCIES
   appraisal
   bundler
   codeclimate-test-reporter
+  dogstatsd
   dotenv
   guard-rspec
-  pry-byebug
+  pry
   psych
   rack-test
   rake
