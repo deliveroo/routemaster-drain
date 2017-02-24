@@ -4,6 +4,7 @@ require 'spec/support/uses_dotenv'
 require 'routemaster/api_client'
 require 'routemaster/cache'
 require 'webrick'
+require 'dogstatsd'
 
 RSpec.describe 'Api client integration specs' do
   module WEBrick
@@ -254,43 +255,51 @@ RSpec.describe 'Api client integration specs' do
   end
 
   describe 'Telemetry' do
-    let(:metrics_client) { double('MetricsClient') }
+    let(:metrics_client) { Dogstatsd.new }
     let(:source_peer) { 'test_service' }
     let(:url) { "#{host}/success" }
+    let(:calls) { [] } 
 
     subject do
       Routemaster::APIClient.new(metrics_client: metrics_client,
                                  source_peer: source_peer)
     end
 
+    before do
+      wrapper = -> (m, *args, &block) {
+        calls << [m.name, *args]
+        m.call(*args, &block)
+      }
+      allow(metrics_client).to receive(:increment).and_wrap_original(&wrapper)
+      allow(metrics_client).to receive(:time).and_wrap_original(&wrapper)
+    end
+
     context 'when metrics source peer is absent' do
-      subject { Routemaster::APIClient.new(metrics_client: metrics_client) }
+      let(:source_peer) { nil }
 
       it 'does not send metrics' do
-        expect(metrics_client).to receive(:increment).never
         subject.get(url)
+        expect(calls).to be_empty
       end
     end
 
-    it 'does send request metrics' do
-      allow(metrics_client).to receive(:time).and_yield
-      allow(metrics_client).to receive(:increment)
-      expected_req_count_tags = ["source:test_service", "destination:localhost", "verb:get"]
-
-      expect(metrics_client).to receive(:increment).with('api_client.request.count', tags: expected_req_count_tags)
-
+    it 'sends request metrics' do
       subject.get(url)
+      expect(calls).to include([:increment, 'api_client.request.count', tags: %w[source:test_service destination:localhost verb:get]])
     end
 
-    it 'does send response metrics' do
-      allow(metrics_client).to receive(:increment)
-      expected_res_count_tags = ["source:test_service", "destination:localhost", "status:200"]
-      expected_latency_tags = ["source:test_service", "destination:localhost", "verb:get"]
-
-      expect(metrics_client).to receive(:increment).with('api_client.response.count', tags: expected_res_count_tags)
-      expect(metrics_client).to receive(:time).with('api_client.latency', tags: expected_latency_tags).and_yield
-
+    it 'sends response metrics' do
       subject.get(url)
+      expect(calls).to include([
+        :increment, 'api_client.response.count', tags: %w[source:test_service destination:localhost status:200]
+      ])
+    end
+
+    it 'sends timing metrics' do
+      subject.get(url)
+      expect(calls).to include([
+        :time, 'api_client.latency', tags: %w[source:test_service destination:localhost verb:get]
+      ])
     end
   end
 end
