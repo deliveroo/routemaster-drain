@@ -1,7 +1,6 @@
 require 'simplecov'
 SimpleCov.start
 
-require 'byebug'
 require 'sidekiq/testing'
 require 'dotenv'
 require 'pry'

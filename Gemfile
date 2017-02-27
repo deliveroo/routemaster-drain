@@ -17,9 +17,8 @@ gem 'simplecov'
 gem 'resque'
 gem 'sidekiq'
 
-group :development, :test do
-  gem 'guard-rspec',                require: false
-  gem 'pry-byebug',                 require: false
-  gem 'rspec'
-  gem 'appraisal'
-end
+gem 'guard-rspec',                require: false
+gem 'pry',                        require: false
+gem 'rspec',                      require: false
+gem 'appraisal',                  require: false
+gem 'dogstatsd',                  require: false
