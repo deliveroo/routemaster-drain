@@ -49,35 +49,15 @@ module Routemaster
     end
 
     def post(url, body: {}, headers: {})
-      host = URI.parse(url).host
-      response_wrapper do
-        connection.post do |req|
-          req.url url
-          req.headers = headers.merge(auth_header(host))
-          req.body = body
-        end
-      end
+      _request(:post, url: url, body: body, headers: headers)
     end
 
     def patch(url, body: {}, headers: {})
-      host = URI.parse(url).host
-      response_wrapper do
-        connection.patch do |req|
-          req.url url
-          req.headers = headers.merge(auth_header(host))
-          req.body = body
-        end
-      end
+      _request(:patch, url: url, body: body, headers: headers)
     end
 
     def delete(url, headers: {})
-      host = URI.parse(url).host
-      response_wrapper do
-        connection.delete do |req|
-          req.url url
-          req.headers = headers.merge(auth_header(host))
-        end
-      end
+      _request(:delete, url: url, body: nil, headers: headers)
     end
 
     def discover(url)
@@ -94,6 +74,15 @@ module Routemaster
 
     private
 
+    def _request(method, url:, body:, headers:)
+      auth = auth_header URI.parse(url).host
+      connection.public_send(method) do |req|
+        req.url url
+        req.headers = headers.merge(auth)
+        req.body = body
+      end
+    end
+
     def response_wrapper(&block)
       response = block.call
       @response_class ? @response_class.new(response, client: self) : response
@@ -101,13 +90,13 @@ module Routemaster
 
     def connection
       @connection ||= Faraday.new do |f|
-        f.request  :json
-        f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
+        f.request :json
+        f.request :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
-        f.adapter  :net_http_persistent
+        f.adapter :net_http_persistent
         f.use Routemaster::Middleware::ErrorHandling
 
         @middlewares.each do |middleware|
