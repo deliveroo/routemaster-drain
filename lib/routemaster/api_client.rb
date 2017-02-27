@@ -45,7 +45,7 @@ module Routemaster
     end
 
     def fget(url, params: {}, headers: {})
-      Responses::FutureResponse.new { get(url, params: {}, headers: {}) }
+      Responses::FutureResponse.new { get(url, params: params, headers: headers) }
     end
 
     def post(url, body: {}, headers: {})
@@ -85,10 +85,11 @@ module Routemaster
     end
 
     def with_response(response_class, &block)
+      memo = @response_class
       @response_class = response_class
-      result = block.call(self)
-      @response_class = Responses::HateoasResponse
-      result
+      block.call(self)
+    ensure
+      @response_class = memo
     end
 
     private

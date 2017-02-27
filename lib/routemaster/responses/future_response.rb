@@ -41,6 +41,11 @@ module Routemaster
 
       delegate :value => :@future
       delegate %i(status headers body) => :value
+      delegate :respond_to_missing? => :value
+      
+      def method_missing(m, *args, &block)
+        value.public_send(m, *args, &block)
+      end
     end
   end
 end
