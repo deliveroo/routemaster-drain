@@ -32,18 +32,17 @@ module Routemaster
       uri = _assert_uri(url)
       enable_caching = options.fetch(:enable_caching, true)
 
-      response_wrapper do
-        request_headers = headers.
-          merge(auth_header(uri.host)).
-          merge(response_cache_opt_headers(enable_caching))
-
-        connection.get(uri.to_s, params, request_headers)
-      end
+      _wrapped_response _request(
+        :get, 
+        url: url, 
+        params: params,
+        headers: headers.merge(response_cache_opt_headers(enable_caching)))
     end
 
-    def fget(url, params: {}, headers: {})
+    # Same as {{get}}, except with 
+    def fget(url, **options)
       uri = _assert_uri(url)
-      Responses::FutureResponse.new { get(uri, params: params, headers: headers) }
+      Responses::FutureResponse.new { get(uri, options) }
     end
 
     def post(url, body: {}, headers: {})
@@ -77,18 +76,18 @@ module Routemaster
       URI.parse(url)
     end
 
-    def _request(method, url:, body:, headers:)
+    def _request(method, url:, body: nil, headers:, params: {})
       uri = _assert_uri(url)
       auth = auth_header(uri.host)
       connection.public_send(method) do |req|
         req.url uri.to_s
+        req.params.merge! params
         req.headers = headers.merge(auth)
         req.body = body
       end
     end
 
-    def response_wrapper(&block)
-      response = block.call
+    def _wrapped_response(response)
       @response_class ? @response_class.new(response, client: self) : response
     end
 
