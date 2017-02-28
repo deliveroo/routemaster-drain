@@ -1,24 +1,24 @@
 require 'spec_helper'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
+require 'spec/support/uses_webmock'
+require 'spec/support/server'
 require 'routemaster/api_client'
-require 'webrick'
+require 'routemaster/cache'
+require 'dogstatsd'
 
-RSpec.describe 'Api client integration specs' do
-  module WEBrick
-    module HTTPServlet
-      class ProcHandler
-        alias do_PATCH do_GET
-      end
-    end
+describe Routemaster::APIClient do
+  def now
+    (Time.now.to_f * 1e6).to_i
   end
 
   uses_dotenv
   uses_redis
+  uses_webmock
 
-  let!(:log) { WEBrick::Log.new '/dev/null' }
+  let(:port) { 8000 }
   let(:service) do
-    WEBrick::HTTPServer.new(Port: 8000, DocumentRoot: Dir.pwd, Logger: log).tap do |server|
+    TestServer.new(port) do |server|
       [400, 401, 403, 404, 409, 412, 413, 429, 500].each do |status_code|
         server.mount_proc "/#{status_code}" do |req, res|
           res.status = status_code
@@ -34,13 +34,13 @@ RSpec.describe 'Api client integration specs' do
       server.mount_proc "/resources/1" do |req, res|
         res['Content-Type'] = 'application/json'
         res.status = 200
-        res.body = { attribute: 'value' }.to_json
+        res.body = { attribute: 'value', updated_at: now }.to_json
       end
 
       server.mount_proc "/discover" do |req, res|
         res['Content-Type'] = 'application/json'
         res.status = 200
-        res.body = { _links: { resources: { href: 'http://localhost:8000/resources' } } }.to_json
+        res.body = { _links: { resources: { href: "http://localhost:#{port}/resources" } } }.to_json
       end
 
       server.mount_proc "/resources" do |req, res|
@@ -51,20 +51,20 @@ RSpec.describe 'Api client integration specs' do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:8000/resourcess?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resourcess?first_name=roo&page=1&per_page=2"
               },
               first: {
-                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               next: {
-                href: "http://localhost:8000/resources?first_name=roo&page=2&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=2&per_page=2"
               },
               resources: [
-                { href: 'http://localhost:8000/resources/1' },
-                { href: 'http://localhost:8000/resources/1' }
+                { href: "http://localhost:#{port}/resources/1" },
+                { href: "http://localhost:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -72,20 +72,20 @@ RSpec.describe 'Api client integration specs' do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:8000/resourcess?first_name=roo&page=2&per_page=2"
+                href: "http://localhost:#{port}/resourcess?first_name=roo&page=2&per_page=2"
               },
               first: {
-                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               next: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               resources: [
-                { href: 'http://localhost:8000/resources/1' },
-                { href: 'http://localhost:8000/resources/1' }
+                { href: "http://localhost:#{port}/resources/1" },
+                { href: "http://localhost:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -93,16 +93,16 @@ RSpec.describe 'Api client integration specs' do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:8000/resourcess?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resourcess?first_name=roo&page=3&per_page=2"
               },
               first: {
-                href: "http://localhost:8000/resources?first_name=roo&page=1&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:8000/resources?first_name=roo&page=3&per_page=2"
+                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               resources: [
-                { href: 'http://localhost:8000/resources/1' }
+                { href: "http://localhost:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -111,21 +111,12 @@ RSpec.describe 'Api client integration specs' do
     end
   end
 
-  before do
-    @pid = fork do
-      trap 'INT' do service.shutdown end
-      service.start
-    end
-    sleep(0.5) # leave sometime for the previous webrick to teardown
-  end
+  before { service.start }
+  after { service.stop }
 
-  after do
-    Process.kill('KILL', @pid)
-    Process.wait(@pid)
-  end
+  before { WebMock.disable_net_connect!(allow_localhost: true) }
 
-  subject { Routemaster::APIClient.new }
-  let(:host) { 'http://localhost:8000' }
+  let(:host) { "http://localhost:#{port}" }
 
   describe 'error handling' do
     it 'raises an ResourceNotFound on 404' do
@@ -165,70 +156,58 @@ RSpec.describe 'Api client integration specs' do
     end
   end
 
-  describe 'Future GET request' do
-    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
-    let(:url) { "#{host}/success" }
 
-    context 'when there is a previous cached resource' do
-      let(:cache) { Routemaster::Config.cache_redis }
+  describe 'caching behaviour' do
+    let(:url) { "#{host}/resources/1" }
+    def timestamp ; subject.get(url).body.updated_at ; end
 
-      it 'returns the response from within the future' do
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
+    describe 'GET requests' do
+      context 'when the resource was fetched' do
+        let!(:cached_stamp) { timestamp }
+        let(:fetched_stamp) { timestamp }
 
-        future = subject.fget(url)
-        expect(future).to be_an_instance_of(Routemaster::Responses::FutureResponse)
+        it 'returns the cached response' do
+          expect(fetched_stamp).to eq(cached_stamp)
+        end
 
-        future.value
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
+        context 'when the cache gets busted' do
+          before { Routemaster::Cache.new.bust(url) }
+
+          it 'returns a fresh response' do
+            expect(fetched_stamp).to be > cached_stamp
+          end
+        end
+      end
+    end
+
+    describe 'PATCH request' do
+      context 'when the resource was fetched' do
+        let!(:cached_stamp) { timestamp }
+        let(:fetched_stamp) { timestamp }
+
+        it 'invalidates the cache on update' do
+          subject.patch(url, body: {})
+          expect(fetched_stamp).to be > cached_stamp
+        end
+      end
+    end
+
+    describe 'DELETE request' do
+      context 'when the resource was fetched' do
+        let!(:cached_stamp) { timestamp }
+        let(:fetched_stamp) { timestamp }
+
+        it 'invalidates the cache on destroy' do
+          subject.delete(url)
+          expect(fetched_stamp).to be > cached_stamp
+        end
       end
     end
   end
 
-  describe 'PATCH request' do
-    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
-    let(:url) { "#{host}/success" }
-
-    context 'when there is a previous cached resource' do
-      before { subject.get(url) }
-      let(:cache) { Routemaster::Config.cache_redis }
-
-      it 'invalidates the cache on update' do
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-        subject.patch(url, body: {})
-
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
-
-        subject.get(url)
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-      end
-    end
-  end
-
-  describe 'DELETE request' do
-    let(:body_cache_keys) { ["cache:#{url}", "v:,l:,body"] }
-    let(:headers_cache_keys) { ["cache:#{url}", "v:,l:,headers"] }
-    let(:url) { "#{host}/success" }
-
-    context 'when there is a previous cached resource' do
-      before { subject.get(url) }
-      let(:cache) { Routemaster::Config.cache_redis }
-
-      it 'invalidates the cache on destroy' do
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-        subject.delete(url)
-
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be_nil
-
-        subject.get(url)
-        expect(cache.hget("cache:#{url}", "v:,l:,body")).to be
-      end
-    end
-  end
 
   describe 'INDEX request' do
-    let(:url) { 'http://localhost:8000/discover' }
+    let(:url) { "http://localhost:#{port}/discover" }
 
     subject do
       Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
@@ -242,13 +221,13 @@ RSpec.describe 'Api client integration specs' do
     it 'does not make any http requests to fetch resources any if just the index method is called' do
       resources = subject.discover(url).resources
 
-      expect(subject).to receive(:get).with("http://localhost:8000/resources", anything).once
+      expect(subject).to receive(:get).with("http://localhost:#{port}/resources", anything).once
       resources.index
     end
   end
 
-  describe 'Telemetry' do
-    let(:metrics_client) { double('MetricsClient') }
+  describe 'telemetry' do
+    let(:metrics_client) { Dogstatsd.new }
     let(:source_peer) { 'test_service' }
     let(:url) { "#{host}/success" }
 
@@ -257,34 +236,39 @@ RSpec.describe 'Api client integration specs' do
                                  source_peer: source_peer)
     end
 
+    before do
+      allow(metrics_client).to receive(:increment).and_call_original
+      allow(metrics_client).to receive(:time).and_call_original
+    end
+
     context 'when metrics source peer is absent' do
-      subject { Routemaster::APIClient.new(metrics_client: metrics_client) }
+      let(:source_peer) { nil }
 
       it 'does not send metrics' do
-        expect(metrics_client).to receive(:increment).never
         subject.get(url)
+        expect(metrics_client).not_to have_received(:increment)
       end
     end
 
-    it 'does send request metrics' do
-      allow(metrics_client).to receive(:time).and_yield
-      allow(metrics_client).to receive(:increment)
-      expected_req_count_tags = ["source:test_service", "destination:localhost", "verb:get"]
-
-      expect(metrics_client).to receive(:increment).with('api_client.request.count', tags: expected_req_count_tags)
-
+    it 'sends request metrics' do
       subject.get(url)
+      expect(metrics_client).to have_received(:increment).with(
+        'api_client.request.count', tags: %w[source:test_service destination:localhost verb:get]
+      )
     end
 
-    it 'does send response metrics' do
-      allow(metrics_client).to receive(:increment)
-      expected_res_count_tags = ["source:test_service", "destination:localhost", "status:200"]
-      expected_latency_tags = ["source:test_service", "destination:localhost", "verb:get"]
-
-      expect(metrics_client).to receive(:increment).with('api_client.response.count', tags: expected_res_count_tags)
-      expect(metrics_client).to receive(:time).with('api_client.latency', tags: expected_latency_tags).and_yield
-
+    it 'sends response metrics' do
       subject.get(url)
+      expect(metrics_client).to have_received(:increment).with(
+        'api_client.response.count', tags: %w[source:test_service destination:localhost status:200]
+      )
+    end
+
+    it 'sends timing metrics' do
+      subject.get(url)
+      expect(metrics_client).to have_received(:time).with(
+        'api_client.latency', tags: %w[source:test_service destination:localhost verb:get]
+      )
     end
   end
 end

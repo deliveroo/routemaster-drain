@@ -33,7 +33,7 @@ module Routemaster
 
     def _cleanup
       @_pid = Process.pid
-      @_connections.each_value(&:quit)
+      @_connections.each_value.map(&:redis).each(&:quit)
       @_connections = {}
     end
 
