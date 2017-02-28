@@ -3,6 +3,8 @@ require 'spec/support/uses_webmock'
 require 'spec/support/uses_redis'
 require 'routemaster/responses/hateoas_enumerable_response'
 
+# need to load this here to resolve circular dependency
+require 'routemaster/resources/rest_resource'
 
 describe Routemaster::Responses::HateoasEnumerableResponse do
   uses_webmock
@@ -65,7 +67,7 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
       expect(subject.map(&:body).map(&:id)).to eq (1..15).to_a
     end
 
-    xit 'does not fetch eagerly' do
+    it 'does not fetch eagerly' do
       subject.first
       expect(@index_stub).to have_been_requested.once
     end
