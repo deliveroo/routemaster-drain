@@ -2,19 +2,27 @@ require 'singleton'
 require 'hashie/rash'
 require 'set'
 require 'routemaster/redis_broker'
+require 'routemaster/null_logger'
 
 module Routemaster
   class Config
+    include Singleton
     module Classmethods
       def method_missing(method, *args, &block)
-        new.send(method, *args, &block)
+        instance.send(method, *args, &block)
       end
 
       def respond_to?(method, include_all = false)
-        new.respond_to?(method, include_all)
+        instance.respond_to?(method, include_all)
       end
     end
     extend Classmethods
+
+    attr_writer :logger
+
+    def logger
+      @logger ||= NullLogger.new
+    end
 
     def drain_redis
       RedisBroker.instance.get(:drain_redis, urls: ENV.fetch('ROUTEMASTER_DRAIN_REDIS').split(','))

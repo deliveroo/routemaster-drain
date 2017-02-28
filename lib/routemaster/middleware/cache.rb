@@ -2,6 +2,7 @@ require 'routemaster/cache'
 require 'routemaster/config'
 require 'routemaster/jobs/client'
 require 'routemaster/jobs/cache_and_sweep'
+require 'routemaster/event_index'
 
 module Routemaster
   module Middleware
@@ -15,7 +16,7 @@ module Routemaster
 
       def call(env)
         env.fetch('routemaster.dirty', []).each do |url|
-          @cache.bust(url)
+          @cache.invalidate(url)
           @client.enqueue(@queue, Routemaster::Jobs::CacheAndSweep, url)
         end
         @app.call(env)
@@ -23,7 +24,3 @@ module Routemaster
     end
   end
 end
-
-
-
-

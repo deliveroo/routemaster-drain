@@ -1,5 +1,5 @@
 PATH
-  remote: ..
+  remote: ../
   specs:
     routemaster-drain (2.3.0)
       faraday (>= 0.9.0)
@@ -73,6 +73,9 @@ GEM
     faraday_middleware (0.11.0.1)
       faraday (>= 0.7.4, < 1.0)
     ffi (1.9.17)
+    fork (1.0.1)
+    fork_break (0.1.4)
+      fork (= 1.0.1)
     formatador (0.2.5)
     globalid (0.3.7)
       activesupport (>= 4.1.0)
@@ -228,6 +231,7 @@ DEPENDENCIES
   codeclimate-test-reporter
   dogstatsd
   dotenv
+  fork_break
   guard-rspec
   pry
   psych

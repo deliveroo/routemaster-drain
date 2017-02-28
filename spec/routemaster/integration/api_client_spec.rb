@@ -3,6 +3,7 @@ require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'spec/support/uses_webmock'
 require 'spec/support/server'
+require 'spec/support/breakpoint_class'
 require 'routemaster/api_client'
 require 'routemaster/cache'
 require 'dogstatsd'
@@ -177,6 +178,14 @@ describe Routemaster::APIClient do
             expect(fetched_stamp).to be > cached_stamp
           end
         end
+
+        context 'when the cache gets invalidated' do
+          before { Routemaster::Cache.new.invalidate(url) }
+
+          it 'returns a fresh response' do
+            expect(fetched_stamp).to be > cached_stamp
+          end
+        end
       end
     end
 
@@ -205,6 +214,65 @@ describe Routemaster::APIClient do
     end
   end
 
+  describe 'interleaved requests' do
+    let(:url) { "#{host}/resources/1" }
+
+    let(:processes) do
+      Array.new(2) do
+        ForkBreak::Process.new do
+          Routemaster::Cache.new.send(cache_method, url)
+          subject.get(url).body
+        end
+      end
+    end
+
+    let(:first_timestamp) do
+      processes[0].return_value.updated_at
+    end
+
+    let(:second_timestamp) do
+      processes[1].return_value.updated_at
+    end
+
+    let(:fresh_timestamp) do
+      subject.get(url).body.updated_at
+    end
+
+    before do
+      breakpoint_class(Routemaster::Middleware::ResponseCaching, :fetch_from_service)
+      processes.first.run_until(:before_fetch_from_service).wait
+      processes.last.finish.wait
+      processes.first.finish.wait
+    end
+
+    context 'the cache is busted between requests' do
+      let(:cache_method) { :bust }
+
+      it 'should return the first_timestamp' do
+        expect(first_timestamp).to eq fresh_timestamp
+      end
+
+      it 'returns a second timestamp older than the first' do
+        expect(second_timestamp).to be < first_timestamp
+      end
+    end
+
+    context 'the cache is invalidated between requests' do
+      let(:cache_method) { :invalidate }
+
+      it 'returns a second timestamp older than the first' do
+        expect(second_timestamp).to be < first_timestamp
+      end
+
+      it 'returns an invalid first request' do
+        expect(first_timestamp).to be < fresh_timestamp
+      end
+
+      it 'returns an invalid second request' do
+        expect(second_timestamp).to be < fresh_timestamp
+      end
+    end
+  end
 
   describe 'INDEX request' do
     let(:url) { "http://localhost:#{port}/discover" }
