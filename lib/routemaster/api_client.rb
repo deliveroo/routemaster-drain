@@ -62,10 +62,10 @@ module Routemaster
       get(url)
     end
 
-    def with_response(response_class, &block)
+    def with_response(response_class)
       memo = @response_class
       @response_class = response_class
-      block.call(self)
+      yield self
     ensure
       @response_class = memo
     end

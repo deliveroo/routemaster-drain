@@ -10,6 +10,8 @@ module Routemaster
 
       subject { described_class.new(url, client: client) }
 
+      before { allow(client).to receive(:with_response).and_yield }
+
       describe '#create' do
         it 'posts to the given url' do
           expect(client).to receive(:post).with(url, body: params)
@@ -25,10 +27,6 @@ module Routemaster
       end
 
       describe '#index' do
-        before do
-          allow(client).to receive(:with_response).and_yield(client)
-        end
-
         it 'gets to the given url' do
           expect(client).to receive(:get).with(url, params: {}, options: { enable_caching: false })
           subject.index

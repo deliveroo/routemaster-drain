@@ -33,10 +33,6 @@ module Routemaster
     class HateoasEnumerableResponse < HateoasResponse
       include Enumerable
 
-      def initialize(response, client: nil)
-        super(response, client: client)
-      end
-
       delegate :each => :resources_from_body
 
       private

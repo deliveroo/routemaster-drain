@@ -1,6 +1,9 @@
 require 'spec_helper'
 require 'routemaster/responses/hateoas_response'
 
+# need to laod this here to resolve circular dependency
+require 'routemaster/resources/rest_resource'
+
 describe Routemaster::Responses::HateoasResponse do
   let(:response) { double('Response', status: status, body: body, headers: headers) }
   let(:status) { 200 }
