@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'routemaster/responses/hateoas_response'
 
 #
@@ -36,11 +37,7 @@ module Routemaster
         super(response, client: client)
       end
 
-      def each(&block)
-        resources_from_body.each do |entry|
-          block.call(entry)
-        end
-      end
+      delegate :each => :resources_from_body
 
       private
 

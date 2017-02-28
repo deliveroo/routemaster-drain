@@ -29,20 +29,21 @@ module Routemaster
     # and `body`. The body is a `Hashie::Mash` if the response was JSON, a
     # string otherwise.
     def get(url, params: {}, headers: {}, options: {})
-      host = URI.parse(url).host
+      uri = _assert_uri(url)
       enable_caching = options.fetch(:enable_caching, true)
 
       response_wrapper do
         request_headers = headers.
-          merge(auth_header(host)).
+          merge(auth_header(uri.host)).
           merge(response_cache_opt_headers(enable_caching))
 
-        connection.get(url, params, request_headers)
+        connection.get(uri.to_s, params, request_headers)
       end
     end
 
     def fget(url, params: {}, headers: {})
-      Responses::FutureResponse.new { get(url, params: params, headers: headers) }
+      uri = _assert_uri(url)
+      Responses::FutureResponse.new { get(uri, params: params, headers: headers) }
     end
 
     def post(url, body: {}, headers: {})
@@ -71,10 +72,16 @@ module Routemaster
 
     private
 
+    def _assert_uri(url)
+      return url if url.kind_of?(URI)
+      URI.parse(url)
+    end
+
     def _request(method, url:, body:, headers:)
-      auth = auth_header URI.parse(url).host
+      uri = _assert_uri(url)
+      auth = auth_header(uri.host)
       connection.public_send(method) do |req|
-        req.url url
+        req.url uri.to_s
         req.headers = headers.merge(auth)
         req.body = body
       end
