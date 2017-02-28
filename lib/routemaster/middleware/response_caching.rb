@@ -35,6 +35,7 @@ module Routemaster
               if Config.logger.debug?
                 Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
               end
+
               node.hmset(namespaced_key,
                          body_cache_field(env), response.body,
                          headers_cache_field(env), Marshal.dump(response.headers),
@@ -51,7 +52,7 @@ module Routemaster
         return nil unless cache_enabled?(env)
         body, headers, most_recent_index, current_index = currently_cached_content(env)
 
-        if most_recent_index.to_i != current_index.to_i && body && headers
+        unless most_recent_index.to_i == current_index.to_i && body && headers
           Config.logger.debug("DRAIN: Cache miss #{url(env)} - index_recent: #{most_recent_index.to_i}") if Config.logger.debug?
           return nil
         end
