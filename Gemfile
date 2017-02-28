@@ -22,3 +22,4 @@ gem 'pry',                        require: false
 gem 'rspec',                      require: false
 gem 'appraisal',                  require: false
 gem 'dogstatsd',                  require: false
+gem 'fork_break',                 require: false
