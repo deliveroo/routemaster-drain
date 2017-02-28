@@ -1,3 +1,5 @@
+require 'routemaster/responses/hateoas_response'
+
 #
 # HateoasEnumerableResponse
 # On initialize we scan and expose all resourcs in the collection via .each

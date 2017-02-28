@@ -1,6 +1,6 @@
-require 'faraday_middleware'
 require 'forwardable'
-require 'json'
+require 'routemaster/api_client'
+require 'routemaster/resources/rest_resource'
 
 module Routemaster
   module Responses
@@ -12,7 +12,7 @@ module Routemaster
 
       def initialize(response, client: nil)
         @response = response
-        @client = client || Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+        @client = client || Routemaster::APIClient.new(response_class: self.class)
       end
 
       def method_missing(m, *args, &block)

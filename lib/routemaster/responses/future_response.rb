@@ -11,7 +11,6 @@ module Routemaster
 
       def initialize
         Thread.pool(5, 20).tap do |p|
-          # TODO: configurable pool size and trim timeout?
           p.auto_trim!
           p.idle_trim! 10 # 10 seconds
           super p

@@ -1,15 +1,12 @@
+require 'uri'
 require 'base64'
 require 'faraday'
 require 'faraday_middleware'
-require 'hashie'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
-require 'routemaster/responses/hateoas_response'
-require 'routemaster/responses/hateoas_enumerable_response'
 require 'routemaster/responses/future_response'
-require 'routemaster/resources/rest_resource'
 
 module Routemaster
   class APIClient

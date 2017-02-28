@@ -1,4 +1,5 @@
 require 'routemaster/api_client'
+require 'routemaster/responses/hateoas_enumerable_response'
 
 module Routemaster
   module Resources
