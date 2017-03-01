@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+#
+# Run all appraisals, with all specified rubies
+#
+require 'yaml'
+
+
+RUBIES = YAML.load_file('.travis.yml')['rvm']
+APPRAISALS = `appraisal list`.strip.split(/\s+/)
+
+RUBIES.each do |ruby|
+  system "appraisal install"
+  APPRAISALS.each do |variant|
+    puts "*** Ruby #{ruby} / variant #{variant}"
+    ENV['RBENV_VERSION'] = ruby
+    system "appraisal #{variant} rspec"
+  end
+end

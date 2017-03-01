@@ -1,6 +1,8 @@
 require 'base64'
 require 'faraday'
 require 'faraday_middleware'
+require 'typhoeus'
+require 'typhoeus/adapters/faraday'
 require 'hashie'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
@@ -106,7 +108,7 @@ module Routemaster
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
-        f.adapter  :net_http_persistent
+        f.adapter :typhoeus
         f.use Routemaster::Middleware::ErrorHandling
 
         @middlewares.each do |middleware|
