@@ -29,12 +29,11 @@ module Routemaster
     # and `body`. The body is a `Hashie::Mash` if the response was JSON, a
     # string otherwise.
     def get(url, params: {}, headers: {}, options: {})
-      uri = _assert_uri(url)
       enable_caching = options.fetch(:enable_caching, true)
 
       _wrapped_response _request(
         :get, 
-        url: url, 
+        url: url,
         params: params,
         headers: headers.merge(response_cache_opt_headers(enable_caching)))
     end
