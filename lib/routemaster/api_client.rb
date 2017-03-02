@@ -2,6 +2,8 @@ require 'base64'
 require 'faraday'
 require 'faraday_middleware'
 require 'typhoeus'
+# loading the Faraday adapter for Typhoeus requires a little dance:
+require 'faraday/adapter/typhoeus'
 require 'typhoeus/adapters/faraday'
 require 'hashie'
 require 'routemaster/config'
@@ -25,6 +27,8 @@ module Routemaster
       @response_class = response_class
       @metrics_client = metrics_client
       @source_peer = source_peer
+
+      connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
 
     # Performs a GET HTTP request for the `url`, with optional
