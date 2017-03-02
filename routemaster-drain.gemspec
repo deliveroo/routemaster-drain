@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency     'wisper', '~> 1.6.1'
   spec.add_runtime_dependency     'hashie'
   spec.add_runtime_dependency     'redis-namespace'
-  spec.add_runtime_dependency     'thread'
+  spec.add_runtime_dependency     'concurrent-ruby'
 end

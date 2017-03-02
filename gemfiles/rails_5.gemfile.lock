@@ -2,12 +2,12 @@ PATH
   remote: ..
   specs:
     routemaster-drain (2.3.0)
+      concurrent-ruby
       faraday (>= 0.9.0)
       faraday_middleware
       hashie
       rack (>= 1.4.5)
       redis-namespace
-      thread
       typhoeus (~> 1.1)
       wisper (~> 1.6.1)
 
@@ -59,6 +59,7 @@ GEM
       thor (>= 0.14.0)
     arel (7.1.4)
     builder (3.2.3)
+    byebug (9.0.6)
     codeclimate-test-reporter (1.0.6)
       simplecov
     coderay (1.1.1)
@@ -211,7 +212,6 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     thor (0.19.4)
-    thread (0.2.2)
     thread_safe (0.3.6)
     typhoeus (1.1.2)
       ethon (>= 0.9.0)
@@ -234,6 +234,7 @@ PLATFORMS
 DEPENDENCIES
   appraisal
   bundler
+  byebug
   codeclimate-test-reporter
   dogstatsd
   dotenv

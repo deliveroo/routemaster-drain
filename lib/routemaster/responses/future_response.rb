@@ -1,30 +1,15 @@
-require 'thread/pool'
-require 'thread/future'
+require 'concurrent/future'
 require 'singleton'
 require 'delegate'
 
 module Routemaster
   module Responses
-    # A pool of threads, used for parallel/future request processing.
-    class Pool < SimpleDelegator
-      include Singleton
-
-      def initialize
-        Thread.pool(5, 20).tap do |p|
-          # TODO: configurable pool size and trim timeout?
-          p.auto_trim!
-          p.idle_trim! 10 # 10 seconds
-          super p
-        end
-      end
-    end
-
     class FutureResponse
       extend Forwardable
 
       # The `block` is expected to return a {Response}
       def initialize(&block)
-        @future = Pool.instance.future(&block)
+        @future = Concurrent::Future.execute(&block)
       end
 
       # @!attribute status
