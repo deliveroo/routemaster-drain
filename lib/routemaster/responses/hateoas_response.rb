@@ -1,4 +1,4 @@
-require 'faraday_middleware'
+require 'core_ext/forwardable'
 require 'forwardable'
 require 'json'
 
