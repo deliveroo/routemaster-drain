@@ -220,6 +220,7 @@ describe Routemaster::APIClient do
     let(:processes) do
       Array.new(2) do
         ForkBreak::Process.new do
+          breakpoint_class(Routemaster::Middleware::ResponseCaching, :fetch_from_service)
           Routemaster::Cache.new.send(cache_method, url)
           subject.get(url).body
         end
@@ -239,7 +240,6 @@ describe Routemaster::APIClient do
     end
 
     before do
-      breakpoint_class(Routemaster::Middleware::ResponseCaching, :fetch_from_service)
       processes.first.run_until(:before_fetch_from_service).wait
       processes.last.finish.wait
       processes.first.finish.wait
