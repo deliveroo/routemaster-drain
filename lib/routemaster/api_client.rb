@@ -2,10 +2,6 @@ require 'base64'
 require 'faraday'
 require 'faraday_middleware'
 require 'typhoeus'
-# loading the Faraday adapter for Typhoeus requires a little dance:
-require 'faraday/adapter/typhoeus'
-require 'typhoeus/adapters/faraday'
-require 'hashie'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
@@ -14,6 +10,20 @@ require 'routemaster/responses/hateoas_response'
 require 'routemaster/responses/hateoas_enumerable_response'
 require 'routemaster/responses/future_response'
 require 'routemaster/resources/rest_resource'
+
+# Loading the Faraday adapter for Typhoeus requires a little dance
+require 'faraday/adapter/typhoeus'
+require 'typhoeus/adapters/faraday'
+
+# The following requires are not direct dependencies, but loading them early
+# prevents Faraday's magic class loading pixie dust from tripping over itself in
+# multithreaded use cases.
+require 'uri'
+require 'faraday/request/retry'
+require 'faraday_middleware/request/encode_json'
+require 'faraday_middleware/response/parse_json'
+require 'faraday_middleware/response/mashify'
+require 'hashie/mash'
 
 module Routemaster
   class APIClient
