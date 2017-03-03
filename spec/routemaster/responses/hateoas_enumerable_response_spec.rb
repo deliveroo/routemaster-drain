@@ -10,8 +10,8 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
   uses_webmock
   uses_redis
 
-  let(:resource_tpl) { Addressable::Template.new('https://example.com/widgets/{id}') }
-  let(:index_tpl) { Addressable::Template.new('https://example.com/widgets{?page,per_page}') }
+  let(:resource_tpl) { Addressable::Template.new('https://example.com/shebangs/{id}') }
+  let(:index_tpl) { Addressable::Template.new('https://example.com/shebangs{?page,per_page}') }
   let(:index_url) { index_tpl.expand(page: nil, per_page:nil).to_s }
   let(:pages) { 5 }
   let(:per_page) { 3 }
@@ -39,7 +39,7 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
       data = Hashie::Mash.new(
         _links: {
           self: { href: index_tpl.expand(page: page, per_page: per_page).to_s },
-          widgets: (start..stop).map { |idx|
+          shebangs: (start..stop).map { |idx|
             { href: resource_tpl.expand(id: idx).to_s }
           }
         },
@@ -57,6 +57,9 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
 
   let(:client) { Routemaster::APIClient.new }
   subject { described_class.new(client.get(index_url)) }
+
+  # so we don't pollute future specs with pending requests:
+  after { Routemaster::Responses::FutureResponse::Pool.reset }
 
   describe '#each' do
     it 'is enumerable' do

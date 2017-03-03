@@ -32,7 +32,7 @@ class TestServer
     end
 
     # wait until the child server is up
-    Timeout.timeout(1) do
+    Timeout.timeout(5) do
       loop do
         begin
           TCPSocket.new('localhost', '8000')

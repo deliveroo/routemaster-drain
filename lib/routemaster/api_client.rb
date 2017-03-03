@@ -1,12 +1,27 @@
-require 'uri'
+require 'core_ext/forwardable'
 require 'base64'
 require 'faraday'
 require 'faraday_middleware'
+require 'typhoeus'
 require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
 require 'routemaster/responses/future_response'
+
+# Loading the Faraday adapter for Typhoeus requires a little dance
+require 'faraday/adapter/typhoeus'
+require 'typhoeus/adapters/faraday'
+
+# The following requires are not direct dependencies, but loading them early
+# prevents Faraday's magic class loading pixie dust from tripping over itself in
+# multithreaded use cases.
+require 'uri'
+require 'faraday/request/retry'
+require 'faraday_middleware/request/encode_json'
+require 'faraday_middleware/response/parse_json'
+require 'faraday_middleware/response/mashify'
+require 'hashie/mash'
 
 module Routemaster
   class APIClient
@@ -20,6 +35,8 @@ module Routemaster
       @response_class = response_class
       @metrics_client = metrics_client
       @source_peer = source_peer
+
+      connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
 
     # Performs a GET HTTP request for the `url`, with optional
@@ -98,7 +115,7 @@ module Routemaster
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
-        f.adapter :net_http_persistent
+        f.adapter :typhoeus
         f.use Routemaster::Middleware::ErrorHandling
 
         @middlewares.each do |middleware|

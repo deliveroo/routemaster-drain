@@ -19,6 +19,7 @@ gem 'sidekiq'
 
 gem 'guard-rspec',                require: false
 gem 'pry',                        require: false
+gem 'byebug',                     require: false
 gem 'rspec',                      require: false
 gem 'appraisal',                  require: false
 gem 'dogstatsd',                  require: false
