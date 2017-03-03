@@ -70,14 +70,5 @@ module Routemaster
     def drain_tokens
       Set.new(ENV.fetch('ROUTEMASTER_DRAIN_TOKENS').split(','))
     end
-
-    def url_expansions
-      Hashie::Rash.new.tap do |result|
-        ENV.fetch('ROUTEMASTER_URL_EXPANSIONS', '').split(',').each do |entry|
-          host, username, password = entry.split(':')
-          result[Regexp.new(host)] = [username, password]
-        end
-      end
-    end
   end
 end

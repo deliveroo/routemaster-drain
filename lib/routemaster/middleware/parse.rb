@@ -15,10 +15,10 @@ module Routemaster
       end
 
       def call(env)
-        if env['CONTENT_TYPE'] != 'application/json'
+        if (env['CONTENT_TYPE'] != 'application/json')
           return [415, {}, []]
         end
-        if payload = _extract_payload(env)
+        if (payload = _extract_payload(env))
           env['routemaster.payload'] = payload
         else
           return [400, {}, []]
