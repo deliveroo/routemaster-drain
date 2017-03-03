@@ -21,7 +21,7 @@ GEM
       rake
       thor (>= 0.14.0)
     byebug (9.0.6)
-    codeclimate-test-reporter (1.0.3)
+    codeclimate-test-reporter (1.0.6)
       simplecov
     coderay (1.1.1)
     concurrent-ruby (1.0.5)
@@ -59,7 +59,7 @@ GEM
       rspec (>= 2.99.0, < 4.0)
     hashdiff (0.3.2)
     hashie (3.4.6)
-    json (2.0.2)
+    json (2.0.3)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -118,7 +118,7 @@ GEM
       connection_pool (~> 2.2, >= 2.2.0)
       rack-protection (>= 1.5.0)
       redis (~> 3.2, >= 3.2.1)
-    simplecov (0.12.0)
+    simplecov (0.13.0)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
