@@ -13,7 +13,7 @@ gem 'webmock',                    require: false
 gem 'rack-test',                  require: false
 gem 'dotenv',                     require: false
 gem 'simplecov',                  require: false
-gem 'codeclimate-test-reporter',  require: false
+gem 'codecov',                    require: false
 gem 'resque',                     require: false
 gem 'sidekiq',                    require: false
 

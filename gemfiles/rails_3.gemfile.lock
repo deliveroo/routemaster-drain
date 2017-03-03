@@ -50,8 +50,10 @@ GEM
     arel (3.0.3)
     builder (3.0.4)
     byebug (9.0.6)
-    codeclimate-test-reporter (1.0.6)
+    codecov (0.1.9)
+      json
       simplecov
+      url
     coderay (1.1.1)
     concurrent-ruby (1.0.5)
     connection_pool (2.2.1)
@@ -200,6 +202,7 @@ GEM
     typhoeus (1.1.2)
       ethon (>= 0.9.0)
     tzinfo (0.3.52)
+    url (0.3.2)
     vegas (0.1.11)
       rack (>= 1.0.0)
     webmock (2.3.2)
@@ -215,7 +218,7 @@ DEPENDENCIES
   appraisal
   bundler
   byebug
-  codeclimate-test-reporter
+  codecov
   dogstatsd
   dotenv
   fork_break
