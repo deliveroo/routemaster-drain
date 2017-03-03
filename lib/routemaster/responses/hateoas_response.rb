@@ -1,6 +1,10 @@
 require 'core_ext/forwardable'
 require 'forwardable'
-require 'json'
+require 'routemaster/api_client'
+
+# While this depends on `RestResource`, we can't laod it as there is a circular
+# dependency.
+# require 'routemaster/resources/rest_resource'
 
 module Routemaster
   module Responses
@@ -12,7 +16,7 @@ module Routemaster
 
       def initialize(response, client: nil)
         @response = response
-        @client = client || Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+        @client = client || Routemaster::APIClient.new(response_class: self.class)
       end
 
       def method_missing(m, *args, &block)
@@ -22,12 +26,8 @@ module Routemaster
         if _links.keys.include?(normalized_method_name)
           unless respond_to?(method_name)
             resource = Resources::RestResource.new(_links[normalized_method_name]['href'], client: @client)
-
-            define_singleton_method(method_name) do |*m_args|
-              resource
-            end
-
-            resource
+            define_singleton_method(method_name) { resource }
+            public_send method_name
           end
         else
           super

@@ -7,10 +7,7 @@ require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
-require 'routemaster/responses/hateoas_response'
-require 'routemaster/responses/hateoas_enumerable_response'
 require 'routemaster/responses/future_response'
-require 'routemaster/resources/rest_resource'
 
 # Loading the Faraday adapter for Typhoeus requires a little dance
 require 'faraday/adapter/typhoeus'
@@ -49,76 +46,71 @@ module Routemaster
     # and `body`. The body is a `Hashie::Mash` if the response was JSON, a
     # string otherwise.
     def get(url, params: {}, headers: {}, options: {})
-      host = URI.parse(url).host
       enable_caching = options.fetch(:enable_caching, true)
 
-      response_wrapper do
-        request_headers = headers.
-          merge(auth_header(host)).
-          merge(response_cache_opt_headers(enable_caching))
-
-        connection.get(url, params, request_headers)
-      end
+      _wrapped_response _request(
+        :get, 
+        url: url,
+        params: params,
+        headers: headers.merge(response_cache_opt_headers(enable_caching)))
     end
 
-    def fget(url, params: {}, headers: {})
-      Responses::FutureResponse.new { get(url, params: {}, headers: {}) }
+    # Same as {{get}}, except with 
+    def fget(url, **options)
+      uri = _assert_uri(url)
+      Responses::FutureResponse.new { get(uri, options) }
     end
 
     def post(url, body: {}, headers: {})
-      host = URI.parse(url).host
-      response_wrapper do
-        connection.post do |req|
-          req.url url
-          req.headers = headers.merge(auth_header(host))
-          req.body = body
-        end
-      end
+      _request(:post, url: url, body: body, headers: headers)
     end
 
     def patch(url, body: {}, headers: {})
-      host = URI.parse(url).host
-      response_wrapper do
-        connection.patch do |req|
-          req.url url
-          req.headers = headers.merge(auth_header(host))
-          req.body = body
-        end
-      end
+      _request(:patch, url: url, body: body, headers: headers)
     end
 
     def delete(url, headers: {})
-      host = URI.parse(url).host
-      response_wrapper do
-        connection.delete do |req|
-          req.url url
-          req.headers = headers.merge(auth_header(host))
-        end
-      end
+      _request(:delete, url: url, body: nil, headers: headers)
     end
 
     def discover(url)
       get(url)
     end
 
-    def with_response(response_class, &block)
+    def with_response(response_class)
+      memo = @response_class
       @response_class = response_class
-      result = block.call(self)
-      @response_class = Responses::HateoasResponse
-      result
+      yield self
+    ensure
+      @response_class = memo
     end
 
     private
 
-    def response_wrapper(&block)
-      response = block.call
+    def _assert_uri(url)
+      return url if url.kind_of?(URI)
+      URI.parse(url)
+    end
+
+    def _request(method, url:, body: nil, headers:, params: {})
+      uri = _assert_uri(url)
+      auth = auth_header(uri.host)
+      connection.public_send(method) do |req|
+        req.url uri.to_s
+        req.params.merge! params
+        req.headers = headers.merge(auth)
+        req.body = body
+      end
+    end
+
+    def _wrapped_response(response)
       @response_class ? @response_class.new(response, client: self) : response
     end
 
     def connection
       @connection ||= Faraday.new do |f|
-        f.request  :json
-        f.request  :retry, max: 2, interval: 100e-3, backoff_factor: 2
+        f.request :json
+        f.request :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener

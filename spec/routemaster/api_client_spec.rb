@@ -10,30 +10,13 @@ describe Routemaster::APIClient do
   uses_redis
   uses_webmock
 
-  describe '.get' do
-    let(:url) { 'https://example.com/widgets/132' }
-    let(:headers) {{}}
-    let(:fetcher) { described_class.new }
-    subject { fetcher.get(url, headers: headers) }
+  let(:url) { 'https://example.com/widgets/132' }
+  let(:headers) {{}}
+  let(:fetcher) { described_class.new }
 
+  shared_examples 'a GET requester' do
     before do
       @req = stub_request(:get, /example\.com/).to_return(
-        status:   200,
-        body:     { id: 132, type: 'widget' }.to_json,
-        headers:  {
-          'content-type' => 'application/json;v=1'
-        }
-      )
-
-      @post_req = stub_request(:post, /example\.com/).to_return(
-        status:   200,
-        body:     { id: 132, type: 'widget' }.to_json,
-        headers:  {
-          'content-type' => 'application/json;v=1'
-        }
-      )
-
-      @patch_req = stub_request(:patch, /example\.com/).to_return(
         status:   200,
         body:     { id: 132, type: 'widget' }.to_json,
         headers:  {
@@ -43,26 +26,8 @@ describe Routemaster::APIClient do
     end
 
     it 'GETs from the URL' do
-      subject
+      subject.status
       expect(@req).to have_been_requested
-    end
-
-    context 'POST request' do
-      subject { fetcher.post(url, body: {}, headers: headers) }
-
-      it 'POSTs from the URL' do
-        subject
-        expect(@post_req).to have_been_requested
-      end
-    end
-
-    context 'PATCH request' do
-      subject { fetcher.patch(url, body: {}, headers: headers) }
-
-      it 'PATCH from the URL' do
-        subject
-        expect(@patch_req).to have_been_requested
-      end
     end
 
     it 'has :status, :headers, :body' do
@@ -76,7 +41,7 @@ describe Routemaster::APIClient do
     end
 
     it 'uses auth' do
-      subject
+      subject.status
       assert_requested(:get, /example/) do |req|
         credentials = Base64.strict_encode64('username:s3cr3t')
         expect(req.headers['Authorization']).to eq("Basic #{credentials}")
@@ -85,7 +50,7 @@ describe Routemaster::APIClient do
 
     it 'passes headers' do
       headers['x-custom-header'] = 'why do you even'
-      subject
+      subject.status
       assert_requested(:get, /example/) do |req|
         expect(req.headers).to include('X-Custom-Header')
       end
@@ -95,14 +60,123 @@ describe Routemaster::APIClient do
       before do
         class DummyResponse
           def initialize(res, client: nil); end
+          def dummy; true; end
         end
       end
 
       let(:fetcher) { described_class.new(response_class: DummyResponse) }
 
-      it 'returns a response_class instance as a response' do
-        expect(subject).to be_an_instance_of(DummyResponse)
+      it 'wraps the response in the response class' do
+        expect(subject.dummy).to be_truthy
       end
+    end
+  end
+
+  describe '#get' do
+    subject { fetcher.get(url, headers: headers) }
+    it_behaves_like 'a GET requester'
+  end
+
+  describe '#fget' do
+    subject { fetcher.fget(url, headers: headers) }
+    it_behaves_like 'a GET requester'
+  end
+
+  describe '#post' do
+    subject { fetcher.post(url, body: {}, headers: headers) }
+
+    before do
+      @post_req = stub_request(:post, /example\.com/).to_return(
+        status:   200,
+        body:     { id: 132, type: 'widget' }.to_json,
+        headers:  {
+          'content-type' => 'application/json;v=1'
+        }
+      )
+    end
+
+    it 'POSTs from the URL' do
+      subject
+      expect(@post_req).to have_been_requested
+    end
+  end
+
+  describe '#patch' do
+    subject { fetcher.patch(url, body: {}, headers: headers) }
+
+    before do
+      @patch_req = stub_request(:patch, /example\.com/).to_return(
+        status:   200,
+        body:     { id: 132, type: 'widget' }.to_json,
+        headers:  {
+          'content-type' => 'application/json;v=1'
+        }
+      )
+    end
+
+    it 'PATCH from the URL' do
+      subject
+      expect(@patch_req).to have_been_requested
+    end
+  end
+
+  describe '#delete' do
+    subject { fetcher.delete(url, headers: headers) }
+
+    before do
+      @delete_req = stub_request(:delete, /example\.com/).to_return(
+        status:   204,
+      )
+    end
+
+    it 'DELETES from the URL' do
+      subject
+      expect(@delete_req).to have_been_requested
+    end
+  end
+
+  describe '#discover' do
+    before do
+      @req = stub_request(:get, /example\.com/).to_return(
+        status:   200,
+        body:     { id: 132, type: 'widget' }.to_json,
+        headers:  {
+          'content-type' => 'application/json;v=1'
+        }
+      )
+    end
+
+    it 'GETs from the URL' do
+      subject.discover('https://example.com')
+      expect(@req).to have_been_requested
+    end
+  end
+
+  describe '#with_response' do
+    before { stub_request(:any, //).to_return(status: 200) }
+
+    class DummyResponseA
+      def initialize(res, client: nil); end
+      def dummy_a; true; end
+    end
+
+    class DummyResponseB
+      def initialize(res, client: nil); end
+      def dummy_b; true; end
+    end
+
+    subject { described_class.new(response_class: DummyResponseA) }
+    let(:response) { subject.get('https://example.com') }
+
+    it 'changes the response wrapper during the block' do
+      subject.with_response(DummyResponseB) do
+        expect(response).to respond_to(:dummy_b)
+      end
+    end
+
+    it 'restores the original response wrapper after the block' do
+      subject.with_response(DummyResponseB) {}
+      expect(response).to respond_to(:dummy_a)
     end
   end
 end

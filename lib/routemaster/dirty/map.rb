@@ -44,7 +44,7 @@ module Routemaster
       # It is possible to call +next+ or +break+ from the block.
       def sweep(limit = 0)
         unswept = []
-        while url = @redis.spop(KEY)
+        while (url = @redis.spop(KEY))
           unswept.push url
           is_swept = !! yield(url)
           unswept.pop if is_swept
