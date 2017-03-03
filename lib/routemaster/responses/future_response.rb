@@ -31,6 +31,14 @@ module Routemaster
       def method_missing(m, *args, &block)
         value.public_send(m, *args, &block)
       end
+
+      def value
+        @future.value.tap do |v|
+          if v.nil? && @future.rejected?
+            raise @future.reason
+          end
+        end
+      end
     end
   end
 end
