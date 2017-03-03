@@ -34,10 +34,8 @@ module Routemaster
       end
 
       def value
-        @future.value.tap do |v|
-          if v.nil? && @future.rejected?
-            raise @future.reason
-          end
+        @future.value.tap do
+          raise @future.reason if @future.rejected?
         end
       end
 
