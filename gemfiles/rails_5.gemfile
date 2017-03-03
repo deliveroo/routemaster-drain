@@ -8,10 +8,10 @@ gem "rake", :require => false
 gem "webmock", :require => false
 gem "rack-test", :require => false
 gem "dotenv", :require => false
+gem "simplecov", :require => false
 gem "codeclimate-test-reporter", :require => false
-gem "simplecov"
-gem "resque"
-gem "sidekiq"
+gem "resque", :require => false
+gem "sidekiq", :require => false
 gem "guard-rspec", :require => false
 gem "pry", :require => false
 gem "byebug", :require => false

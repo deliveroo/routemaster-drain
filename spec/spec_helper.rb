@@ -1,4 +1,5 @@
 require 'simplecov'
+require 'codeclimate-test-reporter'
 SimpleCov.start
 
 require 'sidekiq/testing'
