@@ -58,6 +58,9 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
   let(:client) { Routemaster::APIClient.new }
   subject { described_class.new(client.get(index_url)) }
 
+  # so we don't pollute future specs with pending requests:
+  after { Routemaster::Responses::FutureResponse::Pool.reset }
+
   describe '#each' do
     it 'is enumerable' do
       expect(subject.count).to eq(15)
