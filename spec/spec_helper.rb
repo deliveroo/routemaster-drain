@@ -1,6 +1,9 @@
 require 'simplecov'
 SimpleCov.start
 
+require 'codecov'
+SimpleCov.formatter = SimpleCov::Formatter::Codecov if ENV['CI']
+
 require 'sidekiq/testing'
 require 'dotenv'
 require 'pry'
