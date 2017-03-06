@@ -18,6 +18,3 @@ matrix:
     - rvm: ruby-head
     - rvm: 2.4.0
       gemfile: gemfiles/rails_3.gemfile
-addons:
-  code_climate:
-    repo_token: b65d6447fdd48601786f688ef382bd56fd597b906943ff5c27d3d0fbf1bfc966
