@@ -10,6 +10,14 @@ describe Routemaster::Responses::ResponsePromise do
     end
   end
 
+  it "is chainable" do
+    passing_spy = spy('passing spy')
+    future = described_class.new {}
+    future.on_success { passing_spy.on_success }
+    future.value
+    expect(passing_spy).to have_received(:on_success)
+  end
+
   it 're-raises exceptions' do
     future = described_class.new { raise 'foobar' }
 
