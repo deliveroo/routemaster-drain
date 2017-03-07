@@ -7,7 +7,7 @@ require 'routemaster/config'
 require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
-require 'routemaster/responses/future_response'
+require 'routemaster/responses/response_promise'
 
 # Loading the Faraday adapter for Typhoeus requires a little dance
 require 'faraday/adapter/typhoeus'
@@ -58,7 +58,7 @@ module Routemaster
     # Same as {{get}}, except with 
     def fget(url, **options)
       uri = _assert_uri(url)
-      Responses::FutureResponse.new { get(uri, options) }
+      Responses::ResponsePromise.new { get(uri, options) }
     end
 
     def post(url, body: {}, headers: {})

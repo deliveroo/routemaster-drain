@@ -59,7 +59,7 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
   subject { described_class.new(client.get(index_url)) }
 
   # so we don't pollute future specs with pending requests:
-  after { Routemaster::Responses::FutureResponse::Pool.reset }
+  after { Routemaster::Responses::ResponsePromise::Pool.reset }
 
   describe '#each' do
     it 'is enumerable' do
