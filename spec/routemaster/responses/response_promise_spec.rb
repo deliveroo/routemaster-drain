@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'hashie/mash'
-require 'routemaster/responses/future_response'
+require 'routemaster/responses/response_promise'
 
-describe Routemaster::Responses::FutureResponse do
+describe Routemaster::Responses::ResponsePromise do
   %i[status headers body].each do |method|
     it "passes through '#{method}'" do
       future = described_class.new { Hashie::Mash.new(method => 'foobar') }
