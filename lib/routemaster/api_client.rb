@@ -59,11 +59,6 @@ module Routemaster
     def fget(url, **options)
       uri = _assert_uri(url)
       promise = Responses::ResponsePromise.new { get(uri, options) }
-      if block_given?
-        yield promise
-      end
-      promise.execute
-      promise
     end
 
     def post(url, body: {}, headers: {})

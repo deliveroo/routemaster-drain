@@ -10,7 +10,7 @@ module Routemaster
 
       # The `block` is expected to return a {Response}
       def initialize(&block)
-        @promise = Concurrent::Promise.new(executor: Pool.current, &block)
+        @promise = Concurrent::Promise.execute(executor: Pool.current, &block)
       end
 
       # @!attribute status
@@ -25,7 +25,7 @@ module Routemaster
       # @return [Hashie::Mash]
       # Delegated to the `block`'s return value.
       delegate %i(status headers body) => :value
-      delegate %i(on_success on_error raise execute state) => :@promise
+      delegate %i(on_success on_error execute state) => :@promise
 
       delegate :respond_to_missing? => :value
 
