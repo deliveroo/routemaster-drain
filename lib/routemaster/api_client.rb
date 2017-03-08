@@ -63,6 +63,7 @@ module Routemaster
         yield promise
       end
       promise.execute
+      promise
     end
 
     def post(url, body: {}, headers: {})

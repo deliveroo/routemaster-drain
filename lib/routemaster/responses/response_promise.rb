@@ -5,12 +5,12 @@ require 'delegate'
 
 module Routemaster
   module Responses
-    class ResponsePromise < Concurrent::Promise
+    class ResponsePromise
       extend Forwardable
 
       # The `block` is expected to return a {Response}
-      def initialize(options = {}, &block)
-        super(options.merge(executor: Pool.current), &block)
+      def initialize(&block)
+        @promise = Concurrent::Promise.new(executor: Pool.current, &block)
       end
 
       # @!attribute status
@@ -24,8 +24,9 @@ module Routemaster
       # @!attribute body
       # @return [Hashie::Mash]
       # Delegated to the `block`'s return value.
-
       delegate %i(status headers body) => :value
+      delegate %i(on_success on_error raise execute state) => :@promise
+
       delegate :respond_to_missing? => :value
 
       def method_missing(m, *args, &block)
@@ -33,8 +34,8 @@ module Routemaster
       end
 
       def value
-        super.tap do
-          raise reason if rejected?
+        @promise.value.tap do
+          raise @promise.reason if @promise.rejected?
         end
       end
 
