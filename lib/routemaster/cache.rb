@@ -55,7 +55,7 @@ module Routemaster
     # Like {#get}, but schedules any request in the background using a thread
     # pool. Handy to issue lots of requests in parallel.
     #
-    # @return [FutureResponse], which responds to `status`, `headers`, and `body`
+    # @return [ResponsePromise], which responds to `status`, `headers`, and `body`
     # like [Response].
     def fget(url, version: nil, locale: nil)
       @client.fget(url, headers: headers(version: version, locale: locale))

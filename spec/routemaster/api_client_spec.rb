@@ -80,6 +80,38 @@ describe Routemaster::APIClient do
   describe '#fget' do
     subject { fetcher.fget(url, headers: headers) }
     it_behaves_like 'a GET requester'
+
+    context "when setting callbacks" do
+      before do
+        stub_request(:get, /example\.com/).to_return(
+          status:   200,
+          body:     { id: 132, type: 'widget' }.to_json,
+          headers:  {
+            'content-type' => 'application/json;v=1'
+          }
+        )
+      end
+
+      let(:callback_spy) { spy('callback_spy') }
+
+      subject do
+        fetcher.fget(url, headers: headers) do |promise|
+          promise.on_success do
+            callback_spy.success
+          end
+          promise.rescue do
+            callback_spy.failed
+          end
+        end
+      end
+
+      context "when successful" do
+        it "calls on_success" do
+          expect(subject.status).to eq 200
+          expect(callback_spy).to have_received(:success)
+        end
+      end
+    end
   end
 
   describe '#post' do
