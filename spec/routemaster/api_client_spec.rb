@@ -96,11 +96,8 @@ describe Routemaster::APIClient do
 
       subject do
         fetcher.fget(url, headers: headers) do |promise|
-          promise.on_success do
+          @success_promise = promise.on_success do
             callback_spy.success
-          end
-          promise.rescue do
-            callback_spy.failed
           end
         end
       end
@@ -108,6 +105,7 @@ describe Routemaster::APIClient do
       context "when successful" do
         it "calls on_success" do
           expect(subject.status).to eq 200
+          @success_promise.value #We need to wait before testing if the spy was called
           expect(callback_spy).to have_received(:success)
         end
       end

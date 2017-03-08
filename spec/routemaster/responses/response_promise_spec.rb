@@ -14,9 +14,10 @@ describe Routemaster::Responses::ResponsePromise do
   it "can have callbacks set" do
     passing_spy = spy('passing spy')
     promise = described_class.new { }
-    promise.on_success { passing_spy.on_success }
+    success_promise = promise.on_success { passing_spy.on_success }
     promise.execute
     promise.value
+    success_promise.value
     expect(passing_spy).to have_received(:on_success)
   end
 
