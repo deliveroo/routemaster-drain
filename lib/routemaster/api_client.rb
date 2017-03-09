@@ -58,7 +58,7 @@ module Routemaster
     # Same as {{get}}, except with
     def fget(url, **options)
       uri = _assert_uri(url)
-      promise = Responses::ResponsePromise.new { get(uri, options) }
+      Responses::ResponsePromise.new { get(uri, options) }
     end
 
     def post(url, body: {}, headers: {})
