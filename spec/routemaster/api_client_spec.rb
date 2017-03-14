@@ -118,9 +118,9 @@ describe Routemaster::APIClient do
         end
       end
 
-      context "when successful" do
+      context "when not successful" do
         let(:status){ 500 }
-        it "calls on_success" do
+        it "calls on_error" do
           expect{subject.value}.to raise_error { Routemaster::Errors::FatalResource }
           callback.value #We need to wait before testing if the spy was called
           expect(callback_spy).to have_received(:error)
