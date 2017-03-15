@@ -158,7 +158,7 @@ describe Routemaster::APIClient do
         expect { perform.(host + '/500') }.to raise_error(Routemaster::Errors::FatalResource)
       end
     end
-  
+
     describe '#get' do
       let(:perform) { ->(uri) { subject.get(uri) } }
       include_examples 'exception raiser'

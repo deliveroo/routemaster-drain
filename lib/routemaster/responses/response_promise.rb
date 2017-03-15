@@ -1,16 +1,16 @@
-require 'concurrent/future'
+require 'concurrent/promise'
 require 'concurrent/executor/cached_thread_pool'
 require 'singleton'
 require 'delegate'
 
 module Routemaster
   module Responses
-    class FutureResponse
+    class ResponsePromise
       extend Forwardable
 
       # The `block` is expected to return a {Response}
       def initialize(&block)
-        @future = Concurrent::Future.execute(executor: Pool.current, &block)
+        @promise = Concurrent::Promise.execute(executor: Pool.current, &block)
       end
 
       # @!attribute status
@@ -24,18 +24,18 @@ module Routemaster
       # @!attribute body
       # @return [Hashie::Mash]
       # Delegated to the `block`'s return value.
-
-      delegate :value => :@future
       delegate %i(status headers body) => :value
+      delegate %i(on_success on_error execute state) => :@promise
+
       delegate :respond_to_missing? => :value
-      
+
       def method_missing(m, *args, &block)
         value.public_send(m, *args, &block)
       end
 
       def value
-        @future.value.tap do
-          raise @future.reason if @future.rejected?
+        @promise.value.tap do
+          raise @promise.reason if @promise.rejected?
         end
       end
 

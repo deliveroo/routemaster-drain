@@ -18,9 +18,9 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
 
   before do
     @resource_stub = stub_request(:get, resource_tpl).to_return do |req|
-      { 
-        status: 200, 
-        headers: { 'Content-Type' => 'application/json' }, 
+      {
+        status: 200,
+        headers: { 'Content-Type' => 'application/json' },
         body: {
           id: req.uri.path.split('/').last.to_i,
           _links: {
@@ -59,7 +59,7 @@ describe Routemaster::Responses::HateoasEnumerableResponse do
   subject { described_class.new(client.get(index_url)) }
 
   # so we don't pollute future specs with pending requests:
-  after { Routemaster::Responses::FutureResponse::Pool.reset }
+  after { Routemaster::Responses::ResponsePromise::Pool.reset }
 
   describe '#each' do
     it 'is enumerable' do
