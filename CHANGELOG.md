@@ -1,3 +1,9 @@
+### 2.4.1 (2017-03-15)
+
+Features:
+
+- API Client now exposes promises instead of simple futures (#34)
+
 ### 2.4.0 (2017-03-03)
 
 Features:
