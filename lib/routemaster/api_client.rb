@@ -25,16 +25,22 @@ require 'hashie/mash'
 
 module Routemaster
   class APIClient
+
+    # Memoize the root resources at Class level so that we don't hit the cache
+    # all the time to fetch the root resource before doing anything else.
+    @@root_resources = {}
+
     def initialize(middlewares: [],
                    listener: nil,
                    response_class: nil,
                    metrics_client: nil,
                    source_peer: nil)
-      @listener = listener
-      @middlewares = middlewares
+
+      @listener       = listener
+      @middlewares    = middlewares
       @response_class = response_class
       @metrics_client = metrics_client
-      @source_peer = source_peer
+      @source_peer    = source_peer
 
       connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
@@ -74,7 +80,7 @@ module Routemaster
     end
 
     def discover(url)
-      get(url)
+      @@root_resources[url] ||= get(url)
     end
 
     def with_response(response_class)
