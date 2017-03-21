@@ -1,3 +1,5 @@
+### 2.4.2 (2017-03-21)
+
 Bug fixes:
 
 - APIClient#discover now memoizes the root response at class level (#35)
