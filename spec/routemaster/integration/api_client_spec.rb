@@ -5,6 +5,7 @@ require 'spec/support/uses_webmock'
 require 'spec/support/server'
 require 'spec/support/breakpoint_class'
 require 'routemaster/api_client'
+require 'routemaster/resources/rest_resource'
 require 'routemaster/cache'
 require 'dogstatsd'
 
@@ -297,14 +298,43 @@ describe Routemaster::APIClient do
 
     it 'traverses through pagination next all links that match the request params' do
       res = subject.discover(url)
+
       expect(res.resources.index(filters: { first_name: 'roo' }).count).to eq(5)
     end
 
-    it 'does not make any http requests to fetch resources any if just the index method is called' do
-      resources = subject.discover(url).resources
+    it 'does not make any http requests to fetch individual resources if just the index method is called' do
+      res = subject.discover(url)
 
-      expect(subject).to receive(:get).with("http://localhost:#{port}/resources", anything).once
-      resources.index
+      expect(subject).not_to receive(:get).with("http://localhost:#{port}/resources/#{anything}", anything)
+      res.resources.index
+    end
+  end
+
+  describe 'DISCOVER request' do
+    let(:url) { "http://localhost:#{port}/discover" }
+
+    subject do
+      Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+    end
+
+    before { subject.class.class_variable_set :@@root_resources, {} }
+
+    context 'when the method is called for the first time' do
+      it 'fetches the information using the GET method' do
+        expect(subject).to receive(:get).with(url)
+
+        subject.discover(url)
+      end
+    end
+
+    context 'when the method is called for the n-th time' do
+      before { subject.discover(url) }
+
+      it 'fetches the information from the class variable' do
+        expect(subject).not_to receive(:get).with(url)
+
+        subject.discover(url)
+      end
     end
   end
 
