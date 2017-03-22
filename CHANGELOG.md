@@ -1,3 +1,5 @@
+### 2.4.3 (2017-03-22)
+
 Bug fixes:
 
 - Require 'rest_resource' further up in the file tree (#36)
