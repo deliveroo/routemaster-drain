@@ -2,10 +2,6 @@ require 'core_ext/forwardable'
 require 'forwardable'
 require 'routemaster/api_client'
 
-# While this depends on `RestResource`, we can't laod it as there is a circular
-# dependency.
-# require 'routemaster/resources/rest_resource'
-
 module Routemaster
   module Responses
     class HateoasResponse

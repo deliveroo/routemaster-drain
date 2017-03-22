@@ -9,6 +9,10 @@ require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
 require 'routemaster/responses/response_promise'
 
+# This is not a direct dependency, we need to load it early to prevent a
+# circular dependency in hateoas_response.rb
+require 'routemaster/resources/rest_resource'
+
 # Loading the Faraday adapter for Typhoeus requires a little dance
 require 'faraday/adapter/typhoeus'
 require 'typhoeus/adapters/faraday'
