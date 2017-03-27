@@ -1,3 +1,7 @@
+Features:
+
+- Optionally wrap the APIClient actions inside a Response class (#37)
+
 ### 2.4.3 (2017-03-22)
 
 Bug fixes:

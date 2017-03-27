@@ -55,9 +55,19 @@ describe Routemaster::APIClient do
         expect(req.headers).to include('X-Custom-Header')
       end
     end
+  end
 
+  shared_examples 'a wrappable response' do
     context 'when response_class is present' do
       before do
+        @req = stub_request(:get, /example\.com/).to_return(
+          status:   200,
+          body:     { id: 132, type: 'widget' }.to_json,
+          headers:  {
+            'content-type' => 'application/json;v=1'
+          }
+        )
+
         class DummyResponse
           def initialize(res, client: nil); end
           def dummy; true; end
@@ -75,11 +85,13 @@ describe Routemaster::APIClient do
   describe '#get' do
     subject { fetcher.get(url, headers: headers) }
     it_behaves_like 'a GET requester'
+    it_behaves_like 'a wrappable response'
   end
 
   describe '#fget' do
     subject { fetcher.fget(url, headers: headers) }
     it_behaves_like 'a GET requester'
+    it_behaves_like 'a wrappable response'
 
     context "when setting callbacks" do
       before do
@@ -147,6 +159,8 @@ describe Routemaster::APIClient do
       subject
       expect(@post_req).to have_been_requested
     end
+
+    it_behaves_like 'a wrappable response'
   end
 
   describe '#patch' do
@@ -166,6 +180,8 @@ describe Routemaster::APIClient do
       subject
       expect(@patch_req).to have_been_requested
     end
+
+    it_behaves_like 'a wrappable response'
   end
 
   describe '#delete' do

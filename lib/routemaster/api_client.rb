@@ -72,11 +72,19 @@ module Routemaster
     end
 
     def post(url, body: {}, headers: {})
-      _request(:post, url: url, body: body, headers: headers)
+      _wrapped_response _request(
+        :post,
+        url: url,
+        body: body,
+        headers: headers)
     end
 
     def patch(url, body: {}, headers: {})
-      _request(:patch, url: url, body: body, headers: headers)
+      _wrapped_response _request(
+        :patch,
+        url: url,
+        body: body,
+        headers: headers)
     end
 
     def delete(url, headers: {})
