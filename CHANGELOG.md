@@ -1,3 +1,7 @@
+Features:
+
+- Allow template urls to be defined in services (#38)
+
 ### 2.4.4 (2017-03-27)
 
 Features:

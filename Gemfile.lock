@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     routemaster-drain (2.4.4)
+      addressable
       concurrent-ruby
       faraday (>= 0.9.0)
       faraday_middleware
