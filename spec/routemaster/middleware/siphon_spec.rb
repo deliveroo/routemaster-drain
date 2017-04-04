@@ -18,26 +18,23 @@ describe Routemaster::Middleware::Siphon do
     let(:payload) { [ make_event(1), make_event(1).merge({'topic' => 'notstuff'})] }
 
     context "if no siphon is defined" do
-      let(:options){ {} }
+      let(:options) { {} }
+
       it "passes all to the terminator"  do
         perform
         expect(terminator.last_env['routemaster.payload']).to eq payload
       end
     end
 
-    context "if a 'stuff' syphon is defined" do
-      let(:syphon_double){
-        double(new: syphon_instance)
-      }
-      let(:syphon_instance){
-        double(call: nil)
-      }
-      let(:options){ { 'stuff' => syphon_double } }
+    context "if a 'stuff' siphon is defined" do
+      let(:siphon_double) { double(new: siphon_instance) }
+      let(:siphon_instance) { double(call: nil) }
+      let(:options){ { 'stuff' => siphon_double } }
 
-      it "calls the syphon with the event" do
+      it "calls the siphon with the event" do
         perform
-        expect(syphon_double).to have_received(:new).with(payload[0])
-        expect(syphon_instance).to have_received(:call)
+        expect(siphon_double).to have_received(:new).with(payload[0])
+        expect(siphon_instance).to have_received(:call)
       end
 
       it "passes 'notstuff' to the terminator"  do

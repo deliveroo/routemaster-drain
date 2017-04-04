@@ -40,7 +40,3 @@ describe Routemaster::Middleware::RootPostOnly do
     end
   end
 end
-
-
-
-
