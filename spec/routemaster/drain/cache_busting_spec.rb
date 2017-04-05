@@ -3,10 +3,10 @@ require 'spec/support/rack_test'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'spec/support/events'
-require 'routemaster/drain/expiring_cache'
+require 'routemaster/drain/cache_busting'
 require 'json'
 
-describe Routemaster::Drain::ExpiringCache do
+describe Routemaster::Drain::CacheBusting do
   uses_dotenv
   uses_redis
 

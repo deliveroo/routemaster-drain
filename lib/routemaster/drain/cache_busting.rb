@@ -16,7 +16,7 @@ module Routemaster
     # See the various corresponding middleware for details on operation:
     # {Middleware::RootPostOnly}, {Middleware::Authenticate},
     # {Middleware::Parse}, {Middleware::ExpireCache} and {Terminator}.
-    class ExpiringCache
+    class CacheBusting
       extend Forwardable
 
       def initialize(options = {})
