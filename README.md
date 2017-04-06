@@ -277,9 +277,10 @@ response.user.show(1)
 
 The more elaborate drains are built with two components which can also be used
 independently,
-[`Dirty::Map`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Map)
-and
-[`Dirty::Filter`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Filter).
+[`Dirty::Map`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Map),
+[`Dirty::Filter`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Filter) and
+[`Middleware::Siphon`](http://www.rubydoc.info/github/deliveroo/routemaster-drain/master/Routemaster/Middleware/Siphon).
+
 
 ### Dirty map
 
@@ -314,6 +315,11 @@ It stores transient state in Redis and will emit `:entity_changed` events
 whenever an entity has changed. This event can usefully be fed into a dirty map,
 as in `Receiver::Filter` for instance.
 
+### Siphon
+
+[`Middleware::Siphon`](http://www.rubydoc.info/github/deliveroo/routemaster-drain/master/Routemaster/Middleware/Siphon) extracts
+payloads from the middleware chain, allowing them to be processed separately. This is useful for event topics where the update frequency is not well suited
+to frequent caching. For example, a location update event which you'd expect to receive every few seconds.
 
 ## Contributing
 
@@ -326,4 +332,3 @@ as in `Receiver::Filter` for instance.
 Do not bump version numbers on branches (a maintainer will do this when cutting
 a release); but please do describe your changes in the `CHANGELOG` (at the top,
 without a version number).
-

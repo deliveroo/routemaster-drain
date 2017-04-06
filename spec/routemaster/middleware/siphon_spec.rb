@@ -29,7 +29,7 @@ describe Routemaster::Middleware::Siphon do
     context "if a 'stuff' siphon is defined" do
       let(:siphon_double) { double(new: siphon_instance) }
       let(:siphon_instance) { double(call: nil) }
-      let(:options){ { 'stuff' => siphon_double } }
+      let(:options) { { siphon_events: { 'stuff' => siphon_double } } } 
 
       it "calls the siphon with the event" do
         perform

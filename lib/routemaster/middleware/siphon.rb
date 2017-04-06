@@ -1,12 +1,14 @@
 module Routemaster
   module Middleware
+    # Filters out events based on their topic and passes them to a handling class
+    #
+    # `use Middleware::Siphon, 'some_topic' => SomeTopicHandler`
+    #
+    #  Topic handlers are initialized with the full event payload and must respond to `#call`
     class Siphon
-      # Filters out events based on their topic and passes them to a handling class
-      # Usage:
-      #    use Middleware::Siphon, 'some_topic' => SomeTopicHandler
-      def initialize(app, processors)
+      def initialize(app, siphon_events: nil)
         @app = app
-        @processors = processors
+        @processors = siphon_events || {}
       end
 
       def call(env)
@@ -23,7 +25,7 @@ module Routemaster
       private
 
       def topics_to_siphon
-        @topics_to_siphon ||= @processors.keys
+        @topics_to_siphon ||= @processors.keys.map(&:to_s)
       end
     end
   end

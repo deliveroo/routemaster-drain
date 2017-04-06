@@ -9,7 +9,7 @@ module Routemaster
     class Filter
       # @param filter [Routemaster::Dirty::Filter] an event filter (optional;
       # will be created using the `redis` and `expiry` options if not provided)
-      def initialize(app, filter:nil)
+      def initialize(app, filter:nil, **_)
         @app    = app
         @filter = filter || Routemaster::Dirty::Filter.new
       end
@@ -19,7 +19,7 @@ module Routemaster
         if payload && payload.any?
           env['routemaster.payload'] = @filter.run(payload)
         end
-        @app.call(env) 
+        @app.call(env)
       end
     end
   end
