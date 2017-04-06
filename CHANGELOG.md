@@ -1,3 +1,10 @@
+### Unreleased
+
+Features:
+
+- Adds the Siphon middleware
+
+
 ### 2.4.4 (2017-03-27)
 
 Features:
