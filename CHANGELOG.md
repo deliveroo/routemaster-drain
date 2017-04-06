@@ -3,7 +3,11 @@
 Features:
 
 - Adds the Siphon middleware
+- Adds CacheBusting Middleware
 
+Bug fixes:
+
+- Caching middleware always busts the cache on events - preventing stale events being cached in some circumstances
 
 ### 2.4.4 (2017-03-27)
 
