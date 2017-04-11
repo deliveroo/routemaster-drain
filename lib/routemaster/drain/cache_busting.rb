@@ -1,6 +1,7 @@
 require 'routemaster/middleware/root_post_only'
 require 'routemaster/middleware/authenticate'
 require 'routemaster/middleware/parse'
+require 'routemaster/middleware/siphon'
 require 'routemaster/middleware/expire_cache'
 require 'routemaster/middleware/payload_filter'
 require 'routemaster/middleware/filter'
@@ -25,6 +26,7 @@ module Routemaster
           use Middleware::RootPostOnly
           use Middleware::Authenticate, options
           use Middleware::Parse
+          use Middleware::Siphon,       options
           use Middleware::Filter, { filter: Routemaster::Middleware::PayloadFilter.new }.merge(options)
           use Middleware::ExpireCache
           run terminator

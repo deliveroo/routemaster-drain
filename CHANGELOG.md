@@ -1,3 +1,9 @@
+### Unreleased
+
+Features:
+
+- Adds the `Siphon` middleware  to `CacheBusting` drain (#45)
+
 ### 2.5.0 (2017-04-11)
 
 Features:
