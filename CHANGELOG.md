@@ -1,4 +1,4 @@
-### Unreleased
+### 2.5.0 (2017-04-11)
 
 Features:
 
