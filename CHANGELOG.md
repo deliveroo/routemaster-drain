@@ -4,6 +4,7 @@ Features:
 
 - Adds the Siphon middleware
 - Adds CacheBusting Middleware
+- Allow template urls to be defined in services (#38)
 
 Bug fixes:
 
