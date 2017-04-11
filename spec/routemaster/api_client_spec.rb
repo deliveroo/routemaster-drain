@@ -111,12 +111,7 @@ describe Routemaster::APIClient do
       end
 
       let(:callback){
-        subject.on_success do
-          callback_spy.success
-        end
-        subject.on_error do
-          callback_spy.error
-        end
+        subject.on_success { callback_spy.success }.zip(subject.on_error { callback_spy.error })
       }
 
       context "when successful" do
