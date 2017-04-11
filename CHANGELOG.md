@@ -2,13 +2,13 @@
 
 Features:
 
-- Adds the Siphon middleware
-- Adds CacheBusting Middleware
 - Allow template urls to be defined in services (#38)
+- Adds the `Siphon` middleware (#39, #44)
+- Adds `CacheBusting` middleware (#40)
 
 Bug fixes:
 
-- Caching middleware always busts the cache on events - preventing stale events being cached in some circumstances
+- Caching middleware always busts the cache on events - preventing stale events being cached in some circumstances (#40)
 
 ### 2.4.4 (2017-03-27)
 
