@@ -199,7 +199,7 @@ response = @cache.fget('https://example.com/widgets/123')
 puts response.body.id
 ```
 
-In this example, is your app was notified by Routemaster about Widget #123, the
+In this example, if your app was notified by Routemaster about Widget #123, the
 cache will be very likely to be hit; and it will be invalidated automatically
 whenever the drain gets notified about a change on that widget.
 
@@ -209,6 +209,17 @@ and have any `HTTP GET` requests (and cache queries) happen in parallel.
 See
 [rubydoc](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
+
+### Expire Cache data for all notified resources
+
+You may wish to maintain a coherent cache but don't need the cache to be warmed
+before you process incoming events. In that case, use the cache as detailed above
+but swap the `Caching` drain out for `CachingBusting`
+
+```ruby
+require 'routemaster/drain/machine'
+$app = Routemaster::Drain::CachingBusting.new
+```
 
 ## HTTP Client
 The Drain is using a Faraday http client for communication between services. The client
@@ -277,9 +288,10 @@ response.user.show(1)
 
 The more elaborate drains are built with two components which can also be used
 independently,
-[`Dirty::Map`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Map)
-and
-[`Dirty::Filter`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Filter).
+[`Dirty::Map`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Map),
+[`Dirty::Filter`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Filter) and
+[`Middleware::Siphon`](http://www.rubydoc.info/github/deliveroo/routemaster-drain/master/Routemaster/Middleware/Siphon).
+
 
 ### Dirty map
 
@@ -314,6 +326,11 @@ It stores transient state in Redis and will emit `:entity_changed` events
 whenever an entity has changed. This event can usefully be fed into a dirty map,
 as in `Receiver::Filter` for instance.
 
+### Siphon
+
+[`Middleware::Siphon`](http://www.rubydoc.info/github/deliveroo/routemaster-drain/master/Routemaster/Middleware/Siphon) extracts
+payloads from the middleware chain, allowing them to be processed separately. This is useful for event topics where the update frequency is not well suited
+to frequent caching. For example, a location update event which you'd expect to receive every few seconds.
 
 ## Contributing
 

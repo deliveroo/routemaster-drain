@@ -1,9 +1,11 @@
 require 'routemaster/middleware/root_post_only'
 require 'routemaster/middleware/authenticate'
 require 'routemaster/middleware/parse'
+require 'routemaster/middleware/siphon'
 require 'routemaster/middleware/filter'
 require 'routemaster/middleware/dirty'
 require 'routemaster/middleware/cache'
+require 'routemaster/middleware/expire_cache'
 require 'routemaster/drain/terminator'
 require 'rack/builder'
 require 'delegate'
@@ -28,6 +30,8 @@ module Routemaster
           use Middleware::RootPostOnly
           use Middleware::Authenticate, options
           use Middleware::Parse
+          use Middleware::ExpireCache,  options
+          use Middleware::Siphon,       options
           use Middleware::Filter,       options
           use Middleware::Dirty,        options
           use Middleware::Cache,        options
@@ -40,4 +44,3 @@ module Routemaster
     end
   end
 end
-
