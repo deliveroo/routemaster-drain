@@ -199,7 +199,7 @@ response = @cache.fget('https://example.com/widgets/123')
 puts response.body.id
 ```
 
-In this example, is your app was notified by Routemaster about Widget #123, the
+In this example, if your app was notified by Routemaster about Widget #123, the
 cache will be very likely to be hit; and it will be invalidated automatically
 whenever the drain gets notified about a change on that widget.
 
@@ -209,6 +209,17 @@ and have any `HTTP GET` requests (and cache queries) happen in parallel.
 See
 [rubydoc](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
+
+### Expire Cache data for all notified resources
+
+You may wish to maintain a coherent cache but don't need the cache to be warmed
+before you process incoming events. In that case, use the cache as detailed above
+but swap the `Caching` drain out for `CachingBusting`
+
+```ruby
+require 'routemaster/drain/machine'
+$app = Routemaster::Drain::CachingBusting.new
+```
 
 ## HTTP Client
 The Drain is using a Faraday http client for communication between services. The client

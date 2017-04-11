@@ -3,30 +3,24 @@ require 'spec/support/rack_test'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'spec/support/events'
-require 'spec/support/siphon'
-
-require 'routemaster/drain/caching'
-
+require 'routemaster/drain/cache_busting'
 require 'json'
 
-describe Routemaster::Drain::Caching do
+describe Routemaster::Drain::CacheBusting do
   uses_dotenv
   uses_redis
 
-  let(:app) { described_class.new options}
+  let(:app) { described_class.new }
   let(:listener) { double 'listener' }
-  let(:options) { {} }
 
   before { app.subscribe(listener, prefix: true) }
 
   let(:path)    { '/' }
-  let(:payload) { [1,2,3,1].map { |idx| make_event(idx) } }
+  let(:payload) { [1,2,3,1].map { |idx| make_event(idx) }.to_json }
   let(:environment) {{ 'CONTENT_TYPE' => 'application/json' }}
-  let(:perform) { post path, payload.to_json, environment }
+  let(:perform) { post path, payload, environment }
 
   before { authorize 'd3m0', 'x' }
-
-  include_examples 'supports siphon'
 
   it 'succeeds' do
     perform
@@ -43,12 +37,7 @@ describe Routemaster::Drain::Caching do
   it 'increments the event index' do
     ei_double = double(increment: 1)
     allow(Routemaster::EventIndex).to receive(:new).and_return(ei_double)
-    expect(ei_double).to receive(:increment).exactly(4).times
-    perform
-  end
-
-  it 'schedules caching jobs' do
-    expect_any_instance_of(Routemaster::Jobs::Client).to receive(:enqueue).exactly(3).times
+    expect(ei_double).to receive(:increment).exactly(3).times
     perform
   end
 end

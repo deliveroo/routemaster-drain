@@ -19,11 +19,6 @@ RSpec.describe Routemaster::Middleware::Cache do
   describe '#call' do
     let(:payload) { ['https://example.com/1'] }
 
-    it 'increments the event_index' do
-      expect(cache).to receive(:invalidate)
-      perform
-    end
-
     it 'queues a fetch job' do
       expect(client).to receive(:enqueue).with('routemaster', Routemaster::Jobs::CacheAndSweep, 'https://example.com/1')
       perform
