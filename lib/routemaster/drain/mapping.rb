@@ -1,6 +1,7 @@
 require 'routemaster/middleware/root_post_only'
 require 'routemaster/middleware/authenticate'
 require 'routemaster/middleware/parse'
+require 'routemaster/middleware/siphon'
 require 'routemaster/middleware/filter'
 require 'routemaster/middleware/dirty'
 require 'routemaster/drain/terminator'
@@ -29,6 +30,7 @@ module Routemaster
           use Middleware::RootPostOnly
           use Middleware::Authenticate, options
           use Middleware::Parse
+          use Middleware::Siphon,       options
           use Middleware::Filter,       options
           use Middleware::Dirty,        options
           run terminator
@@ -40,4 +42,3 @@ module Routemaster
     end
   end
 end
-

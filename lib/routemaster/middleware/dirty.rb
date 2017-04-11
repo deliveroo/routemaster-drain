@@ -11,7 +11,7 @@ module Routemaster
     # The dirty map is passed as `:map` to the constructor and must respond to
     # `#mark` (like `Routemaster::Dirty::Map`).
     class Dirty
-      def initialize(app, dirty_map:nil)
+      def initialize(app, dirty_map: nil, **_)
         @app = app
         @map = dirty_map || Routemaster::Dirty::Map.new
       end
@@ -28,6 +28,3 @@ module Routemaster
     end
   end
 end
-
-
-
