@@ -3,6 +3,8 @@ require 'spec/support/rack_test'
 require 'spec/support/uses_redis'
 require 'spec/support/uses_dotenv'
 require 'spec/support/events'
+require 'spec/support/siphon'
+
 require 'routemaster/drain/cache_busting'
 require 'json'
 
@@ -10,17 +12,20 @@ describe Routemaster::Drain::CacheBusting do
   uses_dotenv
   uses_redis
 
-  let(:app) { described_class.new }
+  let(:app) { described_class.new options }
   let(:listener) { double 'listener' }
+  let(:options) { {} }
 
   before { app.subscribe(listener, prefix: true) }
 
   let(:path)    { '/' }
-  let(:payload) { [1,2,3,1].map { |idx| make_event(idx) }.to_json }
+  let(:payload) { [1,2,3,1].map { |idx| make_event(idx) } }
   let(:environment) {{ 'CONTENT_TYPE' => 'application/json' }}
-  let(:perform) { post path, payload, environment }
+  let(:perform) { post path, payload.to_json, environment }
 
   before { authorize 'd3m0', 'x' }
+
+  include_examples 'supports siphon'
 
   it 'succeeds' do
     perform
