@@ -212,13 +212,13 @@ for more details on `Cache`.
 
 ### Expire Cache data for all notified resources
 
-You may wish to maintain a coherent cache but don't need the cache to be warmed
+You may wish to maintain a coherent cache, but don't need the cache to be warmed
 before you process incoming events. In that case, use the cache as detailed above
-but swap the `Caching` drain out for `CachingBusting`
+but swap the `Caching` drain out for `CacheBusting`
 
 ```ruby
-require 'routemaster/drain/machine'
-$app = Routemaster::Drain::CachingBusting.new
+require 'routemaster/drain/cache_busting'
+$app = Routemaster::Drain::CacheBusting.new
 ```
 
 ## HTTP Client

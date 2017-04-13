@@ -2,7 +2,7 @@ module Routemaster
   module Middleware
     # Filters out events based on their topic and passes them to a handling class
     #
-    # `use Middleware::Siphon, 'some_topic' => SomeTopicHandler`
+    # `use Middleware::Siphon, 'siphon_events' => {'some_topic' => SomeTopicHandler`}
     #
     #  Topic handlers are initialized with the full event payload and must respond to `#call`
     class Siphon
