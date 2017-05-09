@@ -11,7 +11,7 @@ module Routemaster
           begin
             Routemaster::Cache.new.get(url)
           rescue Errors::ResourceNotFound
-            nil # nothing to cache
+            true # nothing to cache, remove the element from dirty
           end
         end
       end
