@@ -1,8 +1,13 @@
-### Unreleased
+### 2.5.1 (2017-05-10)
 
 Features:
 
 - Adds the `Siphon` middleware  to `CacheBusting` drain (#45)
+
+Bug fixes:
+
+- Sweep from dirty map if resource is missing (#47)
+
 
 ### 2.5.0 (2017-04-11)
 
