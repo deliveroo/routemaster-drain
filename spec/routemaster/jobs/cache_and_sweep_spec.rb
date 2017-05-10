@@ -25,6 +25,14 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
 
       subject.perform(url)
     end
+
+    it 'busts the cached version of the resource' do
+      expect_any_instance_of(Routemaster::Cache)
+        .to receive(:bust)
+        .with(url)
+
+      subject.perform(url)
+    end
   end
 
   context 'when there is any other error' do
