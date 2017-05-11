@@ -177,7 +177,7 @@ cache as events are received.
 For this purpose, use `Routemaster::Drain::Caching`:
 
 ```ruby
-require 'routemaster/drain/machine'
+require 'routemaster/drain/caching'
 $app = Routemaster::Drain::Caching.new
 ```
 
@@ -188,7 +188,7 @@ And mount it as usual:
 map('/events') { run $app }
 ```
 
-You can still attach a listenenr if you want the incoming events. Typically,
+You can still attach a listener if you want the incoming events. Typically,
 what you'll want is the cache:
 
 ```ruby
@@ -206,6 +206,23 @@ whenever the drain gets notified about a change on that widget.
 Note that `Cache#fget` is a future, so you can efficiently query many resources
 and have any `HTTP GET` requests (and cache queries) happen in parallel.
 
+Resources are fetched through jobs. By default it uses Resque but can be changed
+to use Sidekiq.
+
+```
+ROUTEMASTER_QUEUE_ADAPTER=sidekiq
+```
+
+Finally do not forget the corresponding backend:
+```
+# config/initializers/...
+
+require 'routemaster/jobs/backends/sidekiq'
+# or
+require 'routemaster/jobs/backends/resque'
+```
+
+
 See
 [rubydoc](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
@@ -217,7 +234,7 @@ before you process incoming events. In that case, use the cache as detailed abov
 but swap the `Caching` drain out for `CachingBusting`
 
 ```ruby
-require 'routemaster/drain/machine'
+require 'routemaster/drain/caching_busting'
 $app = Routemaster::Drain::CachingBusting.new
 ```
 
