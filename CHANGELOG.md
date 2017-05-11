@@ -1,4 +1,4 @@
-### UNRELEASED
+### 2.5.2 (2017-05-11)
 
 Bug fixes
 
