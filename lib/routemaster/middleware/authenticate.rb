@@ -17,7 +17,7 @@ module Routemaster
       include Wisper::Publisher
 
       # @param uuid [Enumerable] a set of accepted authentication tokens
-      def initialize(app, uuid: nil)
+      def initialize(app, uuid: nil, **_)
         @app  = app
         @uuid = uuid || Config.drain_tokens
 
@@ -56,4 +56,3 @@ module Routemaster
     end
   end
 end
-

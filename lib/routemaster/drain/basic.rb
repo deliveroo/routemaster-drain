@@ -37,4 +37,3 @@ module Routemaster
     end
   end
 end
-

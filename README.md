@@ -177,7 +177,7 @@ cache as events are received.
 For this purpose, use `Routemaster::Drain::Caching`:
 
 ```ruby
-require 'routemaster/drain/machine'
+require 'routemaster/drain/caching'
 $app = Routemaster::Drain::Caching.new
 ```
 
@@ -188,7 +188,7 @@ And mount it as usual:
 map('/events') { run $app }
 ```
 
-You can still attach a listenenr if you want the incoming events. Typically,
+You can still attach a listener if you want the incoming events. Typically,
 what you'll want is the cache:
 
 ```ruby
@@ -199,16 +199,44 @@ response = @cache.fget('https://example.com/widgets/123')
 puts response.body.id
 ```
 
-In this example, is your app was notified by Routemaster about Widget #123, the
+In this example, if your app was notified by Routemaster about Widget #123, the
 cache will be very likely to be hit; and it will be invalidated automatically
 whenever the drain gets notified about a change on that widget.
 
 Note that `Cache#fget` is a future, so you can efficiently query many resources
 and have any `HTTP GET` requests (and cache queries) happen in parallel.
 
+Resources are fetched through jobs. By default it uses Resque but can be changed
+to use Sidekiq.
+
+```
+ROUTEMASTER_QUEUE_ADAPTER=sidekiq
+```
+
+Finally do not forget the corresponding backend:
+```
+# config/initializers/...
+
+require 'routemaster/jobs/backends/sidekiq'
+# or
+require 'routemaster/jobs/backends/resque'
+```
+
+
 See
 [rubydoc](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
+
+### Expire Cache data for all notified resources
+
+You may wish to maintain a coherent cache, but don't need the cache to be warmed
+before you process incoming events. In that case, use the cache as detailed above
+but swap the `Caching` drain out for `CacheBusting`
+
+```ruby
+require 'routemaster/drain/caching_busting'
+$app = Routemaster::Drain::CachingBusting.new
+```
 
 ## HTTP Client
 The Drain is using a Faraday http client for communication between services. The client
@@ -277,9 +305,10 @@ response.user.show(1)
 
 The more elaborate drains are built with two components which can also be used
 independently,
-[`Dirty::Map`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Map)
-and
-[`Dirty::Filter`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Filter).
+[`Dirty::Map`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Map),
+[`Dirty::Filter`](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Dirty/Filter) and
+[`Middleware::Siphon`](http://www.rubydoc.info/github/deliveroo/routemaster-drain/master/Routemaster/Middleware/Siphon).
+
 
 ### Dirty map
 
@@ -314,6 +343,11 @@ It stores transient state in Redis and will emit `:entity_changed` events
 whenever an entity has changed. This event can usefully be fed into a dirty map,
 as in `Receiver::Filter` for instance.
 
+### Siphon
+
+[`Middleware::Siphon`](http://www.rubydoc.info/github/deliveroo/routemaster-drain/master/Routemaster/Middleware/Siphon) extracts
+payloads from the middleware chain, allowing them to be processed separately. This is useful for event topics where the update frequency is not well suited
+to frequent caching. For example, a location update event which you'd expect to receive every few seconds.
 
 ## Contributing
 
@@ -327,3 +361,5 @@ Do not bump version numbers on branches (a maintainer will do this when cutting
 a release); but please do describe your changes in the `CHANGELOG` (at the top,
 without a version number).
 
+If you have changed dependencies, you need to run `appraisal update` to make
+sure the various version specific gemfiles are updated.

@@ -1,3 +1,31 @@
+### 2.5.2 (2017-05-11)
+
+Bug fixes
+
+- Bust the cache when the resource is not found (#48)
+
+### 2.5.1 (2017-05-10)
+
+Features:
+
+- Adds the `Siphon` middleware  to `CacheBusting` drain (#45)
+
+Bug fixes
+
+- Sweep the dirty map if a resource is missing (#47)
+
+### 2.5.0 (2017-04-11)
+
+Features:
+
+- Allow template urls to be defined in services (#38)
+- Adds the `Siphon` middleware (#39, #44)
+- Adds `CacheBusting` middleware (#40)
+
+Bug fixes:
+
+- Caching middleware always busts the cache on events - preventing stale events being cached in some circumstances (#40)
+
 ### 2.4.4 (2017-03-27)
 
 Features:
