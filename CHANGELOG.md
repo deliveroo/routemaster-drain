@@ -1,3 +1,9 @@
+### UNRELEASED
+
+Bug fixes
+
+- Use thread pool executor instead of cached thread pool (#51)
+
 ### 2.5.2 (2017-05-11)
 
 Bug fixes
