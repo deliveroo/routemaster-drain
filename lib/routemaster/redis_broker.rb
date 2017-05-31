@@ -29,9 +29,13 @@ module Routemaster
 
     # Allow to inject pre-built Redis clients
     #
+    # Before storing a new connection, ensure that any previously
+    # set client is properly closed.
+    #
     def inject(clients={})
       @_injected_clients = true
       clients.each_pair do |name, client|
+        _close_if_present(@_connections[name])
         @_connections[name] = Redis::Namespace.new(DEFAULT_NAMESPACE, redis: client)
       end
     end
@@ -49,8 +53,14 @@ module Routemaster
 
     def _cleanup
       @_pid = Process.pid
-      @_connections.each_value.map(&:redis).each(&:quit)
+      @_connections.each_value { |conn| _close_if_present(conn) }
       @_connections = {}
+    end
+
+    def _close_if_present(connection)
+      if connection.respond_to?(:redis)
+        connection.redis.quit
+      end
     end
 
   end
