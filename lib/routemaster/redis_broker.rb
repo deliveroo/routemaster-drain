@@ -29,7 +29,7 @@ module Routemaster
 
     # Allow to inject pre-built Redis clients
     #
-    # Before storing a new connection, ensure that any previously
+    # Before storing a new connection, ensures that any previously
     # set client is properly closed.
     #
     def inject(clients={})
