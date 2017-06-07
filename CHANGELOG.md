@@ -1,3 +1,9 @@
+### Unreleased
+
+Features
+
+- Allow to supply pre-initialized (distributed) Redis client objects to connect to the Drain Redis and the Cache Redis.
+
 ### 2.5.2 (2017-05-11)
 
 Bug fixes
