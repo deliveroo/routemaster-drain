@@ -36,7 +36,7 @@ Add this line to your application's Gemfile:
 
     gem 'routemaster-drain'
 
-**Configuration**
+### Configuration
 
 This gem is configured through the environment, making 12factor compliance
 easier.
@@ -65,6 +65,17 @@ Optional:
   population jobs should be enqueued.
 - `ROUTEMASTER_CACHE_TIMEOUT`: if using the cache, how long before Faraday will timeout fetching the resource. Defaults to 1 second.
 - `ROUTEMASTER_CACHE_VERIFY_SSL`: if using the cache, whether to verify SSL when fetching the resource. Defaults to false.
+
+Alternatively, it's possible to configure the gem to use pre-initialized Redis clients for the Cache Redis, the Drain Redis, or both.
+
+The clients are expected to be instances of `Redis::Distributed`. When configured, the pre-built clients take precendence and the gem won't try to estabilish its own private connection to the Redis instances supplied in the ENV variables. This is helpful if you want to re-use connections in order to reduce the number of connected clients to your Redis servers.
+
+```ruby
+Routemaster::RedisBroker.instance.inject(
+  drain_redis: a_redis_object,
+  cache_redis: another_redis_object
+)
+```
 
 ## Illustrated use cases
 
