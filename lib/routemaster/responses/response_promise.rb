@@ -58,7 +58,7 @@ module Routemaster
         end
 
         def self._build_pool
-          Concurrent::CachedThreadPool.new(min_length: 5, max_length: 20, max_queue: 0, fallback_policy: :caller_runs)
+          Concurrent::ThreadPoolExecutor.new(min_length: 5, max_length: 20, max_queue: 0, max_threads: 20, fallback_policy: :caller_runs)
         end
       end
     end
