@@ -4,6 +4,13 @@ Bug fixes
 
 - Use thread pool executor instead of cached thread pool (#51)
 
+### 2.5.3 (2017-06-12)
+
+Features
+
+- Allow to supply pre-initialized (distributed) Redis client objects to connect
+  to the Drain Redis and the Cache Redis (#52)
+
 ### 2.5.2 (2017-05-11)
 
 Bug fixes
