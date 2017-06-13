@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Julien Letessier']
   spec.email         = ['julien.letessier@gmail.com']
   spec.summary       = %q{Event receiver for the Routemaster bus}
-  spec.homepage      = 'http://github.com/HouseTrip/routemaster_drain'
+  spec.homepage      = 'http://github.com/deliveroo/routemaster-drain'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($/)
