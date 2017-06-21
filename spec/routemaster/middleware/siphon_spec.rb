@@ -12,9 +12,11 @@ describe Routemaster::Middleware::Siphon do
     post '/whatever', '', 'routemaster.payload' => payload
   end
 
-  describe '#call' do
+  it 'passes with extra options' do
+    expect { described_class.new(filter: 'test') }.not_to raise_error
+  end
 
-    let(:options) { { filter:filter } }
+  describe '#call' do
     let(:payload) { [ make_event(1), make_event(1).merge({'topic' => 'notstuff'})] }
 
     context "if no siphon is defined" do
@@ -29,7 +31,7 @@ describe Routemaster::Middleware::Siphon do
     context "if a 'stuff' siphon is defined" do
       let(:siphon_double) { double(new: siphon_instance) }
       let(:siphon_instance) { double(call: nil) }
-      let(:options) { { siphon_events: { 'stuff' => siphon_double } } } 
+      let(:options) { { siphon_events: { 'stuff' => siphon_double } } }
 
       it "calls the siphon with the event" do
         perform
