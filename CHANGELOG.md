@@ -1,8 +1,13 @@
-### UNRELEASED
+### 3.0.0 (2017-06-22)
+
+Breaking API changes
+
+- Removes the `#with_response` API client method. (#54)
 
 Bug fixes
 
-- Remove state from api client for thread safety (#54)
+- Remove state from api client for thread safety. (#54)
+
 
 ### 2.5.4 (2017-06-12)
 
