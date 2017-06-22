@@ -13,27 +13,24 @@ module Routemaster
       end
 
       def create(params)
-        @client.with_response(Responses::HateoasResponse) do
-          @client.post(expanded_url, body: params)
-        end
+        @client.post(expanded_url, body: params)
       end
 
       def show(id=nil, enable_caching: true)
-        @client.with_response(Responses::HateoasResponse) do
-          @client.get(expanded_url(id: id), options: { enable_caching: enable_caching })
-        end
+        @client.get(expanded_url(id: id), options: { enable_caching: enable_caching })
       end
 
       def index(params: {}, filters: {}, enable_caching: false)
-        @client.with_response(Responses::HateoasEnumerableResponse) do
-          @client.get(expanded_url, params: params.merge(filters), options: { enable_caching: enable_caching })
-        end
+        @client.get(
+          expanded_url, params: params.merge(filters), options: {
+            enable_caching: enable_caching,
+            response_class: Responses::HateoasEnumerableResponse
+          }
+        )
       end
 
       def update(id=nil, params)
-        @client.with_response(Responses::HateoasResponse) do
-          @client.patch(expanded_url(id: id), body: params)
-        end
+        @client.patch(expanded_url(id: id), body: params)
       end
 
       def destroy(id=nil)

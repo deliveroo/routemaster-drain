@@ -1,3 +1,9 @@
+### UNRELEASED
+
+Bug fixes
+
+- Remove state from api client for thread safety (#54)
+
 ### 2.5.4 (2017-06-12)
 
 Bug fixes

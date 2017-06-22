@@ -40,11 +40,11 @@ module Routemaster
                    metrics_client: nil,
                    source_peer: nil)
 
-      @listener       = listener
-      @middlewares    = middlewares
-      @response_class = response_class
-      @metrics_client = metrics_client
-      @source_peer    = source_peer
+      @listener               = listener
+      @middlewares            = middlewares
+      @default_response_class = response_class
+      @metrics_client         = metrics_client
+      @source_peer            = source_peer
 
       connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
@@ -57,12 +57,14 @@ module Routemaster
     # string otherwise.
     def get(url, params: {}, headers: {}, options: {})
       enable_caching = options.fetch(:enable_caching, true)
+      response_class = options[:response_class]
 
       _wrapped_response _request(
         :get,
         url: url,
         params: params,
-        headers: headers.merge(response_cache_opt_headers(enable_caching)))
+        headers: headers.merge(response_cache_opt_headers(enable_caching))),
+        response_class: response_class
     end
 
     # Same as {{get}}, except with
@@ -95,14 +97,6 @@ module Routemaster
       @@root_resources[url] ||= get(url)
     end
 
-    def with_response(response_class)
-      memo = @response_class
-      @response_class = response_class
-      yield self
-    ensure
-      @response_class = memo
-    end
-
     private
 
     def _assert_uri(url)
@@ -121,8 +115,9 @@ module Routemaster
       end
     end
 
-    def _wrapped_response(response)
-      @response_class ? @response_class.new(response, client: self) : response
+    def _wrapped_response(response, response_class: nil)
+      response_class = response_class || @default_response_class
+      response_class ? response_class.new(response, client: self) : response
     end
 
     def connection
