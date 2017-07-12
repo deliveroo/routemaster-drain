@@ -21,7 +21,7 @@ describe Routemaster::APIClient do
   let(:port) { 8000 }
   let(:service) do
     TestServer.new(port) do |server|
-      [400, 401, 403, 404, 409, 412, 413, 429, 500].each do |status_code|
+      [400, 401, 403, 404, 409, 412, 413, 422, 429, 500].each do |status_code|
         server.mount_proc "/#{status_code}" do |req, res|
           res.status = status_code
           res.body = { field: 'test' }.to_json
@@ -149,6 +149,10 @@ describe Routemaster::APIClient do
 
       it 'raises an InvalidResource on 413' do
         expect { perform.(host + '/413') }.to raise_error(Routemaster::Errors::InvalidResource)
+      end
+
+      it 'raises an UnprocessableEntity on 422' do
+        expect { perform.(host + '/422') }.to raise_error(Routemaster::Errors::UnprocessableEntity)
       end
 
       it 'raises an ResourceThrottling on 429' do

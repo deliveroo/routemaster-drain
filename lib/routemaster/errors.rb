@@ -12,6 +12,10 @@ module Routemaster
         body.fetch('errors', {})
       end
 
+      def full_message
+        errors.map { |key, value| "#{key} #{value}" }.join(', ')
+      end
+
       def message
         raise NotImplementedError
       end
@@ -42,6 +46,12 @@ module Routemaster
     class ResourceNotFound < BaseError
       def message
         "Resource Not Found Error"
+      end
+    end
+
+    class UnprocessableEntity < BaseError
+      def message
+        "Unprocessable Entity Error"
       end
     end
 
