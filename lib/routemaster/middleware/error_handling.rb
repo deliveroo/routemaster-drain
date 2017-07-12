@@ -20,7 +20,17 @@ module Routemaster
       def on_complete(env)
         error_class = ERRORS_MAPPING[env[:status]]
 
-        raise error_class.new(env) if error_class
+        if error_class
+          raise error_class.new(env)
+        elsif (407..500).include? env[:status]
+          raise default_error_class.new(env)
+        end
+      end
+
+      private
+
+      def default_error_class
+        Errors::FatalResource
       end
     end
   end
