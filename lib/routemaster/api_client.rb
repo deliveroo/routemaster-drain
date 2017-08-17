@@ -126,6 +126,7 @@ module Routemaster
         f.request :retry, max: 2, interval: 100e-3, backoff_factor: 2
         f.response :mashify
         f.response :json, content_type: /\bjson/
+        f.use :gzip
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
         f.use Routemaster::Middleware::ErrorHandling

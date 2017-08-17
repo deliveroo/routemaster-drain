@@ -4,6 +4,8 @@ require 'spec/support/uses_redis'
 require 'spec/support/uses_webmock'
 require 'routemaster/api_client'
 require 'json'
+require 'stringio'
+require 'zlib'
 
 describe Routemaster::APIClient do
   uses_dotenv
@@ -15,13 +17,14 @@ describe Routemaster::APIClient do
   let(:fetcher) { described_class.new }
 
   shared_examples 'a GET requester' do
+    let(:stubbed_response_body) { { id: 132, type: 'widget' }.to_json }
+    let(:stubbed_response_headers) { { 'content-type' => 'application/json;v=1' } }
+
     before do
       @req = stub_request(:get, /example\.com/).to_return(
         status:   200,
-        body:     { id: 132, type: 'widget' }.to_json,
-        headers:  {
-          'content-type' => 'application/json;v=1'
-        }
+        body:     stubbed_response_body,
+        headers:  stubbed_response_headers,
       )
     end
 
@@ -53,6 +56,34 @@ describe Routemaster::APIClient do
       subject.status
       assert_requested(:get, /example/) do |req|
         expect(req.headers).to include('X-Custom-Header')
+      end
+    end
+
+    it 'requests Gzip encoding' do
+      subject.status
+      expect(WebMock).to have_requested(:get, /example\.com/).with(
+        headers: { 'Accept-Encoding' => 'gzip,deflate' }
+      )
+    end
+
+    context "with a Gzipped response" do
+      let(:stubbed_response_body) do
+        io = StringIO.new
+        writer = Zlib::GzipWriter.new(io)
+        writer << { id: 798, type: 'gizmo' }.to_json
+        writer.close
+        io.string
+      end
+      let(:stubbed_response_headers) do
+        {
+          'Content-Type' => 'application/json;v=1',
+          'Content-Encoding' => 'gzip',
+        }
+      end
+
+      it 'decodes and mashifies body' do
+        expect(subject.body.id).to eq(798)
+        expect(subject.body.type).to eq('gizmo')
       end
     end
   end
