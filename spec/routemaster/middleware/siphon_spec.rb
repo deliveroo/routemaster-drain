@@ -29,12 +29,21 @@ describe Routemaster::Middleware::Siphon do
     context "if a 'stuff' siphon is defined" do
       let(:siphon_double) { double(new: siphon_instance) }
       let(:siphon_instance) { double(call: nil) }
-      let(:options) { { siphon_events: { 'stuff' => siphon_double } } } 
+      let(:options) { { siphon_events: { 'stuff' => siphon_double } } }
 
       it "calls the siphon with the event" do
         perform
         expect(siphon_double).to have_received(:new).with(payload[0])
         expect(siphon_instance).to have_received(:call)
+      end
+
+      context "if an instance is defined as siphon" do
+        let(:options) { { siphon_events: { 'stuff' => siphon_instance } } }
+
+        it "calls the siphon :call method passing in event" do
+          perform
+          expect(siphon_instance).to have_received(:call).with(payload[0])
+        end
       end
 
       it "passes 'notstuff' to the terminator"  do
