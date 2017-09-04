@@ -81,8 +81,9 @@ Routemaster::RedisBroker.instance.inject(
 ## Upgrading
 
 
-If upgrading from any version between 2.4.0 and 3.0.1, and are using caching, your cache may be
-corrupted by entries that lack a TTL (which will eventually cause your Redis
+If upgrading from any version between 2.4.0 and 3.0.1, and are using caching,
+your cache may be corrupted by entries that lack a TTL (which will eventually
+cause your Redis
 storage to blow up).
 
 We provide a tool to fix your data. With your environment loaded and configured
