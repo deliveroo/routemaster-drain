@@ -1,3 +1,10 @@
+### HEAD
+
+Bug fixes:
+
+- Fixes a condition where cache keys in Redis would not expire (#63)
+
+
 ### 3.0.1 (2017-08-08)
 
 Bug fixes:

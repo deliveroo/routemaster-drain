@@ -17,6 +17,7 @@ combining middleware.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
   - [Installation](#installation)
+  - [Upgrading](#upgrading)
   - [Illustrated use cases](#illustrated-use-cases)
     - [Simply receive events from Routemaster](#simply-receive-events-from-routemaster)
     - [Receive change notifications without duplicates](#receive-change-notifications-without-duplicates)
@@ -76,6 +77,24 @@ Routemaster::RedisBroker.instance.inject(
   cache_redis: another_redis_object
 )
 ```
+
+## Upgrading
+
+
+If upgrading from any version between 2.4.0 and 3.0.1, and are using caching,
+your cache may be corrupted by entries that lack a TTL (which will eventually
+cause your Redis
+storage to blow up).
+
+We provide a tool to fix your data. With your environment loaded and configured
+(e.g. from a Rails console), run:
+
+```ruby
+Routemaster::Tasks::FixCacheTTL.new.call
+```
+
+This will scan your cache and add TTLs where missing.
+
 
 ## Illustrated use cases
 
