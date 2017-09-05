@@ -1,4 +1,4 @@
-# routemaster-drain [![Version](https://badge.fury.io/rb/routemaster-drain.svg)](https://rubygems.org/gems/routemaster-drain) [![Build](https://travis-ci.org/deliveroo/routemaster-drain.svg?branch=master)](https://travis-ci.org/deliveroo/routemaster-drain) [![Code Climate](https://codeclimate.com/github/deliveroo/routemaster-drain/badges/gpa.svg)](https://codeclimate.com/github/deliveroo/routemaster-drain) [![codecov](https://codecov.io/gh/deliveroo/routemaster-drain/branch/master/graph/badge.svg)](https://codecov.io/gh/deliveroo/routemaster-drain) [![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/deliveroo/routemaster-drain)
+# routemaster-drain [![Version](https://badge.fury.io/rb/routemaster-drain.svg)](https://rubygems.org/gems/routemaster-drain) [![Build](https://circleci.com/gh/deliveroo/routemaster-drain.svg?style=shield&circle-token=7c256c63e5683bc25f0b4c3db0170446c91d36c8)](https://travis-ci.org/deliveroo/routemaster-drain) [![Code Climate](https://codeclimate.com/github/deliveroo/routemaster-drain/badges/gpa.svg)](https://codeclimate.com/github/deliveroo/routemaster-drain) [![codecov](https://codecov.io/gh/deliveroo/routemaster-drain/branch/master/graph/badge.svg)](https://codecov.io/gh/deliveroo/routemaster-drain) [![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/deliveroo/routemaster-drain)
 
 A Rack-based event receiver for the
 [Routemaster](https://github.com/deliveroo/routemaster) event bus.
@@ -17,6 +17,7 @@ combining middleware.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
   - [Installation](#installation)
+  - [Upgrading](#upgrading)
   - [Illustrated use cases](#illustrated-use-cases)
     - [Simply receive events from Routemaster](#simply-receive-events-from-routemaster)
     - [Receive change notifications without duplicates](#receive-change-notifications-without-duplicates)
@@ -76,6 +77,24 @@ Routemaster::RedisBroker.instance.inject(
   cache_redis: another_redis_object
 )
 ```
+
+## Upgrading
+
+
+If upgrading from any version between 2.4.0 and 3.0.1, and are using caching,
+your cache may be corrupted by entries that lack a TTL (which will eventually
+cause your Redis
+storage to blow up).
+
+We provide a tool to fix your data. With your environment loaded and configured
+(e.g. from a Rails console), run:
+
+```ruby
+Routemaster::Tasks::FixCacheTTL.new.call
+```
+
+This will scan your cache and add TTLs where missing.
+
 
 ## Illustrated use cases
 

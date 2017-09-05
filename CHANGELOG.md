@@ -1,3 +1,17 @@
+### 3.0.2 (2017-09-05)
+
+Bug fixes:
+
+- Fixes a condition where cache keys in Redis would not expire (#63)
+
+
+### 3.0.1 (2017-08-08)
+
+Bug fixes:
+
+- Set middleware before adapter so Faraday is happy (#60)
+
+
 ### 3.0.0 (2017-06-22)
 
 Breaking API changes
