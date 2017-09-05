@@ -128,8 +128,8 @@ module Routemaster
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
-        f.adapter :typhoeus
         f.use Routemaster::Middleware::ErrorHandling
+        f.adapter :typhoeus
 
         @middlewares.each do |middleware|
           f.use(*middleware)
