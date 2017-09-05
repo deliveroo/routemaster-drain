@@ -116,7 +116,7 @@ describe Routemaster::APIClient do
   before { service.start }
   after { service.stop }
 
-  before { WebMock.disable_net_connect!(allow_127.0.0.1: true) }
+  before { WebMock.disable_net_connect!(allow_localhost: true) }
 
   let(:host) { "http://127.0.0.1:#{port}" }
 
