@@ -210,32 +210,4 @@ describe Routemaster::APIClient do
       expect(@req).to have_been_requested
     end
   end
-
-  describe '#with_response' do
-    before { stub_request(:any, //).to_return(status: 200) }
-
-    class DummyResponseA
-      def initialize(res, client: nil); end
-      def dummy_a; true; end
-    end
-
-    class DummyResponseB
-      def initialize(res, client: nil); end
-      def dummy_b; true; end
-    end
-
-    subject { described_class.new(response_class: DummyResponseA) }
-    let(:response) { subject.get('https://example.com') }
-
-    it 'changes the response wrapper during the block' do
-      subject.with_response(DummyResponseB) do
-        expect(response).to respond_to(:dummy_b)
-      end
-    end
-
-    it 'restores the original response wrapper after the block' do
-      subject.with_response(DummyResponseB) {}
-      expect(response).to respond_to(:dummy_a)
-    end
-  end
 end

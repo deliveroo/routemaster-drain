@@ -1,5 +1,5 @@
 module Routemaster
   module Drain
-    VERSION = '2.5.4'
+    VERSION = '3.0.1'
   end
 end

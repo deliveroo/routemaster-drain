@@ -1,3 +1,28 @@
+### HEAD
+
+Bug fixes:
+
+- Fixes a condition where cache keys in Redis would not expire (#63)
+
+
+### 3.0.1 (2017-08-08)
+
+Bug fixes:
+
+- Set middleware before adapter so Faraday is happy (#60)
+
+
+### 3.0.0 (2017-06-22)
+
+Breaking API changes
+
+- Removes the `#with_response` API client method. (#54)
+
+Bug fixes
+
+- Remove state from api client for thread safety. (#54)
+
+
 ### 2.5.4 (2017-06-12)
 
 Bug fixes

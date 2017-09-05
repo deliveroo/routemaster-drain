@@ -47,11 +47,14 @@ module Routemaster
     end
 
     def cache_expiry
-      Integer(ENV.fetch('ROUTEMASTER_CACHE_EXPIRY', 86_400 * 365))
+      # Do not increase this default value. It's likely that cached data will include PII
+      # and 90 days is the maximum permitted retention period at Deliveroo. A higher value
+      # means we would need to worry about purging caches at the end of the period.
+      Integer(ENV.fetch('ROUTEMASTER_CACHE_EXPIRY', 86_400 * 90))
     end
 
     def cache_auth
-      Hashie::Rash.new.tap do |result|
+      @cache_auth ||= Hashie::Rash.new.tap do |result|
         ENV.fetch('ROUTEMASTER_CACHE_AUTH', '').split(',').each do |entry|
           host, username, password = entry.split(':')
           result[Regexp.new(host)] = [username, password]

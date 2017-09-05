@@ -7,8 +7,6 @@ module Routemaster
       let(:client) { double('Client') }
       let(:params) { {} }
 
-      before { allow(client).to receive(:with_response).and_yield }
-
       describe "singular resource" do
         let(:url) { '/resources/1' }
 
@@ -50,7 +48,11 @@ module Routemaster
 
         describe '#index' do
           it 'gets to the given url' do
-            expect(client).to receive(:get).with(url, params: {}, options: { enable_caching: false })
+            expect(client).to receive(:get).with(
+              url, params: {}, options: {
+                enable_caching: false, response_class: Routemaster::Responses::HateoasEnumerableResponse
+              }
+            )
             subject.index
           end
         end
