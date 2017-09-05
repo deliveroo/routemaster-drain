@@ -18,7 +18,7 @@ describe Routemaster::APIClient do
   uses_redis
   uses_webmock
 
-  let(:port) { 8000 }
+  let(:port) { 8080 }
   let(:service) do
     TestServer.new(port) do |server|
       [400, 401, 403, 404, 409, 412, 413, 429, 500].each do |status_code|
@@ -42,7 +42,7 @@ describe Routemaster::APIClient do
       server.mount_proc "/discover" do |req, res|
         res['Content-Type'] = 'application/json'
         res.status = 200
-        res.body = { _links: { resources: { href: "http://localhost:#{port}/resources" } } }.to_json
+        res.body = { _links: { resources: { href: "http://127.0.0.1:#{port}/resources" } } }.to_json
       end
 
       server.mount_proc "/resources" do |req, res|
@@ -53,20 +53,20 @@ describe Routemaster::APIClient do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:#{port}/resourcess?first_name=roo&page=1&per_page=2"
+                href: "http://127.0.0.1:#{port}/resourcess?first_name=roo&page=1&per_page=2"
               },
               first: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               next: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=2&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=2&per_page=2"
               },
               resources: [
-                { href: "http://localhost:#{port}/resources/1" },
-                { href: "http://localhost:#{port}/resources/1" }
+                { href: "http://127.0.0.1:#{port}/resources/1" },
+                { href: "http://127.0.0.1:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -74,20 +74,20 @@ describe Routemaster::APIClient do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:#{port}/resourcess?first_name=roo&page=2&per_page=2"
+                href: "http://127.0.0.1:#{port}/resourcess?first_name=roo&page=2&per_page=2"
               },
               first: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               next: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               resources: [
-                { href: "http://localhost:#{port}/resources/1" },
-                { href: "http://localhost:#{port}/resources/1" }
+                { href: "http://127.0.0.1:#{port}/resources/1" },
+                { href: "http://127.0.0.1:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -95,16 +95,16 @@ describe Routemaster::APIClient do
           res.body = {
             _links: {
               self: {
-                href: "http://localhost:#{port}/resourcess?first_name=roo&page=3&per_page=2"
+                href: "http://127.0.0.1:#{port}/resourcess?first_name=roo&page=3&per_page=2"
               },
               first: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=1&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=1&per_page=2"
               },
               last: {
-                href: "http://localhost:#{port}/resources?first_name=roo&page=3&per_page=2"
+                href: "http://127.0.0.1:#{port}/resources?first_name=roo&page=3&per_page=2"
               },
               resources: [
-                { href: "http://localhost:#{port}/resources/1" }
+                { href: "http://127.0.0.1:#{port}/resources/1" }
               ]
             }
           }.to_json
@@ -118,7 +118,7 @@ describe Routemaster::APIClient do
 
   before { WebMock.disable_net_connect!(allow_localhost: true) }
 
-  let(:host) { "http://localhost:#{port}" }
+  let(:host) { "http://127.0.0.1:#{port}" }
 
   describe 'error handling' do
 
@@ -290,7 +290,7 @@ describe Routemaster::APIClient do
   end
 
   describe 'INDEX request' do
-    let(:url) { "http://localhost:#{port}/discover" }
+    let(:url) { "http://127.0.0.1:#{port}/discover" }
 
     subject do
       Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
@@ -305,13 +305,13 @@ describe Routemaster::APIClient do
     it 'does not make any http requests to fetch individual resources if just the index method is called' do
       res = subject.discover(url)
 
-      expect(subject).not_to receive(:get).with("http://localhost:#{port}/resources/#{anything}", anything)
+      expect(subject).not_to receive(:get).with("http://127.0.0.1:#{port}/resources/#{anything}", anything)
       res.resources.index
     end
   end
 
   describe 'DISCOVER request' do
-    let(:url) { "http://localhost:#{port}/discover" }
+    let(:url) { "http://127.0.0.1:#{port}/discover" }
 
     subject do
       Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
@@ -365,21 +365,21 @@ describe Routemaster::APIClient do
     it 'sends request metrics' do
       subject.get(url)
       expect(metrics_client).to have_received(:increment).with(
-        'api_client.request.count', tags: %w[source:test_service destination:localhost verb:get]
+        'api_client.request.count', tags: %w[source:test_service destination:127.0.0.1 verb:get]
       )
     end
 
     it 'sends response metrics' do
       subject.get(url)
       expect(metrics_client).to have_received(:increment).with(
-        'api_client.response.count', tags: %w[source:test_service destination:localhost status:200]
+        'api_client.response.count', tags: %w[source:test_service destination:127.0.0.1 status:200]
       )
     end
 
     it 'sends timing metrics' do
       subject.get(url)
       expect(metrics_client).to have_received(:time).with(
-        'api_client.latency', tags: %w[source:test_service destination:localhost verb:get]
+        'api_client.latency', tags: %w[source:test_service destination:127.0.0.1 verb:get]
       )
     end
   end
