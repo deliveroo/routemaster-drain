@@ -36,7 +36,7 @@ module Routemaster
         node.pipelined do |p|
           keys.zip(ttls).each do |k,ttl|
             next unless ttl < 0
-            node.expire(k, Config.cache_expiry)
+            p.expire(k, Config.cache_expiry)
           end
         end
       end
