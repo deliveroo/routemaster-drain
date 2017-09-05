@@ -35,8 +35,9 @@ class TestServer
     Timeout.timeout(5) do
       loop do
         begin
-          TCPSocket.new('localhost', '8000')
+          TCPSocket.new('127.0.0.1', @port)
         rescue Errno::ECONNREFUSED
+          sleep 0.1
           next
         end
         break
