@@ -1,3 +1,14 @@
+### -- next (??)
+
+Features:
+
+- Allow instances to be used as handlers for `Siphon` middleware (#62)
+
+Deprecation:
+
+- Classes used as handler for `Siphon` middleware, used to receive the event in the initializer.
+This is now deprecated. Instead the event is passed to the `.call` class method.
+
 ### 3.0.2 (2017-09-05)
 
 Bug fixes:
