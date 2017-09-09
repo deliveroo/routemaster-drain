@@ -19,9 +19,13 @@ module Routemaster
         end
         siphoned.each do |event|
           processor = @processors[event['topic']]
-          processor.respond_to?(:call) ?
-            processor.call(event) :
+          if processor.respond_to?(:call)
+            processor.call(event)
+          else
+            warn '[deprecation] handlers that receive event in initializer are deprecated. '\
+              'define a `.call` method that receives event.'
             processor.new(event).call
+          end
         end
         env['routemaster.payload'] = non_siphoned
         @app.call(env)
