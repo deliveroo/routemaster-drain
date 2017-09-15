@@ -54,7 +54,7 @@ module Routemaster
     end
 
     def cache_auth
-      @cache_auth ||= Hashie::Rash.new.tap do |result|
+      Hashie::Rash.new.tap do |result|
         ENV.fetch('ROUTEMASTER_CACHE_AUTH', '').split(',').each do |entry|
           host, username, password = entry.split(':')
           result[Regexp.new(host)] = [username, password]
