@@ -1,3 +1,9 @@
+### 3.0.3 (2017-09-21)
+
+Bug fixes:
+
+- Fixes a regression introduced in 3.0.1 where the APIClient auth data would not be populated under some conditions. (#65)
+
 ### 3.0.2 (2017-09-05)
 
 Bug fixes:
