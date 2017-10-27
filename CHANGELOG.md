@@ -1,4 +1,4 @@
-### -- next (??)
+### 3.1.0
 
 Features:
 
@@ -8,6 +8,12 @@ Deprecation:
 
 - Classes used as handler for `Siphon` middleware, used to receive the event in the initializer.
 This is now deprecated. Instead the event is passed to the `.call` class method.
+
+### 3.0.3 (2017-09-21)
+
+Bug fixes:
+
+- Fixes a regression introduced in 3.0.1 where the APIClient auth data would not be populated under some conditions. (#65)
 
 ### 3.0.2 (2017-09-05)
 
