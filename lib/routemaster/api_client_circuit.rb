@@ -27,14 +27,18 @@ module Routemaster
 
     def circuit
       Circuitbox.circuit(@circuit_name, {
+        sleep_window: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_SLEEP_WINDOW', 60).to_i,
+        time_window: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIME_WINDOW', 120).to_i,
+        volume_threshold: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_VOLUME_THRESHOLD', 50).to_i,
+        error_threshold:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).to_i,
+        timeout_seconds:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIMEOUT_SECONDS', 1,).to_i,
         cache: Moneta.new(:Redis, backend: Config.cache_redis),
-        sleep_window: 60,
-        volume_threshold: 50,
-        time_window: 120,
-        error_threshold:  50,
-        timeout_seconds:  1,
         exceptions: [Routemaster::Errors::FatalResource, Faraday::TimeoutError]
       })
+    end
+
+    def configuration_setting(circuit_name, setting_name, default)
+      ENV.fetch("#{circuit_name}.#{setting_name}", ENV.fetch(setting_name, default))
     end
   end
 end
