@@ -329,6 +329,18 @@ response.user.show(1)
 #=> HateoasResponse
 ```
 
+### Circuit Breaker
+
+The client ships with a circuit breaker for get requests, this can be enabled by setting `ENABLE_API_CLIENT_CIRCUIT`. The Circuit Breaker is powered by [Circuitbox](https://github.com/yammer/circuitbox).
+
+The following parameters can be used:
+
+- `CIRCUIT_BREAKER_SLEEP_WINDOW` - The time in seconds the circuit will remain open once it's triggered
+- `CIRCUIT_BREAKER_TIME_WINDOW` - The time in seconds over which it calculates the error rate
+- `CIRCUIT_BREAKER_VOLUME_THRESHOLD` - The minimum amount of requests that can trigger the circuit to open
+- `CIRCUIT_BREAKER_ERROR_THRESHOLD` - The % of errors required for the circuit to open in the sleep window
+
+Each of these settings can be controlled on a per domain basis. To set `CIRCUIT_BREAKER_SLEEP_WINDOW` for `example.com` set `example.com.CIRCUIT_BREAKER_SLEEP_WINDOW`
 
 
 ## Internals
