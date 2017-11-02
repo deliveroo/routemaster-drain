@@ -123,7 +123,11 @@ module Routemaster
     def connection
       @connection ||= Faraday.new do |f|
         f.request :json
-        f.request :retry, max: 2, interval: 100e-3, backoff_factor: 2
+        f.request :retry,
+          max: 2,
+          interval: 100e-3,
+          backoff_factor: 2,
+          methods: Faraday::Request::Retry::IDEMPOTENT_METHODS + [:patch]
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener

@@ -1,3 +1,7 @@
+Features:
+
+- Consider PATCH requests to always be indempodent so they can be retried on timeouts
+
 ### 3.0.3 (2017-09-21)
 
 Bug fixes:

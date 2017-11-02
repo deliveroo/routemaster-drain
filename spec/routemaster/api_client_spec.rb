@@ -159,24 +159,41 @@ describe Routemaster::APIClient do
   end
 
   describe '#patch' do
-    subject { fetcher.patch(url, body: {}, headers: headers) }
+    let(:body) { { 'one' => 1, 'two' => 2 }.to_json }
+    subject { fetcher.patch(url, body: body, headers: headers) }
 
-    before do
-      @patch_req = stub_request(:patch, /example\.com/).to_return(
-        status:   200,
-        body:     { id: 132, type: 'widget' }.to_json,
-        headers:  {
-          'content-type' => 'application/json;v=1'
-        }
-      )
+    context 'when request succeeds' do
+      before do
+        @patch_req = stub_request(:patch, /example\.com/).to_return(
+          status:   200,
+          body:     { id: 132, type: 'widget' }.to_json,
+          headers:  {
+            'content-type' => 'application/json;v=1'
+          }
+        )
+      end
+
+      it 'PATCH from the URL' do
+        subject
+        expect(@patch_req).to have_been_requested
+      end
+
+      it_behaves_like 'a wrappable response'
     end
 
-    it 'PATCH from the URL' do
-      subject
-      expect(@patch_req).to have_been_requested
-    end
+    context 'when request times out' do
+      before do
+        stub_request(:patch, url).to_timeout
+      end
 
-    it_behaves_like 'a wrappable response'
+      it 'tries the PATCH request 3 times' do
+        begin
+          subject
+        rescue Faraday::TimeoutError
+        end
+        assert_requested(:patch, url, body: body, times: 3)
+      end
+    end
   end
 
   describe '#delete' do
