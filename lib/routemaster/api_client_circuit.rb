@@ -31,7 +31,7 @@ module Routemaster
         time_window: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIME_WINDOW', 120).to_i,
         volume_threshold: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_VOLUME_THRESHOLD', 50).to_i,
         error_threshold:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).to_i,
-        timeout_seconds:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIMEOUT_SECONDS', 1,).to_i,
+        timeout_seconds:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIMEOUT_SECONDS', 1).to_i,
         cache: Moneta.new(:Redis, backend: Config.cache_redis),
         exceptions: [Routemaster::Errors::FatalResource, Faraday::TimeoutError]
       })
