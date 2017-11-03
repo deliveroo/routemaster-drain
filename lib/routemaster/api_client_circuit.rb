@@ -22,16 +22,15 @@ module Routemaster
     private
 
     def enabled?
-      ENV.fetch('ENABLE_API_CLIENT_CIRCUIT', 'NO') =~ /\A(YES|TRUE|ON|1)\Z/i
+      ENV.fetch('ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT', 'NO') =~ /\A(YES|TRUE|ON|1)\Z/i
     end
 
     def circuit
       Circuitbox.circuit(@circuit_name, {
-        sleep_window: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_SLEEP_WINDOW', 60).to_i,
-        time_window: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIME_WINDOW', 120).to_i,
-        volume_threshold: configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_VOLUME_THRESHOLD', 50).to_i,
-        error_threshold:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).to_i,
-        timeout_seconds:  configuration_setting(@circuit_name, 'CIRCUIT_BREAKER_TIMEOUT_SECONDS', 1).to_i,
+        sleep_window: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_SLEEP_WINDOW', 60).to_i,
+        time_window: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_TIME_WINDOW', 120).to_i,
+        volume_threshold: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD', 50).to_i,
+        error_threshold:  configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).to_i,
         cache: Moneta.new(:Redis, backend: Config.cache_redis),
         exceptions: [Routemaster::Errors::FatalResource, Faraday::TimeoutError]
       })
