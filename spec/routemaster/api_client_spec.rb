@@ -159,24 +159,65 @@ describe Routemaster::APIClient do
   end
 
   describe '#patch' do
-    subject { fetcher.patch(url, body: {}, headers: headers) }
+    let(:body) { { 'one' => 1, 'two' => 2 }.to_json }
+    subject { fetcher.patch(url, body: body, headers: headers) }
 
-    before do
-      @patch_req = stub_request(:patch, /example\.com/).to_return(
-        status:   200,
-        body:     { id: 132, type: 'widget' }.to_json,
-        headers:  {
-          'content-type' => 'application/json;v=1'
-        }
-      )
+    context 'when request succeeds' do
+      before do
+        @patch_req = stub_request(:patch, /example\.com/).to_return(
+          status:   200,
+          body:     { id: 132, type: 'widget' }.to_json,
+          headers:  {
+            'content-type' => 'application/json;v=1'
+          }
+        )
+      end
+
+      it 'PATCH from the URL' do
+        subject
+        expect(@patch_req).to have_been_requested
+      end
+
+      it_behaves_like 'a wrappable response'
     end
 
-    it 'PATCH from the URL' do
-      subject
-      expect(@patch_req).to have_been_requested
-    end
+    context 'when request times out' do
+      subject do
+        begin
+          fetcher.patch(url, body: body, headers: headers)
+        rescue Faraday::TimeoutError
+        end
+      end
 
-    it_behaves_like 'a wrappable response'
+      before do
+        stub_request(:patch, url).to_timeout
+      end
+
+      it 'tries the PATCH request only once' do
+        subject
+        assert_requested(:patch, url, body: body, times: 1)
+      end
+
+      context 'when PATCH is specified as a method to retry' do
+        let(:retry_methods) { [:patch] }
+        let(:fetcher) { described_class.new(retry_methods: retry_methods) }
+
+        it 'tries the PATCH request 3 times' do
+          subject
+          assert_requested(:patch, url, body: body, times: 3)
+        end
+
+        context 'when retry attempt count is specified' do
+          let(:retry_attempts) { 4 }
+          let(:fetcher) { described_class.new(retry_methods: retry_methods, retry_attempts: retry_attempts) }
+
+          it "tries the PATCH request '1 + retry-count' times" do
+            subject
+            assert_requested(:patch, url, body: body, times: 1 + retry_attempts)
+          end
+        end
+      end
+    end
   end
 
   describe '#delete' do

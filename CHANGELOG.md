@@ -1,3 +1,7 @@
+Features:
+
+- Make retry-attempt-count and retry-methods configurable in APIClient.
+
 ### 3.0.3 (2017-09-21)
 
 Bug fixes:
