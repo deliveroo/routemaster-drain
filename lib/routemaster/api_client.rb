@@ -35,17 +35,14 @@ module Routemaster
     # all the time to fetch the root resource before doing anything else.
     @@root_resources = {}
 
-    def initialize(middlewares: [],
-                   listener: nil,
-                   response_class: nil,
-                   metrics_client: nil,
-                   source_peer: nil)
-
-      @listener               = listener
-      @middlewares            = middlewares
-      @default_response_class = response_class
-      @metrics_client         = metrics_client
-      @source_peer            = source_peer
+    def initialize(options = {})
+      @listener               = options.fetch :listener, nil
+      @middlewares            = options.fetch :middlewares, []
+      @default_response_class = options.fetch :response_class, nil
+      @metrics_client         = options.fetch :metrics_client, nil
+      @source_peer            = options.fetch :source_peer, nil
+      @retry_attempts         = options.fetch :retry_attempts, 2
+      @retry_methods          = options.fetch :retry_methods, Faraday::Request::Retry::IDEMPOTENT_METHODS
 
       connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
@@ -125,7 +122,11 @@ module Routemaster
     def connection
       @connection ||= Faraday.new do |f|
         f.request :json
-        f.request :retry, max: 2, interval: 100e-3, backoff_factor: 2
+        f.request :retry,
+          max: @retry_attempts,
+          interval: 100e-3,
+          backoff_factor: 2,
+          methods: @retry_methods
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
