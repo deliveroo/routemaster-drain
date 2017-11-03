@@ -2,8 +2,13 @@
 
 Features:
 
- - Make retry-attempt-count and retry-methods configurable in APIClient.
- - Adds a circuit breaker to GET requests (#66)
+- Adds a circuit breaker to GET requests (#66)
+
+### 3.0.4 (2017-11-42)
+
+Features:
+
+- Make retry-attempt-count and retry-methods configurable in APIClient.
 
 ### 3.0.3 (2017-09-21)
 
