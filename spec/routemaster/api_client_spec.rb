@@ -182,16 +182,40 @@ describe Routemaster::APIClient do
     end
 
     context 'when request times out' do
+      subject do
+        begin
+          fetcher.patch(url, body: body, headers: headers)
+        rescue Faraday::TimeoutError
+        end
+      end
+
       before do
         stub_request(:patch, url).to_timeout
       end
 
-      it 'tries the PATCH request 3 times' do
-        begin
+      it 'tries the PATCH request only once' do
+        subject
+        assert_requested(:patch, url, body: body, times: 1)
+      end
+
+      context 'when PATCH is specified as a method to retry' do
+        let(:retry_methods) { [:patch] }
+        let(:fetcher) { described_class.new(retry_methods: retry_methods) }
+
+        it 'tries the PATCH request 3 times' do
           subject
-        rescue Faraday::TimeoutError
+          assert_requested(:patch, url, body: body, times: 3)
         end
-        assert_requested(:patch, url, body: body, times: 3)
+
+        context 'when retry attempt count is specified' do
+          let(:retry_attempts) { 4 }
+          let(:fetcher) { described_class.new(retry_methods: retry_methods, retry_attempts: retry_attempts) }
+
+          it "tries the PATCH request '1 + retry-count' times" do
+            subject
+            assert_requested(:patch, url, body: body, times: 1 + retry_attempts)
+          end
+        end
       end
     end
   end
