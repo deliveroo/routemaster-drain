@@ -38,7 +38,7 @@ describe Routemaster::Cache do
     context 'when there is no previous cached response' do
       it 'makes a HTTP request' do
         perform.call
-        expect(WebMock).to have_requested(:get, url) 
+        expect(WebMock).to have_requested(:get, url)
       end
 
       it 'returns fresh headers' do

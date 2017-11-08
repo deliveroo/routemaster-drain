@@ -35,7 +35,11 @@ module Routemaster
     end
 
     def load_into_redis
-      @redis.redis.script(:load, @script)
+      if @redis.respond_to? :redis
+        @redis.redis.script(:load, @script)
+      else
+        @redis.script(:load, @script)
+      end
     end
   end
 end

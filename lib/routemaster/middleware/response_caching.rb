@@ -35,9 +35,10 @@ module Routemaster
               Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
             end
 
-            script = LuaScript.new('cache_service_response', @cache)
+            namespaced_key = "#{@cache.namespace}:#{cache_key(env)}"
+            script = LuaScript.new('cache_service_response', @cache.redis.node_for(namespaced_key))
             script.run(
-              ["#{@cache.namespace}:#{cache_key(env)}"],
+              [namespaced_key],
               [
                 body_cache_field(env), response.body,
                 headers_cache_field(env), Marshal.dump(response.headers),
