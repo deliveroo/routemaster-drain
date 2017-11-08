@@ -1,6 +1,7 @@
 require 'wisper'
 require 'routemaster/event_index'
 require 'routemaster/cache_key'
+require 'routemaster/lua_script'
 
 module Routemaster
   module Middleware
@@ -30,18 +31,20 @@ module Routemaster
           response = response_env.response
 
           if response.success? && cache_enabled?(env)
-            namespaced_key = "#{@cache.namespace}:#{cache_key(env)}"
-            @cache.redis.node_for(namespaced_key).multi do |node|
-              if Config.logger.debug?
-                Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
-              end
-
-              node.hmset(namespaced_key,
-                         body_cache_field(env), response.body,
-                         headers_cache_field(env), Marshal.dump(response.headers),
-                         :most_recent_index, event_index)
-              node.expire(namespaced_key, @expiry)
+            if Config.logger.debug?
+              Config.logger.debug("DRAIN: Saving #{url(env)} with a event index of #{event_index}")
             end
+
+            script = LuaScript.new('cache_service_response', @cache)
+            script.run(
+              ["#{@cache.namespace}:#{cache_key(env)}"],
+              [
+                body_cache_field(env), response.body,
+                headers_cache_field(env), Marshal.dump(response.headers),
+                :most_recent_index, event_index,
+                @expiry
+              ]
+            )
 
             @listener._publish(:cache_miss, url(env)) if @listener
           end

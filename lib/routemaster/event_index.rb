@@ -1,4 +1,5 @@
 require 'routemaster/cache_key'
+require 'routemaster/lua_script'
 module Routemaster
   class EventIndex
     def initialize(url, cache: Config.cache_redis)
@@ -7,12 +8,8 @@ module Routemaster
     end
 
     def increment
-      _node do |cache, key|
-        cache.multi do |m|
-          m.hincrby(key, 'current_index', 1)
-          m.expire(key, Config.cache_expiry)
-        end
-      end
+      LuaScript.new('increment_and_expire_h', @cache)
+                .run([_key],['current_index', Config.cache_expiry])
       self
     end
 
