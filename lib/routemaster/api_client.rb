@@ -8,6 +8,7 @@ require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
 require 'routemaster/responses/response_promise'
+require 'routemaster/api_client_circuit'
 
 # This is not a direct dependency, we need to load it early to prevent a
 # circular dependency in hateoas_response.rb
@@ -55,13 +56,14 @@ module Routemaster
     def get(url, params: {}, headers: {}, options: {})
       enable_caching = options.fetch(:enable_caching, true)
       response_class = options[:response_class]
-
-      _wrapped_response _request(
-        :get,
-        url: url,
-        params: params,
-        headers: headers.merge(response_cache_opt_headers(enable_caching))),
-        response_class: response_class
+      APIClientCircuit.new(url).call do
+        _wrapped_response _request(
+          :get,
+          url: url,
+          params: params,
+          headers: headers.merge(response_cache_opt_headers(enable_caching))),
+          response_class: response_class
+      end
     end
 
     # Same as {{get}}, except with

@@ -1,3 +1,9 @@
+### HEAD
+
+Features:
+
+- Adds a circuit breaker to GET requests (#66)
+
 ### 3.1.0 (2017-11-42)
 
 Features:
