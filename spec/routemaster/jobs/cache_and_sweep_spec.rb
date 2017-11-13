@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Routemaster::Jobs::CacheAndSweep do
   let(:url) { 'https://example.com/foo' }
+  let(:env) { double(Faraday::Env, url: url) }
 
   subject { described_class.new }
 
@@ -11,7 +12,7 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
     before do
       allow_any_instance_of(Routemaster::Cache)
         .to receive(:get)
-        .and_raise(Routemaster::Errors::ResourceNotFound.new(""))
+        .and_raise(Routemaster::Errors::ResourceNotFound.new(env))
     end
 
     it 'does not bubble up the error' do

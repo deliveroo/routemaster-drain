@@ -35,13 +35,13 @@ module Routemaster
 
     class InvalidResource < BaseError
       def message
-        "Invalid Resource Error"
+        "Invalid Resource Error. url #{env.url}"
       end
     end
 
     class ResourceNotFound < BaseError
       def message
-        "Resource Not Found Error"
+        "Resource Not Found Error. url: #{env.url}"
       end
     end
 
