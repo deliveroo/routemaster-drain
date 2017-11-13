@@ -29,7 +29,7 @@ module Routemaster
 
     class UnauthorizedResourceAccess < BaseError
       def message
-        "Unauthorized Resource Access Error"
+        "Unauthorized Resource Access Error. url: #{env.url}"
       end
     end
 
@@ -53,7 +53,7 @@ module Routemaster
 
     class ConflictResource < BaseError
       def message
-        "ConflictResourceError Resource Error"
+        "ConflictResourceError Resource Error. url: #{env.url}"
       end
     end
 
@@ -66,7 +66,7 @@ module Routemaster
 
     class ResourceThrottling < BaseError
       def message
-        "Resource Throttling Error"
+        "Resource Throttling Error. url: #{env.url}"
       end
     end
   end
