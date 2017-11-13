@@ -1,3 +1,9 @@
+### 3.3.0 (2017-11-13)
+
+Features:
+
+- Adds a circuit breaker to all requests (#72)
+
 ### 3.2.0 (2017-11-10)
 
 Features:
