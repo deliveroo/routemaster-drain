@@ -56,14 +56,12 @@ module Routemaster
     def get(url, params: {}, headers: {}, options: {})
       enable_caching = options.fetch(:enable_caching, true)
       response_class = options[:response_class]
-      APIClientCircuit.new(url).call do
-        _wrapped_response _request(
-          :get,
-          url: url,
-          params: params,
-          headers: headers.merge(response_cache_opt_headers(enable_caching))),
-          response_class: response_class
-      end
+      _wrapped_response _request(
+        :get,
+        url: url,
+        params: params,
+        headers: headers.merge(response_cache_opt_headers(enable_caching))),
+        response_class: response_class
     end
 
     # Same as {{get}}, except with
@@ -106,11 +104,13 @@ module Routemaster
     def _request(method, url:, body: nil, headers:, params: {})
       uri = _assert_uri(url)
       auth = auth_header(uri.host)
-      connection.public_send(method) do |req|
-        req.url uri.to_s
-        req.params.merge! params
-        req.headers = headers.merge(auth)
-        req.body = body
+      APIClientCircuit.new(url).call do
+        connection.public_send(method) do |req|
+          req.url uri.to_s
+          req.params.merge! params
+          req.headers = headers.merge(auth)
+          req.body = body
+        end
       end
     end
 
