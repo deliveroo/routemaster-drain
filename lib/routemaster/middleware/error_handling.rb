@@ -13,7 +13,7 @@ module Routemaster
         (412..412) => Errors::IncompatibleVersion,
         (413..413) => Errors::InvalidResource,
         (429..429) => Errors::ResourceThrottling,
-        (407..500) => Errors::FatalResource
+        (407..599) => Errors::FatalResource
       }.freeze
 
       def on_complete(env)
