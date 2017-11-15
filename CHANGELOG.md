@@ -1,3 +1,9 @@
+### HEAD
+
+Features:
+
+- Adds a PUT request to the APIClient
+
 ### 3.2.0 (2017-11-10)
 
 Features:
