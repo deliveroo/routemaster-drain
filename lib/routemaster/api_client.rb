@@ -80,6 +80,14 @@ module Routemaster
         headers: headers)
     end
 
+    def put(url, body: {}, headers: {})
+      _wrapped_response _request(
+        :put,
+        url: url,
+        body: body,
+        headers: headers)
+    end
+
     def patch(url, body: {}, headers: {})
       _wrapped_response _request(
         :patch,
