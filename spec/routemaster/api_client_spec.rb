@@ -202,7 +202,7 @@ describe Routemaster::APIClient do
         let(:retry_attempts) { 4 }
         let(:fetcher) { described_class.new(retry_attempts: retry_attempts) }
 
-        it "tries the PATCH request '1 + retry-count' times" do
+        it "tries the PUT request '1 + retry-count' times" do
           subject
           assert_requested(:put, url, body: body, times: 1 + retry_attempts)
         end
