@@ -72,20 +72,16 @@ module Routemaster
       Responses::ResponsePromise.new { get(uri, options) }
     end
 
-    def post(url, body: {}, headers: {})
-      _wrapped_response _request(
-        :post,
-        url: url,
-        body: body,
-        headers: headers)
+    def patch(url, body: {}, headers: {})
+      patch_post_or_put(:patch, url, body, headers)
     end
 
-    def patch(url, body: {}, headers: {})
-      _wrapped_response _request(
-        :patch,
-        url: url,
-        body: body,
-        headers: headers)
+    def post(url, body: {}, headers: {})
+      patch_post_or_put(:post, url, body, headers)
+    end
+
+    def put(url, body: {}, headers: {})
+      patch_post_or_put(:put, url, body, headers)
     end
 
     def delete(url, headers: {})
@@ -97,6 +93,14 @@ module Routemaster
     end
 
     private
+
+    def patch_post_or_put(type, url, body, headers)
+      _wrapped_response _request(
+        type,
+        url: url,
+        body: body,
+        headers: headers)
+    end
 
     def _assert_uri(url)
       return url if url.kind_of?(URI)
