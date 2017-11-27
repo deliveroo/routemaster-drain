@@ -1,3 +1,9 @@
+### 3.4.0 (2017-11-16)
+
+Features:
+
+- Raises error on 405 and 503
+
 ### 3.3.0 (2017-11-16)
 
 Features:
