@@ -69,5 +69,17 @@ module Routemaster
         "Resource Throttling Error"
       end
     end
+
+    class MethodNotAllowed < BaseError
+      def message
+        "Method Not Allowed"
+      end
+    end
+
+    class ServiceNotAvailable < BaseError
+      def message
+        "Service Not Available"
+      end
+    end
   end
 end
