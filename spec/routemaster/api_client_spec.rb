@@ -158,6 +158,58 @@ describe Routemaster::APIClient do
     it_behaves_like 'a wrappable response'
   end
 
+  describe '#put' do
+    let(:body) { { 'one' => 1, 'two' => 2 }.to_json }
+    subject { fetcher.put(url, body: body, headers: headers) }
+
+    context 'when request succeeds' do
+      before do
+        @put_req= stub_request(:put, /example\.com/).to_return(
+          status:   200,
+          body:     { id: 132, type: 'widget' }.to_json,
+          headers:  {
+            'content-type' => 'application/json;v=1'
+          }
+        )
+      end
+
+      it 'PUT from the URL' do
+        subject
+        expect(@put_req).to have_been_requested
+      end
+
+      it_behaves_like 'a wrappable response'
+    end
+
+    context 'when request times out' do
+      subject do
+        begin
+          fetcher.put(url, body: body, headers: headers)
+        rescue Faraday::TimeoutError
+        end
+      end
+
+      before do
+        stub_request(:put, url).to_timeout
+      end
+
+      it 'tries the PUT request three times' do
+        subject
+        assert_requested(:put, url, body: body, times: 3)
+      end
+
+      context 'when retry attempt count is specified' do
+        let(:retry_attempts) { 4 }
+        let(:fetcher) { described_class.new(retry_attempts: retry_attempts) }
+
+        it "tries the PUT request '1 + retry-count' times" do
+          subject
+          assert_requested(:put, url, body: body, times: 1 + retry_attempts)
+        end
+      end
+    end
+  end
+
   describe '#patch' do
     let(:body) { { 'one' => 1, 'two' => 2 }.to_json }
     subject { fetcher.patch(url, body: body, headers: headers) }

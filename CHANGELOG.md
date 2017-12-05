@@ -1,10 +1,22 @@
+### 3.4.0 (2017-11-16)
+
+Features:
+
+- Raises error on 405 and 503
+
+### 3.3.0 (2017-11-16)
+
+Features:
+
+- Adds a PUT request to the APIClient
+
 ### 3.2.0 (2017-11-10)
 
 Features:
 
 - Adds a circuit breaker to GET requests (#66)
 
-### 3.1.0 (2017-11-2)
+### 3.1.0 (2017-11-02)
 
 Features:
 
