@@ -3,7 +3,8 @@ require 'routemaster/dirty/map'
 require 'spec_helper'
 
 RSpec.describe Routemaster::Jobs::CacheAndSweep do
-  let(:url) { 'https://example.com/foo' }
+  let(:url)        { 'https://example.com/foo' }
+  let(:sample_env) { OpenStruct.new(url: url, status: 200) }
 
   subject { described_class.new }
 
@@ -11,7 +12,7 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
     before do
       allow_any_instance_of(Routemaster::Cache)
         .to receive(:get)
-        .and_raise(Routemaster::Errors::ResourceNotFound.new(""))
+        .and_raise(Routemaster::Errors::ResourceNotFound.new(sample_env))
     end
 
     it 'does not bubble up the error' do

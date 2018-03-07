@@ -29,19 +29,19 @@ module Routemaster
 
     class UnauthorizedResourceAccess < BaseError
       def message
-        "Unauthorized Resource Access Error"
+        "Unauthorized Resource Access: #{env.url}"
       end
     end
 
     class InvalidResource < BaseError
       def message
-        "Invalid Resource Error"
+        "Invalid Resource #{env.url}"
       end
     end
 
     class ResourceNotFound < BaseError
       def message
-        "Resource Not Found Error"
+        "Resource Not Found: #{env.url}"
       end
     end
 
@@ -53,7 +53,7 @@ module Routemaster
 
     class ConflictResource < BaseError
       def message
-        "ConflictResourceError Resource Error"
+        "Conflict Resource: #{env.url}"
       end
     end
 
@@ -72,7 +72,7 @@ module Routemaster
 
     class MethodNotAllowed < BaseError
       def message
-        "Method Not Allowed"
+        "Method Not Allowed: #{env.method} #{env.url}"
       end
     end
 
