@@ -11,6 +11,7 @@ module Routemaster
         (404..404) => Errors::ResourceNotFound,
         (405..405) => Errors::MethodNotAllowed,
         (409..409) => Errors::ConflictResource,
+        (410..410) => Errors::ResourceGone,
         (412..412) => Errors::IncompatibleVersion,
         (413..413) => Errors::InvalidResource,
         (429..429) => Errors::ResourceThrottling,

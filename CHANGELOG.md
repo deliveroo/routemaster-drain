@@ -1,3 +1,11 @@
+### HEAD
+
+_A description of your awesome changes here!_
+
+Features:
+
+- Raises more semantically correct error on 410
+
 ### 3.4.0 (2017-11-16)
 
 Features:
