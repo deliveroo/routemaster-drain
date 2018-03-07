@@ -2,6 +2,8 @@
 
 _A description of your awesome changes here!_
 
+### 3.5.0 (2018-03-07)
+
 Features:
 
 - Raises more semantically correct error on 410
