@@ -53,7 +53,7 @@ module Routemaster
 
     class FatalResource < BaseError
       def message
-        "Fatal Resource Error. body: #{body}, url: #{env.url}, method: #{env.method}"
+        "Fatal Resource Error. body: #{env.body}, url: #{env.url}, method: #{env.method}"
       end
     end
 

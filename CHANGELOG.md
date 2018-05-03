@@ -2,6 +2,12 @@
 
 _A description of your awesome changes here!_
 
+### 3.5.1 (2018-05-01)
+
+Bug fixes:
+
+- Fix the issue with parsing body in fatal error message. (#78)
+
 ### 3.5.0 (2018-03-07)
 
 Features:
