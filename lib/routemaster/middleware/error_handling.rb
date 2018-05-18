@@ -9,11 +9,14 @@ module Routemaster
         (401..401) => Errors::UnauthorizedResourceAccess,
         (403..403) => Errors::UnauthorizedResourceAccess,
         (404..404) => Errors::ResourceNotFound,
+        (405..405) => Errors::MethodNotAllowed,
         (409..409) => Errors::ConflictResource,
+        (410..410) => Errors::ResourceGone,
         (412..412) => Errors::IncompatibleVersion,
         (413..413) => Errors::InvalidResource,
         (429..429) => Errors::ResourceThrottling,
-        (407..500) => Errors::FatalResource
+        (407..500) => Errors::FatalResource,
+        (503..503) => Errors::ServiceNotAvailable
       }.freeze
 
       def on_complete(env)

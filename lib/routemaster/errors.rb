@@ -45,9 +45,15 @@ module Routemaster
       end
     end
 
+    class ResourceGone < BaseError
+      def message
+        "Resource Gone: #{env.url}"
+      end
+    end
+
     class FatalResource < BaseError
       def message
-        "Fatal Resource Error. body: #{body}, url: #{env.url}, method: #{env.method}"
+        "Fatal Resource Error. body: #{env.body}, url: #{env.url}, method: #{env.method}"
       end
     end
 
@@ -67,6 +73,18 @@ module Routemaster
     class ResourceThrottling < BaseError
       def message
         "Resource Throttling Error"
+      end
+    end
+
+    class MethodNotAllowed < BaseError
+      def message
+        "Method Not Allowed"
+      end
+    end
+
+    class ServiceNotAvailable < BaseError
+      def message
+        "Service Not Available"
       end
     end
   end

@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency     'hashie'
   spec.add_runtime_dependency     'redis-namespace'
   spec.add_runtime_dependency     'concurrent-ruby'
+  spec.add_runtime_dependency     'circuitbox'
 end

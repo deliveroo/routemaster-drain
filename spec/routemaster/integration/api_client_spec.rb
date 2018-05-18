@@ -21,7 +21,7 @@ describe Routemaster::APIClient do
   let(:port) { 8080 }
   let(:service) do
     TestServer.new(port) do |server|
-      [400, 401, 403, 404, 409, 412, 413, 429, 500].each do |status_code|
+      [400, 401, 403, 404, 405, 409, 412, 413, 429, 500, 503].each do |status_code|
         server.mount_proc "/#{status_code}" do |req, res|
           res.status = status_code
           res.body = { field: 'test' }.to_json
@@ -139,6 +139,10 @@ describe Routemaster::APIClient do
         expect { perform.(host + '/403') }.to raise_error(Routemaster::Errors::UnauthorizedResourceAccess)
       end
 
+      it 'raises a MethodNotAllowed on 405' do
+        expect { perform.(host + '/405') }.to raise_error(Routemaster::Errors::MethodNotAllowed)
+      end
+
       it 'raises an ConflictResource on 409' do
         expect { perform.(host + '/409') }.to raise_error(Routemaster::Errors::ConflictResource)
       end
@@ -157,6 +161,10 @@ describe Routemaster::APIClient do
 
       it 'raises an FatalResource on 500' do
         expect { perform.(host + '/500') }.to raise_error(Routemaster::Errors::FatalResource)
+      end
+
+      it 'raises a ServiceNotAvailable on 503' do
+        expect { perform.(host + '/503') }.to raise_error(Routemaster::Errors::ServiceNotAvailable)
       end
     end
 

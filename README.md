@@ -1,4 +1,4 @@
-# routemaster-drain [![Version](https://badge.fury.io/rb/routemaster-drain.svg)](https://rubygems.org/gems/routemaster-drain) [![Build](https://circleci.com/gh/deliveroo/routemaster-drain.svg?style=shield&circle-token=7c256c63e5683bc25f0b4c3db0170446c91d36c8)](https://travis-ci.org/deliveroo/routemaster-drain) [![Code Climate](https://codeclimate.com/github/deliveroo/routemaster-drain/badges/gpa.svg)](https://codeclimate.com/github/deliveroo/routemaster-drain) [![codecov](https://codecov.io/gh/deliveroo/routemaster-drain/branch/master/graph/badge.svg)](https://codecov.io/gh/deliveroo/routemaster-drain) [![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/deliveroo/routemaster-drain)
+# routemaster-drain [![Version](https://badge.fury.io/rb/routemaster-drain.svg)](https://rubygems.org/gems/routemaster-drain) [![Build](https://circleci.com/gh/deliveroo/routemaster-drain.svg?style=shield&circle-token=7c256c63e5683bc25f0b4c3db0170446c91d36c8)](https://circleci.com/gh/deliveroo/routemaster-drain) [![Code Climate](https://codeclimate.com/github/deliveroo/routemaster-drain/badges/gpa.svg)](https://codeclimate.com/github/deliveroo/routemaster-drain) [![codecov](https://codecov.io/gh/deliveroo/routemaster-drain/branch/master/graph/badge.svg)](https://codecov.io/gh/deliveroo/routemaster-drain) [![Docs](http://img.shields.io/badge/API%20docs-rubydoc.info-blue.svg)](http://rubydoc.info/github/deliveroo/routemaster-drain)
 
 A Rack-based event receiver for the
 [Routemaster](https://github.com/deliveroo/routemaster) event bus.
@@ -329,6 +329,18 @@ response.user.show(1)
 #=> HateoasResponse
 ```
 
+### Circuit Breaker
+
+The client ships with a circuit breaker for get requests, this can be enabled by setting `ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT`. The Circuit Breaker is powered by [Circuitbox](https://github.com/yammer/circuitbox).
+
+The following parameters can be used:
+
+- `ROUTEMASTER_CIRCUIT_BREAKER_SLEEP_WINDOW` - The time in seconds the circuit will remain open once it's triggered
+- `ROUTEMASTER_CIRCUIT_BREAKER_TIME_WINDOW` - The time in seconds over which it calculates the error rate
+- `ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD` - The minimum amount of requests that can trigger the circuit to open
+- `ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD` - The % of errors required for the circuit to open in the sleep window
+
+Each of these settings can be controlled on a per domain basis. To set `ROUTEMASTER_CIRCUIT_BREAKER_SLEEP_WINDOW` for `example.com` set `example.com.ROUTEMASTER_CIRCUIT_BREAKER_SLEEP_WINDOW`
 
 
 ## Internals

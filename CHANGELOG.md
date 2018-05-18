@@ -1,3 +1,49 @@
+### HEAD
+
+_A description of your awesome changes here!_
+
+### 3.5.1 (2018-05-01)
+
+Bug fixes:
+
+- Fix the issue with parsing body in fatal error message. (#78)
+
+### 3.5.0 (2018-03-07)
+
+Features:
+
+- Raises more semantically correct error on 410
+
+### 3.4.0 (2017-11-16)
+
+Features:
+
+- Raises error on 405 and 503
+
+### 3.3.0 (2017-11-16)
+
+Features:
+
+- Adds a PUT request to the APIClient
+
+### 3.2.0 (2017-11-10)
+
+Features:
+
+- Adds a circuit breaker to GET requests (#66)
+
+### 3.1.0 (2017-11-02)
+
+Features:
+
+- Make retry-attempt-count and retry-methods configurable in APIClient.
+
+### 3.0.3 (2017-09-21)
+
+Bug fixes:
+
+- Fixes a regression introduced in 3.0.1 where the APIClient auth data would not be populated under some conditions. (#65)
+
 ### 3.0.2 (2017-09-05)
 
 Bug fixes:

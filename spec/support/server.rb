@@ -7,6 +7,7 @@ module WEBrick
   module HTTPServlet
     class ProcHandler
       alias do_PATCH do_GET
+      alias do_DELETE do_GET
     end
   end
 end
@@ -25,7 +26,7 @@ class TestServer
         DocumentRoot: Dir.pwd,
         Logger: WEBrick::Log.new('/dev/null'),
         AccessLog: [nil, nil]
-      ).tap do |server|  
+      ).tap do |server|
         @setup.call(server)
         server.start
       end

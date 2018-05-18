@@ -8,6 +8,7 @@ require 'routemaster/middleware/response_caching'
 require 'routemaster/middleware/error_handling'
 require 'routemaster/middleware/metrics'
 require 'routemaster/responses/response_promise'
+require 'routemaster/api_client_circuit'
 
 # This is not a direct dependency, we need to load it early to prevent a
 # circular dependency in hateoas_response.rb
@@ -34,17 +35,14 @@ module Routemaster
     # all the time to fetch the root resource before doing anything else.
     @@root_resources = {}
 
-    def initialize(middlewares: [],
-                   listener: nil,
-                   response_class: nil,
-                   metrics_client: nil,
-                   source_peer: nil)
-
-      @listener               = listener
-      @middlewares            = middlewares
-      @default_response_class = response_class
-      @metrics_client         = metrics_client
-      @source_peer            = source_peer
+    def initialize(options = {})
+      @listener               = options.fetch :listener, nil
+      @middlewares            = options.fetch :middlewares, []
+      @default_response_class = options.fetch :response_class, nil
+      @metrics_client         = options.fetch :metrics_client, nil
+      @source_peer            = options.fetch :source_peer, nil
+      @retry_attempts         = options.fetch :retry_attempts, 2
+      @retry_methods          = options.fetch :retry_methods, Faraday::Request::Retry::IDEMPOTENT_METHODS
 
       connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
@@ -58,13 +56,14 @@ module Routemaster
     def get(url, params: {}, headers: {}, options: {})
       enable_caching = options.fetch(:enable_caching, true)
       response_class = options[:response_class]
-
-      _wrapped_response _request(
-        :get,
-        url: url,
-        params: params,
-        headers: headers.merge(response_cache_opt_headers(enable_caching))),
-        response_class: response_class
+      APIClientCircuit.new(url).call do
+        _wrapped_response _request(
+          :get,
+          url: url,
+          params: params,
+          headers: headers.merge(response_cache_opt_headers(enable_caching))),
+          response_class: response_class
+      end
     end
 
     # Same as {{get}}, except with
@@ -73,20 +72,16 @@ module Routemaster
       Responses::ResponsePromise.new { get(uri, options) }
     end
 
-    def post(url, body: {}, headers: {})
-      _wrapped_response _request(
-        :post,
-        url: url,
-        body: body,
-        headers: headers)
+    def patch(url, body: {}, headers: {})
+      patch_post_or_put(:patch, url, body, headers)
     end
 
-    def patch(url, body: {}, headers: {})
-      _wrapped_response _request(
-        :patch,
-        url: url,
-        body: body,
-        headers: headers)
+    def post(url, body: {}, headers: {})
+      patch_post_or_put(:post, url, body, headers)
+    end
+
+    def put(url, body: {}, headers: {})
+      patch_post_or_put(:put, url, body, headers)
     end
 
     def delete(url, headers: {})
@@ -98,6 +93,14 @@ module Routemaster
     end
 
     private
+
+    def patch_post_or_put(type, url, body, headers)
+      _wrapped_response _request(
+        type,
+        url: url,
+        body: body,
+        headers: headers)
+    end
 
     def _assert_uri(url)
       return url if url.kind_of?(URI)
@@ -123,7 +126,11 @@ module Routemaster
     def connection
       @connection ||= Faraday.new do |f|
         f.request :json
-        f.request :retry, max: 2, interval: 100e-3, backoff_factor: 2
+        f.request :retry,
+          max: @retry_attempts,
+          interval: 100e-3,
+          backoff_factor: 2,
+          methods: @retry_methods
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
