@@ -208,6 +208,30 @@ describe Routemaster::APIClient do
         end
       end
     end
+
+    context 'when request raises fatal resource exception' do
+      let(:env) { double(body: body, url: url, method: 'PUT') }
+
+      subject do
+        begin
+          fetcher.put(url, body: body, headers: headers)
+        rescue Routemaster::Errors::FatalResource
+        end
+      end
+
+      before do
+        stub_request(:put, url).to_raise(Routemaster::Errors::FatalResource.new(env))
+      end
+
+      context 'when retry exceptions is specified' do
+        let(:fetcher) { described_class.new(retry_exceptions: [ Routemaster::Errors::FatalResource ]) }
+
+        it 'tries to PUT request three times' do
+          subject
+          assert_requested(:put, url, body: body, times: 3)
+        end
+      end
+    end
   end
 
   describe '#patch' do

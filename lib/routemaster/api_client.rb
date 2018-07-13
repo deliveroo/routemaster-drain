@@ -43,6 +43,7 @@ module Routemaster
       @source_peer            = options.fetch :source_peer, nil
       @retry_attempts         = options.fetch :retry_attempts, 2
       @retry_methods          = options.fetch :retry_methods, Faraday::Request::Retry::IDEMPOTENT_METHODS
+      @retry_exceptions       = options.fetch :retry_exceptions, Faraday::Request::Retry::Options.new.exceptions
 
       connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
@@ -130,7 +131,8 @@ module Routemaster
           max: @retry_attempts,
           interval: 100e-3,
           backoff_factor: 2,
-          methods: @retry_methods
+          methods: @retry_methods,
+          exceptions: @retry_exceptions
         f.response :mashify
         f.response :json, content_type: /\bjson/
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
