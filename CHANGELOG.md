@@ -2,6 +2,8 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.0 (2018-07-23)
+
 Features:
 
 - Allowed connections to take the exceptions in which to retry requests on (#79)
