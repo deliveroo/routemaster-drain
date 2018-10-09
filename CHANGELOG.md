@@ -2,6 +2,12 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.1 (2018-10-09)
+
+Features:
+
+- Clients can now set User Agent when placing requests
+
 ### 3.6.0 (2018-07-23)
 
 Features:
