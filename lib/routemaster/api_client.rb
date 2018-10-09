@@ -111,10 +111,11 @@ module Routemaster
     def _request(method, url:, body: nil, headers:, params: {})
       uri = _assert_uri(url)
       auth = auth_header(uri.host)
+      headers = [*user_agent_header, *auth, *headers].to_h
       connection.public_send(method) do |req|
         req.url uri.to_s
         req.params.merge! params
-        req.headers = headers.merge(auth)
+        req.headers = headers
         req.body = body
       end
     end
@@ -153,6 +154,11 @@ module Routemaster
     def auth_header(host)
       auth_string = Config.cache_auth.fetch(host, []).join(':')
       { 'Authorization' => "Basic #{Base64.strict_encode64(auth_string)}" }
+    end
+
+    def user_agent_header
+      agent = @source_peer || "Faraday v#{Faraday::VERSION}"
+      { 'User-Agent' => agent }
     end
 
     def response_cache_opt_headers(value)
