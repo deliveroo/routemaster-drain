@@ -55,6 +55,32 @@ describe Routemaster::APIClient do
         expect(req.headers).to include('X-Custom-Header')
       end
     end
+
+    describe 'source peer' do
+      context 'with a source peer' do
+        let(:options) { { source_peer: 'ServiceA' } }
+        let(:fetcher) { described_class.new(options) }
+
+        it 'should set the user agent header to the source peer' do
+          subject.status
+          assert_requested(:get, /example/) do |req|
+            expect(req.headers).to include('User-Agent' => 'ServiceA')
+          end
+        end
+      end
+
+      context 'without a source peer' do
+        let(:options) { { source_peer: nil } }
+        let(:fetcher) { described_class.new(options) }
+
+        it 'should set the user agent header to the faraday version' do
+          subject.status
+          assert_requested(:get, /example/) do |req|
+            expect(req.headers).to include('User-Agent' => "Faraday v#{Faraday::VERSION}" )
+          end
+        end
+      end
+    end
   end
 
   shared_examples 'a wrappable response' do
