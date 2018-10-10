@@ -282,7 +282,10 @@ Example:
 require 'routemaster/fetcher'
 require 'routemaster/responses/hateoas_response'
 
-client = Routemaster::APIClient.new(response_class: Routemaster::Responses::HateoasResponse)
+client = Routemaster::APIClient.new(
+  response_class: Routemaster::Responses::HateoasResponse,
+  source_peer: "<your user agent>"
+)
 
 response = client.discover('https://identity.deliveroo.com.dev')
 session_create_response = response.sessions.create(email: 'test@test.com', password: 'sup3rs3cr3t')

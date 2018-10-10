@@ -6,8 +6,7 @@ _A description of your awesome changes here!_
 
 Features:
 
-- Clients can now set User Agent when placing requests (#80) by specifying
-  `source_peer` option when initializing `APIClient`
+- Clients can now set User Agent when placing requests (#80) - details in README
 
 ### 3.6.0 (2018-07-23)
 
