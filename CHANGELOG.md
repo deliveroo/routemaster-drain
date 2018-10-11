@@ -2,6 +2,13 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.2 (2018-10-11)
+
+Features:
+
+- `Routemaster::Cache` can be be given initialisation options to merge into the
+  default ones for creating a `Routemaster::APIClient` instance (#82)
+
 ### 3.6.1 (2018-10-09)
 
 Features:
