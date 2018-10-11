@@ -62,6 +62,19 @@ module Routemaster
           perform.status
         end
       end
+
+      context 'with source_peer client option' do
+        let(:options) { {} }
+        subject { described_class.new(client_options: {source_peer: 'test-peer'}) }
+
+        it 'calls get on the api client with given user agent' do
+          perform.status
+
+          assert_requested(:get, url) do |req|
+            expect(req.headers).to include('User-Agent' => 'test-peer' )
+          end
+        end
+      end
     end
 
     describe '#get' do
