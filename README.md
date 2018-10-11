@@ -257,6 +257,13 @@ See
 [rubydoc](http://rubydoc.info/github/deliveroo/routemaster-drain/Routemaster/Cache)
 for more details on `Cache`.
 
+If you need to provide configure the `APIClient` used by `Routemaster::Cache`, you can
+configure it using `client_options`:
+
+```ruby
+$cache = Routemaster::Cache.new(client_options: {source_peer: "<your user agent>"})
+```
+
 ### Expire Cache data for all notified resources
 
 You may wish to maintain a coherent cache, but don't need the cache to be warmed
