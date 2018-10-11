@@ -18,9 +18,9 @@ module Routemaster
   class Cache
     include Wisper::Publisher
 
-    def initialize(redis: nil, client: nil)
+    def initialize(redis: nil, client: nil, client_options: {})
       @redis  = redis || Config.cache_redis
-      @client = client || APIClient.new(listener: self)
+      @client = client || APIClient.new(client_options.merge(listener: self))
     end
 
     # Bust the cache for a given URL
