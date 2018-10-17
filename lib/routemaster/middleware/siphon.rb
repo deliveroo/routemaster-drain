@@ -8,7 +8,7 @@ module Routemaster
     class Siphon
       def initialize(app, options = {})
         @app = app
-        @processors = options.fetch(:siphone_events) { {} }
+        @processors = options.fetch(:siphon_events) { {} }
       end
 
       def call(env)
