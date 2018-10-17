@@ -2,6 +2,13 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.3 (2018-10-17)
+
+Features
+
+- Allow `Routemaster::Middleware::Siphon` to ignore unexpected named arguments
+  within its initialize method
+
 ### 3.6.2 (2018-10-11)
 
 Features:

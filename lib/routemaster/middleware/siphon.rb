@@ -6,7 +6,7 @@ module Routemaster
     #
     #  Topic handlers are initialized with the full event payload and must respond to `#call`
     class Siphon
-      def initialize(app, siphon_events: nil)
+      def initialize(app, siphon_events: nil, **_)
         @app = app
         @processors = siphon_events || {}
       end
