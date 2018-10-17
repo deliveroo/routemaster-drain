@@ -2,12 +2,9 @@
 
 _A description of your awesome changes here!_
 
-### 3.6.3 (2018-10-17)
+Bug fix:
 
-Features
-
-- Allow `Routemaster::Middleware::Siphon` to ignore unexpected named arguments
-  within its initialize method
+- Allow all middleware classes to be initialised in the same format
 
 ### 3.6.2 (2018-10-11)
 
