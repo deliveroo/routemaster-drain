@@ -5,8 +5,8 @@ module Routemaster
 
       def initialize(app, client: nil, source_peer: nil)
         @app    = app
-        @client = client
-        @source_peer = source_peer
+        @client = options[:client]
+        @source_peer = options[:source_peer]
       end
 
       def call(request_env)

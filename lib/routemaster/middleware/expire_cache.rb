@@ -3,9 +3,9 @@ require 'routemaster/cache'
 module Routemaster
   module Middleware
     class ExpireCache
-      def initialize(app, cache:nil, **_)
+      def initialize(app, options = {})
         @app    = app
-        @cache  = cache || Routemaster::Cache.new
+        @cache  = options.fetch(:cache) { Routemaster::Cache.new }
       end
 
       def call(env)

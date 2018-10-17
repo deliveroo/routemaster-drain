@@ -11,9 +11,9 @@ module Routemaster
     # The dirty map is passed as `:map` to the constructor and must respond to
     # `#mark` (like `Routemaster::Dirty::Map`).
     class Dirty
-      def initialize(app, dirty_map: nil, **_)
+      def initialize(app, options = {})
         @app = app
-        @map = dirty_map || Routemaster::Dirty::Map.new
+        @map = options.fetch(:dirty_map) { Routemaster::Dirty::Map.new }
       end
 
       def call(env)

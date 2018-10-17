@@ -7,11 +7,11 @@ require 'routemaster/event_index'
 module Routemaster
   module Middleware
     class Cache
-      def initialize(app, cache:nil, client:nil, queue:nil, **_)
+      def initialize(app, options = {})
         @app    = app
-        @cache  = cache || Routemaster::Cache.new
-        @client = client || Routemaster::Jobs::Client.new
-        @queue  = queue || Config.queue_name
+        @cache  = options.fetch(:cache) { Routemaster::Cache.new }
+        @client = options.fetch(:client) { Routemaster::Jobs::Client.new }
+        @queue  = options.fetch(:queue) { Config.queue_name }
       end
 
       def call(env)
