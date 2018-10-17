@@ -7,7 +7,7 @@ module Routemaster
     #
     # Will use `Routemaster::Dirty::Filter` by default.
     class Filter
-      # @param filter [Routemaster::Dirty::Filter] an event filter (optional;
+      # options[:filter] [Routemaster::Dirty::Filter] an event filter (optional;
       # will be created using the `redis` and `expiry` options if not provided)
       def initialize(app, options = {})
         @app    = app

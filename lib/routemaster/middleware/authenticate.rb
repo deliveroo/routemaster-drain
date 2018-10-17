@@ -16,7 +16,7 @@ module Routemaster
     class Authenticate
       include Wisper::Publisher
 
-      # @param uuid [Enumerable] a set of accepted authentication tokens
+      # options[:uuid] [Enumerable] a set of accepted authentication tokens
       def initialize(app, options = {})
         @app  = app
         @uuid = options.fetch(:uuid) { Config.drain_tokens }
