@@ -2,7 +2,7 @@ module Routemaster
   module Middleware
     # Rejects all requests but POST to the root path
     class RootPostOnly
-      def initialize(app)
+      def initialize(app, _options = {})
         @app  = app
       end
 

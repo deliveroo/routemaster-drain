@@ -3,10 +3,10 @@ module Routemaster
     class Metrics
       INTERACTION_KEY = 'api_client'.freeze
 
-      def initialize(app, client: nil, source_peer: nil)
+      def initialize(app, options = {})
         @app    = app
-        @client = client
-        @source_peer = source_peer
+        @client = options[:client]
+        @source_peer = options[:source_peer]
       end
 
       def call(request_env)

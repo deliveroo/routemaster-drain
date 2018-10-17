@@ -16,10 +16,10 @@ module Routemaster
     class Authenticate
       include Wisper::Publisher
 
-      # @param uuid [Enumerable] a set of accepted authentication tokens
-      def initialize(app, uuid: nil, **_)
+      # options[:uuid] [Enumerable] a set of accepted authentication tokens
+      def initialize(app, options = {})
         @app  = app
-        @uuid = uuid || Config.drain_tokens
+        @uuid = options.fetch(:uuid) { Config.drain_tokens }
 
         unless @uuid.kind_of?(String) || @uuid.kind_of?(Enumerable)
           raise ArgumentError, ':uuid must be a String or Enumerable'

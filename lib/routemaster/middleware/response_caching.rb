@@ -10,11 +10,11 @@ module Routemaster
       VERSION_REGEX = /application\/json;v=(?<version>\S*)/
       RESPONSE_CACHING_OPT_HEADER = 'X-routemaster_drain.opt_cache'.freeze
 
-      def initialize(app, cache: Config.cache_redis, listener: nil)
+      def initialize(app, options = {})
         @app = app
-        @cache = cache
+        @cache = options.fetch(:cache) { Config.cache_redis }
         @expiry = Config.cache_expiry
-        @listener = listener
+        @listener = options[:listener]
       end
 
       def call(env)

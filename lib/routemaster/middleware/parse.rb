@@ -10,7 +10,7 @@ module Routemaster
     # Lower middlewares (or the app) can access the parsed payload as a hash
     # in +env['routemaster.payload']+
     class Parse
-      def initialize(app)
+      def initialize(app, _options = {})
         @app  = app
       end
 
