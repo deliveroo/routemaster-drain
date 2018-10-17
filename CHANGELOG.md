@@ -2,6 +2,8 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.3 (2018-10-17)
+
 Bug fix:
 
 - Allow all middleware classes to be initialised in the same format
