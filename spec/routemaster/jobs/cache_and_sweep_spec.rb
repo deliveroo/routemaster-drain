@@ -45,8 +45,8 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
     end
   end
 
-  context 'when a source_peer is not provided' do
-    it 'requests using the source_peer' do
+  context 'when client_options are not provided' do
+    it 'does requests using default client_options' do
       expect(Routemaster::Cache).to receive(:new)
         .with(client_options: {})
         .and_return(double(get: true))
@@ -55,16 +55,15 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
     end
   end
 
-  context 'when a source_peer is provided' do
-    let(:source_peer) { 'test-source-peer' }
-    let(:client_options) { { source_peer: source_peer } }
+  context 'when client_options are provided' do
+    let(:client_options) { { source_peer: 'test-source-peer' } }
 
-    it 'requests using the source_peer' do
-      expect(Routemaster::Cache).to receive(:new).
-        with(client_options: client_options).
-        and_return(double(get: true))
+    it 'requests using the client_options' do
+      expect(Routemaster::Cache).to receive(:new)
+        .with(client_options: client_options)
+        .and_return(double(get: true))
 
-      subject.perform(url, {source_peer: source_peer })
+      subject.perform(url, client_options)
     end
   end
 end

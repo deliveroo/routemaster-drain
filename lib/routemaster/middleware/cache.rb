@@ -12,12 +12,17 @@ module Routemaster
         @cache  = options.fetch(:cache) { Routemaster::Cache.new }
         @client = options.fetch(:client) { Routemaster::Jobs::Client.new }
         @queue  = options.fetch(:queue) { Config.queue_name }
-        @source_peer = options[:source_peer]
+        @cache_client_options = options[:client_options]
       end
 
       def call(env)
         env.fetch('routemaster.dirty', []).each do |url|
-          @client.enqueue(@queue, Routemaster::Jobs::CacheAndSweep, url, @source_peer)
+          @client.enqueue(
+            @queue,
+            Routemaster::Jobs::CacheAndSweep,
+            url,
+            @cache_client_options
+          )
         end
         @app.call(env)
       end

@@ -5,6 +5,8 @@ _A description of your awesome changes here!_
 Features:
 
 - Prepend default User-Agent with 'RoutemasterDrain'
+- Allow client_options to be passed into `Routemaster::Jobs::CacheAndSweep` jobs
+  so that `Routemaster::Cache` can be instantiated with the correct parameters.
 
 ### 3.6.3 (2018-10-17)
 
