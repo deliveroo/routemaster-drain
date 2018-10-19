@@ -2,6 +2,10 @@
 
 _A description of your awesome changes here!_
 
+Features:
+
+- Prepend default User-Agent with 'RoutemasterDrain'
+
 ### 3.6.3 (2018-10-17)
 
 Bug fix:
