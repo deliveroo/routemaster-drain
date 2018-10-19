@@ -64,7 +64,7 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
         with(client_options: client_options).
         and_return(double(get: true))
 
-      subject.perform(url, source_peer)
+      subject.perform(url, {source_peer: source_peer })
     end
   end
 end

@@ -6,8 +6,8 @@ module Routemaster
     # Caches a URL using {Cache} and sweeps the dirty map if successful.
     # Busts the cache if the resource was deleted.
     class CacheAndSweep
-      def perform(url, source_peer = nil)
-        @source_peer = source_peer
+      def perform(url, options = {})
+        @source_peer = options[:source_peer]
         Dirty::Map.new.sweep_one(url) do
           begin
             cache.get(url)
