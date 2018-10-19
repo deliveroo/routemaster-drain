@@ -76,7 +76,7 @@ describe Routemaster::APIClient do
         it 'should set the user agent header to the faraday version' do
           subject.status
           assert_requested(:get, /example/) do |req|
-            expect(req.headers).to include('User-Agent' => "Faraday v#{Faraday::VERSION}" )
+            expect(req.headers).to include('User-Agent' => "RoutemasterDrain - Faraday v#{Faraday::VERSION}" )
           end
         end
       end

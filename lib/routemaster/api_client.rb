@@ -157,7 +157,7 @@ module Routemaster
     end
 
     def user_agent_header
-      agent = @source_peer || "Faraday v#{Faraday::VERSION}"
+      agent = @source_peer || "RoutemasterDrain - Faraday v#{Faraday::VERSION}"
       { 'User-Agent' => agent }
     end
 
