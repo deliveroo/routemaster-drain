@@ -47,9 +47,9 @@ RSpec.describe Routemaster::Jobs::CacheAndSweep do
 
   context 'when a source_peer is not provided' do
     it 'requests using the source_peer' do
-      expect(Routemaster::Cache).to receive(:new).
-        with(client_options: {}).
-        and_return(double(get: true))
+      expect(Routemaster::Cache).to receive(:new)
+        .with(client_options: {})
+        .and_return(double(get: true))
 
       subject.perform(url)
     end
