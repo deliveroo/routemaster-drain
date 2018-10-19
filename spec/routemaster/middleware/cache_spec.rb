@@ -20,7 +20,7 @@ RSpec.describe Routemaster::Middleware::Cache do
     let(:payload) { ['https://example.com/1'] }
 
     it 'queues a fetch job' do
-      expect(client).to receive(:enqueue).with('routemaster', Routemaster::Jobs::CacheAndSweep, 'https://example.com/1')
+      expect(client).to receive(:enqueue).with('routemaster', Routemaster::Jobs::CacheAndSweep, 'https://example.com/1', nil)
       perform
     end
   end
