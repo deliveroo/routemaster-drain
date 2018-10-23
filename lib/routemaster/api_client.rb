@@ -30,6 +30,7 @@ require 'hashie/mash'
 
 module Routemaster
   class APIClient
+    DEFAULT_USER_AGENT = ENV.fetch('ROUTEMASTER_API_CLIENT_USER_AGENT') { "RoutemasterDrain - Faraday v#{Faraday::VERSION}" }.freeze
 
     # Memoize the root resources at Class level so that we don't hit the cache
     # all the time to fetch the root resource before doing anything else.
@@ -157,8 +158,7 @@ module Routemaster
     end
 
     def user_agent_header
-      agent = @source_peer || "RoutemasterDrain - Faraday v#{Faraday::VERSION}"
-      { 'User-Agent' => agent }
+      { 'User-Agent' => @source_peer || DEFAULT_USER_AGENT }
     end
 
     def response_cache_opt_headers(value)

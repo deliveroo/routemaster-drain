@@ -264,6 +264,9 @@ configure it using `client_options`:
 $cache = Routemaster::Cache.new(client_options: {source_peer: "<your user agent>"})
 ```
 
+You can specify your user agent with the `ROUTEMASTER_API_CLIENT_USER_AGENT` environment
+variable as well.
+
 ### Expire Cache data for all notified resources
 
 You may wish to maintain a coherent cache, but don't need the cache to be warmed

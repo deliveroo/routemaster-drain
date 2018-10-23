@@ -52,7 +52,8 @@ describe Routemaster::APIClient do
       headers['x-custom-header'] = 'why do you even'
       subject.status
       assert_requested(:get, /example/) do |req|
-        expect(req.headers).to include('X-Custom-Header')
+        expect(req.headers.keys).to include('X-Custom-Header')
+        expect(req.headers['User-Agent']).to eql "RoutemasterDrain - Faraday v0.15.3"
       end
     end
 

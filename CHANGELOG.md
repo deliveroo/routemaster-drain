@@ -4,7 +4,7 @@ _A description of your awesome changes here!_
 
 Features:
 
-- Prepend default User-Agent with 'RoutemasterDrain'
+- Add fallback values for User-Agent header in API client
 
 ### 3.6.3 (2018-10-17)
 
