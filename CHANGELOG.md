@@ -2,8 +2,11 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.4 (2018-10-23)
+
 Features:
 
+- Allow specification of User-Agent through environment variable
 - Add fallback values for User-Agent header in API client
 
 ### 3.6.3 (2018-10-17)
