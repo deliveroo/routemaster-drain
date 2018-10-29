@@ -3,7 +3,7 @@ require 'wisper'
 module Routemaster
   module Drain
     # Tiny Rack app to terminates a Routemaster middleware chain.
-    # 
+    #
     # Respond 204 if a payload has been parsed (i.e. present in the environment)
     # and 400 if not.
     #

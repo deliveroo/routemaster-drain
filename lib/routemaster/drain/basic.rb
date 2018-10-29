@@ -18,16 +18,17 @@ module Routemaster
       extend Forwardable
 
       def initialize(options = {})
+        classes = [
+          Middleware::RootPostOnly,
+          Middleware::Authenticate,
+          Middleware::Parse,
+        ]
         @terminator = terminator = Terminator.new
         @app = ::Rack::Builder.app do
-          use Middleware::RootPostOnly
-          use Middleware::Authenticate, options
-          use Middleware::Parse
+          classes.each { |c| use(c, options) }
           run terminator
         end
       end
-
-      # delegate :call => :@app
 
       def call(env)
         @app.call(env)

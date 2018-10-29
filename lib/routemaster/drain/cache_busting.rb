@@ -21,19 +21,23 @@ module Routemaster
       extend Forwardable
 
       def initialize(options = {})
+        classes = [
+          Middleware::RootPostOnly,
+          Middleware::Authenticate,
+          Middleware::Parse,
+          Middleware::Siphon,
+          Middleware::Filter,
+          Middleware::ExpireCache,
+        ]
         @terminator = terminator = Terminator.new
         @app = ::Rack::Builder.new do
-          use Middleware::RootPostOnly
-          use Middleware::Authenticate, options
-          use Middleware::Parse
-          use Middleware::Siphon,       options
-          use Middleware::Filter, { filter: Routemaster::Middleware::PayloadFilter.new }.merge(options)
-          use Middleware::ExpireCache
+          options = options.merge(filter: Routemaster::Middleware::PayloadFilter.new)
+          classes.each { |c| use(c, options) }
           run terminator
         end
       end
 
-      delegate :call => :@app
+      delegate call: :@app
       delegate [:on, :subscribe] => :@terminator
     end
   end

@@ -2,6 +2,11 @@
 
 _A description of your awesome changes here!_
 
+Features:
+
+- Relocate logic so that it can be called from outside the
+  request path
+
 ### 3.6.4 (2018-10-23)
 
 Features:
