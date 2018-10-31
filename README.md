@@ -139,6 +139,13 @@ map '/events' do
 end
 ```
 
+You can use the `.subscribe` method multiple times to have your event batches
+go through multiple listeners. But bear in the mind any performance cost of
+multiple places of processing the event batches. For example, instead of having
+multiple listener classes that iterate over the events in a batch, you can have
+a single listener class that iterates over the batch only once and reacts to the
+batch's events accordingly.
+
 This relies on the excellent event bus from the [wisper
 gem](https://github.com/krisleech/wisper#wisper).
 
