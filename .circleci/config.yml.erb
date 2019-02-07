@@ -23,7 +23,7 @@ jobs:
           name: Select build variant (Ruby <%= ruby %>, <%= variant %>)
           command: |
             rbenv local <%= ruby %> ;
-            gem install bundler ;
+            gem install bundler -v '~> 1.17' ;
             bundle config --local gemfile $PWD/gemfiles/<%= variant %>.gemfile
 
       - restore_cache:
