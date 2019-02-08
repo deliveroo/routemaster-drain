@@ -53,7 +53,7 @@ describe Routemaster::APIClient do
       subject.status
       assert_requested(:get, /example/) do |req|
         expect(req.headers.keys).to include('X-Custom-Header')
-        expect(req.headers['User-Agent']).to eql "RoutemasterDrain - Faraday v0.15.3"
+        expect(req.headers['User-Agent']).to eql "RoutemasterDrain - Faraday v#{Faraday::VERSION}"
       end
     end
 

@@ -140,11 +140,12 @@ module Routemaster
         f.use Routemaster::Middleware::ResponseCaching, listener: @listener
         f.use Routemaster::Middleware::Metrics, client: @metrics_client, source_peer: @source_peer
         f.use Routemaster::Middleware::ErrorHandling
-        f.adapter :typhoeus
 
         @middlewares.each do |middleware|
           f.use(*middleware)
         end
+
+        f.adapter :typhoeus
 
         f.options.timeout      = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
         f.options.open_timeout = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
