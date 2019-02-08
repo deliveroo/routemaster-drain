@@ -2,6 +2,16 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.5 (2019-02-08)
+
+Bug fix:
+
+- Make sure Faraday adapter is loaded after all middleware for ApiClient
+
+Drop:
+
+- Builds for Ruby 2.2
+
 ### 3.6.4 (2018-10-23)
 
 Features:
