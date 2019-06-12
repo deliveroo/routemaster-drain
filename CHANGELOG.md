@@ -2,6 +2,13 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.6 (2019-06-12)
+
+Features:
+
+- Set Faraday `timeout` by passing `faraday_timeout` option to the API Client contructor
+  `APIClient.new( {faraday_timeout: 2} )`
+
 ### 3.6.5 (2019-02-08)
 
 Bug fix:
