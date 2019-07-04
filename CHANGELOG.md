@@ -2,6 +2,12 @@
 
 _A description of your awesome changes here!_
 
+### 3.7.0 (2019-07-04)
+
+Features:
+
+- Allow specifying a map of VPC domains to be used
+
 ### 3.6.5 (2019-02-08)
 
 Bug fix:

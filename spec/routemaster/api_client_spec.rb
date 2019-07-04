@@ -11,12 +11,13 @@ describe Routemaster::APIClient do
   uses_webmock
 
   let(:url) { 'https://example.com/widgets/132' }
+  let(:expected_host) { /example\.com/ }
   let(:headers) {{}}
   let(:fetcher) { described_class.new }
 
   shared_examples 'a GET requester' do
     before do
-      @req = stub_request(:get, /example\.com/).to_return(
+      @req = stub_request(:get, expected_host).to_return(
         status:   200,
         body:     { id: 132, type: 'widget' }.to_json,
         headers:  {
@@ -87,7 +88,7 @@ describe Routemaster::APIClient do
   shared_examples 'a wrappable response' do
     context 'when response_class is present' do
       before do
-        @req = stub_request(:get, /example\.com/).to_return(
+        @req = stub_request(:get, expected_host).to_return(
           status:   200,
           body:     { id: 132, type: 'widget' }.to_json,
           headers:  {
@@ -106,6 +107,18 @@ describe Routemaster::APIClient do
       it 'wraps the response in the response class' do
         expect(subject.dummy).to be_truthy
       end
+
+      context 'when vpc mapping is configured' do
+        let(:expected_host) { /internal-example\.net/ }
+        let(:vpc_mapping) { 'example.com:internal-example.net' }
+        before do
+          stub_const('ENV', ENV.to_h.merge('ROUTEMASTER_VPC_HOSTS' => vpc_mapping))
+        end
+
+        it 'wraps the response in the response class' do
+          expect(subject.dummy).to be_truthy
+        end
+      end
     end
   end
 
@@ -122,7 +135,7 @@ describe Routemaster::APIClient do
 
     context "when setting callbacks" do
       before do
-        stub_request(:get, /example\.com/).to_return(
+        stub_request(:get, expected_host).to_return(
           status:   status,
           body:     { id: 132, type: 'widget' }.to_json,
           headers:  {
@@ -168,7 +181,7 @@ describe Routemaster::APIClient do
     subject { fetcher.post(url, body: {}, headers: headers) }
 
     before do
-      @post_req = stub_request(:post, /example\.com/).to_return(
+      @post_req = stub_request(:post, expected_host).to_return(
         status:   200,
         body:     { id: 132, type: 'widget' }.to_json,
         headers:  {
@@ -191,7 +204,7 @@ describe Routemaster::APIClient do
 
     context 'when request succeeds' do
       before do
-        @put_req= stub_request(:put, /example\.com/).to_return(
+        @put_req= stub_request(:put, expected_host).to_return(
           status:   200,
           body:     { id: 132, type: 'widget' }.to_json,
           headers:  {
@@ -267,7 +280,7 @@ describe Routemaster::APIClient do
 
     context 'when request succeeds' do
       before do
-        @patch_req = stub_request(:patch, /example\.com/).to_return(
+        @patch_req = stub_request(:patch, expected_host).to_return(
           status:   200,
           body:     { id: 132, type: 'widget' }.to_json,
           headers:  {
@@ -327,7 +340,7 @@ describe Routemaster::APIClient do
     subject { fetcher.delete(url, headers: headers) }
 
     before do
-      @delete_req = stub_request(:delete, /example\.com/).to_return(
+      @delete_req = stub_request(:delete, expected_host).to_return(
         status:   204,
       )
     end
@@ -340,7 +353,7 @@ describe Routemaster::APIClient do
 
   describe '#discover' do
     before do
-      @req = stub_request(:get, /example\.com/).to_return(
+      @req = stub_request(:get, expected_host).to_return(
         status:   200,
         body:     { id: 132, type: 'widget' }.to_json,
         headers:  {

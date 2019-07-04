@@ -62,6 +62,15 @@ module Routemaster
       end
     end
 
+    def vpc_host_mapping
+      Hashie::Rash.new.tap do |result|
+        ENV.fetch('ROUTEMASTER_VPC_HOSTS', '').split(',').each do |entry|
+          host, vpc_host = entry.split(':')
+          result[Regexp.new(host)] = vpc_host
+        end
+      end
+    end
+
     def queue_adapter
       ENV.fetch('ROUTEMASTER_QUEUE_ADAPTER', 'resque').to_sym
     end

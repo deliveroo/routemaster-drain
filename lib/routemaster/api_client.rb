@@ -109,9 +109,15 @@ module Routemaster
       URI.parse(url)
     end
 
+    def _assert_vpc_uri(uri)
+      return uri unless (vpc_host = Config.vpc_host_mapping[uri.host])
+      uri.clone.tap { |res| res.host = vpc_host }
+    end
+
     def _request(method, url:, body: nil, headers:, params: {})
       uri = _assert_uri(url)
       auth = auth_header(uri.host)
+      uri = _assert_vpc_uri(uri)
       headers = [*user_agent_header, *auth, *headers].to_h
       connection.public_send(method) do |req|
         req.url uri.to_s
