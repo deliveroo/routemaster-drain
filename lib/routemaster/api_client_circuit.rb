@@ -25,13 +25,14 @@ module Routemaster
       ENV.fetch('ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT', 'NO') =~ /\A(YES|TRUE|ON|1)\Z/i
     end
 
+
     def circuit
       Circuitbox.circuit(@circuit_name, {
         sleep_window: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_SLEEP_WINDOW', 60).to_i,
         time_window: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_TIME_WINDOW', 120).to_i,
         volume_threshold: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD', 50).to_i,
-        error_threshold: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).to_i,
-        cache: Moneta::Adapters::Redis.new(backend: Config.cache_redis),
+        error_threshold:  configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).to_i,
+        cache: Moneta.new(:Redis, backend: Config.cache_redis),
         exceptions: [Routemaster::Errors::FatalResource, Faraday::TimeoutError]
       })
     end
