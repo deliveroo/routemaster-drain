@@ -4,160 +4,24 @@
 version: 2
 jobs:
 
-  build_2.3.4_rails_3:
+  build_2.5_rails_5:
     docker:
-      - image: deliveroo/multiruby
+      - image: circleci/ruby:2.5.0
       - image: redis:3-alpine
     steps:
       - checkout
 
       - run:
-          name: Select build variant (Ruby 2.3.4, rails_3)
+          name: Install bundler
           command: |
-            rbenv local 2.3.4 ;
-            gem install bundler -v '~> 1.17' ;
-            bundle config --local gemfile $PWD/gemfiles/rails_3.gemfile
-
-      - restore_cache:
-          keys: 
-            - v2-bundle-2.3.4-rails_3-{{ .Branch }}
-            - v2-bundle-2.3.4-rails_3
-            - v2-bundle-2.3.4
-
-      - run: 
-          name: Install dependencies
-          command: |
-            bundle install --jobs=3 --retry=3 --path=$PWD/vendor/bundle
-
-      - run:
-          name: Run test suite
-          command: |
-            unset RACK_ENV &&
-            unset RAILS_ENV &&
-            bundle exec rspec
-
-      - save_cache:
-          key: v2-bundle-2.3.4-rails_3-{{ .Branch }}
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.3.4-rails_3
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.3.4
-          paths:
-            - ~/project/vendor/bundle
-
-  build_2.3.4_rails_4:
-    docker:
-      - image: deliveroo/multiruby
-      - image: redis:3-alpine
-    steps:
-      - checkout
-
-      - run:
-          name: Select build variant (Ruby 2.3.4, rails_4)
-          command: |
-            rbenv local 2.3.4 ;
-            gem install bundler -v '~> 1.17' ;
-            bundle config --local gemfile $PWD/gemfiles/rails_4.gemfile
-
-      - restore_cache:
-          keys: 
-            - v2-bundle-2.3.4-rails_4-{{ .Branch }}
-            - v2-bundle-2.3.4-rails_4
-            - v2-bundle-2.3.4
-
-      - run: 
-          name: Install dependencies
-          command: |
-            bundle install --jobs=3 --retry=3 --path=$PWD/vendor/bundle
-
-      - run:
-          name: Run test suite
-          command: |
-            unset RACK_ENV &&
-            unset RAILS_ENV &&
-            bundle exec rspec
-
-      - save_cache:
-          key: v2-bundle-2.3.4-rails_4-{{ .Branch }}
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.3.4-rails_4
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.3.4
-          paths:
-            - ~/project/vendor/bundle
-
-  build_2.4.1_rails_4:
-    docker:
-      - image: deliveroo/multiruby
-      - image: redis:3-alpine
-    steps:
-      - checkout
-
-      - run:
-          name: Select build variant (Ruby 2.4.1, rails_4)
-          command: |
-            rbenv local 2.4.1 ;
-            gem install bundler -v '~> 1.17' ;
-            bundle config --local gemfile $PWD/gemfiles/rails_4.gemfile
-
-      - restore_cache:
-          keys: 
-            - v2-bundle-2.4.1-rails_4-{{ .Branch }}
-            - v2-bundle-2.4.1-rails_4
-            - v2-bundle-2.4.1
-
-      - run: 
-          name: Install dependencies
-          command: |
-            bundle install --jobs=3 --retry=3 --path=$PWD/vendor/bundle
-
-      - run:
-          name: Run test suite
-          command: |
-            unset RACK_ENV &&
-            unset RAILS_ENV &&
-            bundle exec rspec
-
-      - save_cache:
-          key: v2-bundle-2.4.1-rails_4-{{ .Branch }}
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.4.1-rails_4
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.4.1
-          paths:
-            - ~/project/vendor/bundle
-
-  build_2.3.4_rails_5:
-    docker:
-      - image: deliveroo/multiruby
-      - image: redis:3-alpine
-    steps:
-      - checkout
-
-      - run:
-          name: Select build variant (Ruby 2.3.4, rails_5)
-          command: |
-            rbenv local 2.3.4 ;
             gem install bundler -v '~> 1.17' ;
             bundle config --local gemfile $PWD/gemfiles/rails_5.gemfile
 
       - restore_cache:
           keys: 
-            - v2-bundle-2.3.4-rails_5-{{ .Branch }}
-            - v2-bundle-2.3.4-rails_5
-            - v2-bundle-2.3.4
+            - v2-bundle-2.5.0-rails_5-{{ .Branch }}
+            - v2-bundle-2.5.0-rails_5
+            - v2-bundle-2.5.0
 
       - run: 
           name: Install dependencies
@@ -172,60 +36,15 @@ jobs:
             bundle exec rspec
 
       - save_cache:
-          key: v2-bundle-2.3.4-rails_5-{{ .Branch }}
+          key: v2-bundle-2.5.0-rails_5-{{ .Branch }}
           paths:
             - ~/project/vendor/bundle
       - save_cache:
-          key: v2-bundle-2.3.4-rails_5
+          key: v2-bundle-2.5.0-rails_5
           paths:
             - ~/project/vendor/bundle
       - save_cache:
-          key: v2-bundle-2.3.4
-          paths:
-            - ~/project/vendor/bundle
-
-  build_2.4.1_rails_5:
-    docker:
-      - image: deliveroo/multiruby
-      - image: redis:3-alpine
-    steps:
-      - checkout
-
-      - run:
-          name: Select build variant (Ruby 2.4.1, rails_5)
-          command: |
-            rbenv local 2.4.1 ;
-            gem install bundler -v '~> 1.17' ;
-            bundle config --local gemfile $PWD/gemfiles/rails_5.gemfile
-
-      - restore_cache:
-          keys: 
-            - v2-bundle-2.4.1-rails_5-{{ .Branch }}
-            - v2-bundle-2.4.1-rails_5
-            - v2-bundle-2.4.1
-
-      - run: 
-          name: Install dependencies
-          command: |
-            bundle install --jobs=3 --retry=3 --path=$PWD/vendor/bundle
-
-      - run:
-          name: Run test suite
-          command: |
-            unset RACK_ENV &&
-            unset RAILS_ENV &&
-            bundle exec rspec
-
-      - save_cache:
-          key: v2-bundle-2.4.1-rails_5-{{ .Branch }}
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.4.1-rails_5
-          paths:
-            - ~/project/vendor/bundle
-      - save_cache:
-          key: v2-bundle-2.4.1
+          key: v2-bundle-2.5.0
           paths:
             - ~/project/vendor/bundle
 
@@ -234,14 +53,5 @@ workflows:
   version: 2
   test:
     jobs:
-    
-      - build_2.3.4_rails_3
-    
-      - build_2.3.4_rails_4
-    
-      - build_2.4.1_rails_4
-    
-      - build_2.3.4_rails_5
-    
-      - build_2.4.1_rails_5
+      - build_2.5_rails_5
     
