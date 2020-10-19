@@ -1,4 +1,3 @@
-require 'core_ext/forwardable'
 require 'base64'
 require 'faraday'
 require 'faraday_middleware'

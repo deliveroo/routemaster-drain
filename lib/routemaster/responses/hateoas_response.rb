@@ -1,4 +1,3 @@
-require 'core_ext/forwardable'
 require 'forwardable'
 require 'routemaster/api_client'
 
