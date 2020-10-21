@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency     'redis-namespace'
   spec.add_runtime_dependency     'concurrent-ruby'
   spec.add_runtime_dependency     'circuitbox'
+  spec.add_runtime_dependency     'moneta', '1.0.0'
 end
