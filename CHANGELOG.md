@@ -1,6 +1,11 @@
 ### HEAD
 
 _A description of your awesome changes here!_
+### 3.6.7 (2021-02-11)
+
+Features:
+
+- APIClient accepts timeout and open_timeout options
 
 ### 3.6.5 (2019-02-08)
 
