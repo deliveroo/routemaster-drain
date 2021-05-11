@@ -45,6 +45,8 @@ module Routemaster
       @retry_attempts         = options.fetch :retry_attempts, 2
       @retry_methods          = options.fetch :retry_methods, Faraday::Request::Retry::IDEMPOTENT_METHODS
       @retry_exceptions       = options.fetch :retry_exceptions, Faraday::Request::Retry::Options.new.exceptions
+      @timeout                = options.fetch :timeout, nil
+      @open_timeout           = options.fetch :open_timeout, nil
 
       connection # warm up connection so Faraday does all it's magical file loading in the main thread
     end
@@ -147,8 +149,8 @@ module Routemaster
 
         f.adapter :typhoeus
 
-        f.options.timeout      = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
-        f.options.open_timeout = ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1).to_f
+        f.options.timeout      = (@timeout || ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1)).to_f
+        f.options.open_timeout = (@open_timeout || ENV.fetch('ROUTEMASTER_CACHE_TIMEOUT', 1)).to_f
         f.ssl.verify           = ENV.fetch('ROUTEMASTER_CACHE_VERIFY_SSL', 'false') == 'true'
       end
     end
