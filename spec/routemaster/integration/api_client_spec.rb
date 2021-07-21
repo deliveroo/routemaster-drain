@@ -21,7 +21,7 @@ describe Routemaster::APIClient do
   let(:port) { 8080 }
   let(:service) do
     TestServer.new(port) do |server|
-      [400, 401, 403, 404, 405, 409, 412, 413, 429, 500, 503].each do |status_code|
+      [400, 401, 403, 404, 405, 409, 412, 413, 429, 500, 502, 503].each do |status_code|
         server.mount_proc "/#{status_code}" do |req, res|
           res.status = status_code
           res.body = { field: 'test' }.to_json
@@ -161,6 +161,10 @@ describe Routemaster::APIClient do
 
       it 'raises an FatalResource on 500' do
         expect { perform.(host + '/500') }.to raise_error(Routemaster::Errors::FatalResource)
+      end
+
+      it 'raises a BadGateway on 502' do
+        expect { perform.(host + '/502') }.to raise_error(Routemaster::Errors::BadGateway)
       end
 
       it 'raises a ServiceNotAvailable on 503' do

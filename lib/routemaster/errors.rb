@@ -82,6 +82,12 @@ module Routemaster
       end
     end
 
+    class BadGateway < BaseError
+      def message
+        "Bad Gateway"
+      end
+    end
+
     class ServiceNotAvailable < BaseError
       def message
         "Service Not Available"
