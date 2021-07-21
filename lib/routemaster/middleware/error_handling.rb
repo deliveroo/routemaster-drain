@@ -16,6 +16,7 @@ module Routemaster
         (413..413) => Errors::InvalidResource,
         (429..429) => Errors::ResourceThrottling,
         (407..500) => Errors::FatalResource,
+        (502..502) => Errors::BadGateway,
         (503..503) => Errors::ServiceNotAvailable
       }.freeze
 
