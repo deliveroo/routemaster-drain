@@ -2,6 +2,8 @@
 
 _A description of your awesome changes here!_
 
+### 3.6.8
+
 Features:
 
 - Raises error on `502 Bad Gateway` [#94](https://github.com/deliveroo/routemaster-drain/pull/94)
