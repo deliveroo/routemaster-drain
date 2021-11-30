@@ -109,10 +109,37 @@ describe Routemaster::APIClient do
     end
   end
 
+  shared_examples 'a circuit breaker wrapped request' do
+    let(:fetcher) { described_class.new(retry_attempts: 0) }
+    let(:method)  { :get }
+
+    before do
+      ENV['ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT']        = 'YES'
+      ENV['ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD']  = '1'
+      ENV['ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD'] = '1'
+
+      stub_request(method, url).to_timeout
+    end
+
+    after do
+      ENV['ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT']        = nil
+      ENV['ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD']  = nil
+      ENV['ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD'] = nil
+    end
+
+
+    it 'trips after the second request' do
+      5.times { expect { subject }.to raise_error StandardError }
+      expect(WebMock).to have_requested(method, url).twice
+    end
+  end
+
   describe '#get' do
     subject { fetcher.get(url, headers: headers) }
+
     it_behaves_like 'a GET requester'
     it_behaves_like 'a wrappable response'
+    it_behaves_like 'a circuit breaker wrapped request'
   end
 
   describe '#fget' do
@@ -183,6 +210,9 @@ describe Routemaster::APIClient do
     end
 
     it_behaves_like 'a wrappable response'
+    it_behaves_like 'a circuit breaker wrapped request' do
+      let(:method) { :post }
+    end
   end
 
   describe '#put' do
@@ -206,6 +236,9 @@ describe Routemaster::APIClient do
       end
 
       it_behaves_like 'a wrappable response'
+      it_behaves_like 'a circuit breaker wrapped request' do
+        let(:method) { :put }
+      end
     end
 
     context 'when request times out' do
@@ -282,6 +315,9 @@ describe Routemaster::APIClient do
       end
 
       it_behaves_like 'a wrappable response'
+      it_behaves_like 'a circuit breaker wrapped request' do
+        let(:method) { :patch }
+      end
     end
 
     context 'when request times out' do
