@@ -3,7 +3,6 @@
 
 version: 2
 jobs:
-
   build_2.5_rails_5:
     docker:
       - image: circleci/ruby:2.4.1
@@ -19,9 +18,9 @@ jobs:
 
       - restore_cache:
           keys: 
-            - v2-bundle-2.5.0-rails_5-{{ .Branch }}
-            - v2-bundle-2.5.0-rails_5
-            - v2-bundle-2.5.0
+            - v3-bundle-2.5.0-rails_5-{{ .Branch }}
+            - v3-bundle-2.5.0-rails_5
+            - v3-bundle-2.5.0
 
       - run: 
           name: Install dependencies
@@ -36,22 +35,20 @@ jobs:
             bundle exec rspec
 
       - save_cache:
-          key: v2-bundle-2.5.0-rails_5-{{ .Branch }}
+          key: v3-bundle-2.5.0-rails_5-{{ .Branch }}
           paths:
             - ~/project/vendor/bundle
       - save_cache:
-          key: v2-bundle-2.5.0-rails_5
+          key: v3-bundle-2.5.0-rails_5
           paths:
             - ~/project/vendor/bundle
       - save_cache:
-          key: v2-bundle-2.5.0
+          key: v3-bundle-2.5.0
           paths:
             - ~/project/vendor/bundle
-
 
 workflows:
   version: 2
   test:
     jobs:
       - build_2.5_rails_5
-    

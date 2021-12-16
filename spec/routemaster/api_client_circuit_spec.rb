@@ -12,7 +12,10 @@ describe Routemaster::APIClientCircuit do
   context "when enabled" do
     before do
       sb_req
-      allow_any_instance_of(described_class).to receive(:enabled?){ true }
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV)
+        .to receive(:fetch)
+        .with('ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT', 'NO').and_return('YES')
     end
 
     let(:url){ 'http://example.com/foobar' }

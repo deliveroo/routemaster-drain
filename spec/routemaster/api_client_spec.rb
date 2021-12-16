@@ -111,26 +111,27 @@ describe Routemaster::APIClient do
 
   shared_examples 'a circuit breaker wrapped request' do
     let(:fetcher) { described_class.new(retry_attempts: 0) }
+    let(:url)     { 'https://circuit.example.com/circuit/132' }
     let(:method)  { :get }
 
     before do
-      ENV['ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT']        = 'YES'
-      ENV['ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD']  = '1'
-      ENV['ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD'] = '1'
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV)
+        .to receive(:fetch)
+        .with('ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT', 'NO').and_return('YES')
+      allow(ENV)
+        .to receive(:fetch)
+        .with('ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD', 50).and_return('1')
+      allow(ENV)
+        .to receive(:fetch)
+        .with('ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD', 50).and_return('1')
 
       stub_request(method, url).to_timeout
     end
 
-    after do
-      ENV['ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT']        = nil
-      ENV['ROUTEMASTER_CIRCUIT_BREAKER_ERROR_THRESHOLD']  = nil
-      ENV['ROUTEMASTER_CIRCUIT_BREAKER_VOLUME_THRESHOLD'] = nil
-    end
-
-
     it 'trips after the second request' do
       5.times { expect { subject }.to raise_error StandardError }
-      expect(WebMock).to have_requested(method, url).twice
+      expect(a_request(method, url)).to have_been_made.at_most_times(2)
     end
   end
 
