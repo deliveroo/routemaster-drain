@@ -6,7 +6,7 @@ _A description of your awesome changes here!_
 
 Features:
 
-- Adds circuit breakeing to PATCH PUT POST requests (#66)
+- Adds circuit breaker to PATCH PUT POST requests (#66)
 
 ### 3.6.8
 

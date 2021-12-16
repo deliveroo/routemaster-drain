@@ -47,8 +47,53 @@ jobs:
           paths:
             - ~/project/vendor/bundle
 
+  build_2.7_rails_6:
+    docker:
+      - image: circleci/ruby:2.7.4
+      - image: redis:6-alpine
+    steps:
+      - checkout
+
+      - run:
+          name: Install bundler
+          command: |
+            gem install bundler -v '~> 2' ;
+            bundle config --local gemfile $PWD/gemfiles/rails_6.gemfile
+
+      - restore_cache:
+          keys: 
+            - bundle-2.7.4-rails_6-{{ .Branch }}
+            - bundle-2.7.4-rails_6
+            - bundle-2.7.4
+
+      - run: 
+          name: Install dependencies
+          command: |
+            bundle install --jobs=3 --retry=3 --path=$PWD/vendor/bundle
+
+      - run:
+          name: Run test suite
+          command: |
+            unset RACK_ENV &&
+            unset RAILS_ENV &&
+            bundle exec rspec
+
+      - save_cache:
+          key: bundle-2.7.4-rails_6-{{ .Branch }}
+          paths:
+            - ~/project/vendor/bundle
+      - save_cache:
+          key: bundle-2.7.4-rails_6
+          paths:
+            - ~/project/vendor/bundle
+      - save_cache:
+          key: bundle-2.7.4
+          paths:
+            - ~/project/vendor/bundle
+
 workflows:
   version: 2
   test:
     jobs:
       - build_2.5_rails_5
+      - build_2.7_rails_6
