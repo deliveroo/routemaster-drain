@@ -2,6 +2,12 @@
 
 _A description of your awesome changes here!_
 
+### 3.7.0
+
+Features:
+
+- Adds circuit breaker to PATCH PUT POST requests (#66)
+
 ### 3.6.8
 
 Features:

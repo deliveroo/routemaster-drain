@@ -1,5 +1,5 @@
 module Routemaster
   module Drain
-    VERSION = '3.6.8'.freeze
+    VERSION = '3.7.0'.freeze
   end
 end

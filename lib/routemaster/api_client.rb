@@ -99,11 +99,13 @@ module Routemaster
     private
 
     def patch_post_or_put(type, url, body, headers)
-      _wrapped_response _request(
-        type,
-        url: url,
-        body: body,
-        headers: headers)
+      APIClientCircuit.new(url).call do
+        _wrapped_response _request(
+          type,
+          url: url,
+          body: body,
+          headers: headers)
+      end
     end
 
     def _assert_uri(url)

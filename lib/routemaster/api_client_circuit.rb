@@ -25,7 +25,6 @@ module Routemaster
       ENV.fetch('ROUTEMASTER_ENABLE_API_CLIENT_CIRCUIT', 'NO') =~ /\A(YES|TRUE|ON|1)\Z/i
     end
 
-
     def circuit
       Circuitbox.circuit(@circuit_name, {
         sleep_window: configuration_setting(@circuit_name, 'ROUTEMASTER_CIRCUIT_BREAKER_SLEEP_WINDOW', 60).to_i,
