@@ -285,6 +285,24 @@ require 'routemaster/drain/caching_busting'
 $app = Routemaster::Drain::CachingBusting.new
 ```
 
+### Bust Cache for a URL
+
+If a service updates its `_links` one needs to clear caches to force URL
+discovery. Run this (e.g. as a one-off in Hopper):
+
+```ruby
+url = ENV['MY_SERVICE_URL']
+cache = Routemaster::Cache.new
+cache.invalidate(url)
+cache.bust(url)
+```
+
+Note that the URL has to match exactly. For example, `/` suffix would need to be busted separately.
+
+The links are also stored as a class variable in the running Ruby processes.
+You need to restart them, too. You can restart just the affected services or
+the whole app.
+
 ## HTTP Client
 The Drain is using a Faraday http client for communication between services. The client
 comes with a convenient caching mechanism as a default and supports custom response materialization.
