@@ -425,3 +425,4 @@ without a version number).
 
 If you have changed dependencies, you need to run `appraisal update` to make
 sure the various version specific gemfiles are updated.
+test
