@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency     'rack', '>= 1.4.5'
   spec.add_runtime_dependency     'wisper', '~> 1.6.1'
   spec.add_runtime_dependency     'hashie'
-  spec.add_runtime_dependency     'redis-namespace', '~> 1.9.0'
+  spec.add_runtime_dependency     'redis-namespace'
   spec.add_runtime_dependency     'concurrent-ruby'
   spec.add_runtime_dependency     'circuitbox'
   spec.add_runtime_dependency     'moneta', '1.0.0'
