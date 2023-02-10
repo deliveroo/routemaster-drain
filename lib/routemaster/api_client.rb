@@ -22,8 +22,6 @@ require 'typhoeus/adapters/faraday'
 # prevents Faraday's magic class loading pixie dust from tripping over itself in
 # multithreaded use cases.
 require 'uri'
-require 'faraday/retry'
-require 'faraday/multipart'
 require 'faraday_middleware/request/encode_json'
 require 'faraday_middleware/response/parse_json'
 require 'faraday_middleware/response/mashify'

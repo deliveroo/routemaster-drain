@@ -18,8 +18,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency     'addressable'
   spec.add_runtime_dependency     'faraday'
-  spec.add_runtime_dependency     'faraday-retry'
-  spec.add_runtime_dependency     'faraday-multipart'
   spec.add_runtime_dependency     'faraday_middleware'
   spec.add_runtime_dependency     'typhoeus', '~> 1.1'
   spec.add_runtime_dependency     'rack', '>= 1.4.5'
