@@ -23,6 +23,7 @@ require 'typhoeus/adapters/faraday'
 # multithreaded use cases.
 require 'uri'
 require 'faraday/retry'
+require 'faraday/multipart'
 require 'faraday_middleware/request/encode_json'
 require 'faraday_middleware/response/parse_json'
 require 'faraday_middleware/response/mashify'
