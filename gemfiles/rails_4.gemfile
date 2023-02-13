@@ -20,5 +20,6 @@ gem "appraisal", :require => false
 gem "dogstatsd", :require => false
 gem "fork_break", :require => false
 gem "rails", "~> 4.2"
+gem "webrick"
 
 gemspec :path => "../"
