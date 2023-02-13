@@ -19,7 +19,7 @@ describe Routemaster::Dirty::Filter do
 
   describe '#run' do
     let(:options) {{ redis:  redis }}
-    subject { described_class.new(options) }
+    subject { described_class.new(**options) }
 
     let(:result) { subject.run(payload) }
     let(:payload) { [] }

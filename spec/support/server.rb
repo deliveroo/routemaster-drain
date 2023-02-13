@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'timeout'
+require 'webrick'
 
 # Patch WEBrick as it doesn't support PATCH (?)
 module WEBrick
