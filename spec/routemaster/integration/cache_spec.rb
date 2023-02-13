@@ -4,7 +4,6 @@ require 'spec/support/uses_dotenv'
 require 'spec/support/uses_webmock'
 require 'spec/support/server'
 require 'routemaster/cache'
-require 'webrick'
 
 describe Routemaster::Cache do
   uses_dotenv
