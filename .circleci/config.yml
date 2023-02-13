@@ -5,7 +5,7 @@ version: 2
 jobs:
   build_2.5_rails_5:
     docker:
-      - image: circleci/ruby:2.4.1
+      - image: circleci/ruby:2.7.4
       - image: redis:3-alpine
     steps:
       - checkout
