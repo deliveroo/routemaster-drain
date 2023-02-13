@@ -58,7 +58,7 @@ jobs:
           name: Install bundler
           command: |
             gem install bundler -v '~> 1.17' ;
-            bundle config --local gemfile $PWD/gemfiles/rails_5.gemfile
+            bundle config --local gemfile $PWD/gemfiles/rails_4.gemfile
 
       - restore_cache:
           keys: 
