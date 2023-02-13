@@ -141,3 +141,4 @@ workflows:
     jobs:
       - build_2.5_rails_5
       - build_2.7_rails_6
+      - build_3.0_rails_4
