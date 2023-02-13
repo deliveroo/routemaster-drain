@@ -47,6 +47,50 @@ jobs:
           paths:
             - ~/project/vendor/bundle
 
+  build_3.0_rails_4:
+    docker:
+      - image: circleci/ruby:3.0.0
+      - image: redis:3-alpine
+    steps:
+      - checkout
+
+      - run:
+          name: Install bundler
+          command: |
+            gem install bundler -v '~> 1.17' ;
+            bundle config --local gemfile $PWD/gemfiles/rails_5.gemfile
+
+      - restore_cache:
+          keys: 
+            - v3-bundle-3.0.0-rails_4-{{ .Branch }}
+            - v3-bundle-3.0.0-rails_4
+            - v3-bundle-3.0.0
+
+      - run: 
+          name: Install dependencies
+          command: |
+            bundle install --jobs=3 --retry=3 --path=$PWD/vendor/bundle
+
+      - run:
+          name: Run test suite
+          command: |
+            unset RACK_ENV &&
+            unset RAILS_ENV &&
+            bundle exec rspec
+
+      - save_cache:
+          key: v3-bundle-3.0.0-rails_4-{{ .Branch }}
+          paths:
+            - ~/project/vendor/bundle
+      - save_cache:
+          key: v3-bundle-3.0.0-rails_4
+          paths:
+            - ~/project/vendor/bundle
+      - save_cache:
+          key: v3-bundle-3.0.0
+          paths:
+            - ~/project/vendor/bundle
+
   build_2.7_rails_6:
     docker:
       - image: circleci/ruby:2.7.4
