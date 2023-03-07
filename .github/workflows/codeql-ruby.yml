@@ -3,12 +3,12 @@ name: "CodeQL - Minimal incremental analysis"
 on:
   push:
     branches:
-      - "main"  # Change this to the branch to default branch
+      - "master"  # Change this to the branch to default branch
       - "!ignore/branch" # Ignore CodeQL scan for these branches
       - "!test/*" # Ignore CodeQL scan for these branches
   pull_request:
     branches:
-      - "main"  # Change this to the branch to default branch
+      - "master"  # Change this to the branch to default branch
     paths-ignore:
       - '**/*.md'
       - '**/*.txt'
