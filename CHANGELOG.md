@@ -2,6 +2,8 @@
 
 _A description of your awesome changes here!_
 
+- Instrument timeout exceptions (#110)
+
 ### 3.7.1
 
 Features:

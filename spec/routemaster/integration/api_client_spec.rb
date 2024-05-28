@@ -394,5 +394,32 @@ describe Routemaster::APIClient do
         'api_client.latency', tags: %w[source:test_service destination:127.0.0.1 verb:get]
       )
     end
+
+    context 'when the response status code is non-2xx' do
+      it 'sends the response metrics with the status code and error class fatal resource' do
+        expect { subject.post("#{host}/429") }.to raise_error(Routemaster::Errors::ResourceThrottling)
+
+        expect(metrics_client).to have_received(:increment).with(
+          'api_client.response.count', tags: %w[source:test_service destination:127.0.0.1 status:429]
+        )
+      end
+
+      it 'sends the response metrics with the status code and error class fatal resource' do
+        expect { subject.post("#{host}/500") }.to raise_error(Routemaster::Errors::FatalResource)
+
+        expect(metrics_client).to have_received(:increment).with(
+          'api_client.response.count', tags: %w[source:test_service destination:127.0.0.1 status:500]
+        )
+      end
+
+      it 'sends the response metrics with the status code and error class fatal resource' do
+        stub_request(:put, "#{host}/429").to_timeout
+        expect { subject.put("#{host}/429") }.to raise_error(Faraday::TimeoutError)
+
+        expect(metrics_client).to have_received(:increment).with(
+          'api_client.response.count', tags: %w[source:test_service destination:127.0.0.1 status:timeout]
+        ).at_least(1).times
+      end
+    end
   end
 end
