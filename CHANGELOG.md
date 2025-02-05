@@ -2,6 +2,22 @@
 
 _A description of your awesome changes here!_
 
+### 3.7.2
+
+- Instrument timeout exceptions (#110)
+
+### 3.7.1
+
+Features:
+
+- Add ruby 3 compability
+
+Bug fixes:
+
+- Explictly set sidekiq gem version
+- Update circleci base image
+- Remove `require 'faraday/request/retry'` dependency since its deprecated in faraday `1.10.3`.
+
 ### 3.7.0
 
 Features:

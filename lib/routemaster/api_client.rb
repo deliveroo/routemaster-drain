@@ -22,7 +22,6 @@ require 'typhoeus/adapters/faraday'
 # prevents Faraday's magic class loading pixie dust from tripping over itself in
 # multithreaded use cases.
 require 'uri'
-require 'faraday/request/retry'
 require 'faraday_middleware/request/encode_json'
 require 'faraday_middleware/response/parse_json'
 require 'faraday_middleware/response/mashify'
@@ -73,7 +72,7 @@ module Routemaster
     # Same as {{get}}, except with
     def fget(url, **options)
       uri = _assert_uri(url)
-      Responses::ResponsePromise.new { get(uri, options) }
+      Responses::ResponsePromise.new { get(uri, **options) }
     end
 
     def patch(url, body: {}, headers: {})

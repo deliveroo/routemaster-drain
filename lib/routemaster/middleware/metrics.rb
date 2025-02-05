@@ -22,6 +22,9 @@ module Routemaster
           rescue Routemaster::Errors::BaseError => e
             increment_response_count(response_tags(e.env))
             raise e
+          rescue Faraday::TimeoutError => e
+            increment_response_count(%W[source:#{source_peer} destination:#{request_env.url.host} status:timeout])
+            raise e
           end
         end
       end

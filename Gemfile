@@ -15,7 +15,7 @@ gem 'dotenv',                     require: false
 gem 'simplecov',                  require: false
 gem 'codecov',                    require: false
 gem 'resque',                     require: false
-gem 'sidekiq',                    require: false
+gem 'sidekiq', '~> 5.2.10',       require: false
 
 gem 'guard-rspec',                require: false
 gem 'pry',                        require: false
